@@ -11,7 +11,7 @@ const Skills = () => {
           </h2>
         </div>
 
-        <div className="font-mono grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+        <div className="font-mono grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
           {skillCategories.map((category, index) => (
             <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 sm:p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
 

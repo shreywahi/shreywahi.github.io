@@ -44,8 +44,6 @@ const Projects = () => {
                                     />
                                 </div>
                             )}
-
-                            <br />
                             
                             <CardHeader className="w-full flex flex-col items-center text-center">
                                 <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
