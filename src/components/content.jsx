@@ -103,8 +103,8 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/budget-calculator-app",
 		demoUrl: "https://dodoshrey.github.io/budget-calculator-app/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/DOM_Manipulation_xwdy6i.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441360/DOM_Manipulation_totkvh.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/budget_calculator_qrd3np.jpg",
+		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441365/budget_calculator_dsenty.mp4"
 	},
 	{
 		title: "Pig Game",
@@ -112,8 +112,8 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/dodoshrey/pig-game",
 		demoUrl: "https://dodoshrey.github.io/pig-game/",
-		imageUrl: "/project_pic/pig_game.jpg",
-		videoUrl: "/project_video/pig_game.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/pig_game_zptoaj.jpg",
+		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441379/pig_game_qpqm3f.mp4"
 	},
 	{
 		title: "DOM Manipulation Example",
@@ -121,8 +121,8 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/DOM-Manupulation-Example",
 		demoUrl: "https://dodoshrey.github.io/DOM-Manupulation-Example",
-		imageUrl: "/project_pic/DOM_Manipulation.jpg",
-		videoUrl: "/project_video/DOM_Manipulation.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/DOM_Manipulation_xwdy6i.jpg",
+		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441360/DOM_Manipulation_totkvh.mp4"
 	},
 	{
 		title: "Furniture Shopping Site",
@@ -130,7 +130,7 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/first-site",
 		demoUrl: "https://dodoshrey.github.io/first-site/",
-		imageUrl: "/https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/furniture_shop_wiwkdz.jpg",
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/furniture_shop_wiwkdz.jpg",
 		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441363/furniture_shop_esrryb.mp4"
 	},
 	{
