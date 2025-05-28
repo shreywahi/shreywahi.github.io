@@ -15,16 +15,15 @@ const About = () => {
           <div className="space-y-4 sm:space-y-6">
 
             <p className="text-base sm:text-lg font-mono text-purple-500 dark:text-orange-400 leading-relaxed text-justify">
-              I'm a Software Engineer at Microsoft with a focus on UX Engineering, I blend creative design with technical
-              development to create secure and intuitive web applications. A frontend expert with a strong foundation in 
-              technologies, I design and implement comprehensive solutions that prioritize user experience and security.
+              I am a Software Engineer at Microsoft, specializing in UX Engineering. I leverage my expertise in frontend development to craft secure,
+              intuitive, and high-performance web applications. My approach blends creative design principles with robust technical execution, 
+              consistently prioritizing an exceptional user experience alongside stringent security measures.
             </p>
             
             <p className="text-base sm:text-lg font-mono text-purple-500 dark:text-orange-400 leading-relaxed text-justify">
-              With over 4+ years of experience, I've developed expertise in ReactJS, TypeScript, and various cloud technologies.
-              My day to day work involves enhancing security solutions and designing user interfaces that protect
-              millions of users while maintaining a seamless experience. I'm also experienced in optimizing application
-              performance and architecting scalable frontend solutions.
+              With over four years of experience, I am proficient in ReactJS, TypeScript, and various cloud technologies. My daily work involves
+              enhancing security solutions and designing user interfaces that safeguard millions of users without compromising on a seamless experience.
+              I also focus on optimizing application performance and architecting scalable frontend solutions.
             </p>
             
             <div className="grid grid-cols-3 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-8">
