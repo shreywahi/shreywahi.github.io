@@ -157,7 +157,7 @@ const Sidebar = () => {
             {isSidebarOpen && (
                 <aside
                     ref={desktopSidebarRef}
-                    className="hidden md:flex fixed top-0 left-0 h-full w-64 bg-black/80 backdrop-blur shadow-xl z-50 flex-col justify-between border-r border-blue-300"
+                    className="hidden md:flex fixed inset-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex-col justify-between border-r border-blue-300 overflow-y-auto"
                     role="navigation"
                     aria-label="Sidebar Navigation"
                     tabIndex={-1}
@@ -249,14 +249,13 @@ const Sidebar = () => {
                     {/* Overlay */}
                     <div
                         className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-                        // onClick removed, handled globally
                         tabIndex={-1}
                         aria-hidden="true"
                     />
                     {/* Drawer */}
                     <aside
                         ref={mobileSidebarRef}
-                        className="relative w-3/5 max-w-[200px] bg-black/90 backdrop-blur shadow-xl flex flex-col justify-between border-r border-blue-300 animate-slide-in-left"
+                        className="relative h-full w-4/5 max-w-xs bg-black/90 backdrop-blur shadow-xl flex flex-col justify-between border-r border-blue-300 animate-slide-in-left overflow-y-auto"
                         tabIndex={-1}
                         role="navigation"
                         aria-label="Sidebar Navigation"
