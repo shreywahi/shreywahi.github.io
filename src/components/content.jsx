@@ -1,5 +1,29 @@
 import { Code, Database, Globe, Smartphone, Shield } from 'lucide-react';
 
+export const getColorClasses = (color) => {
+  const colorMap = {
+    blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
+    green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
+    purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
+    pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
+    red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
+    yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
+export const getIconColor = (color) => {
+  const colorMap = {
+    blue: "text-blue-600 dark:text-blue-300",
+    green: "text-green-600 dark:text-green-300",
+    purple: "text-purple-600 dark:text-purple-300",
+    pink: "text-pink-600 dark:text-pink-300",
+    red: "text-red-600 dark:text-red-300",
+    yellow: "text-yellow-600 dark:text-yellow-300"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
 export const experiences = [
   {
     title: "Software Engineer - Level 60",
@@ -67,6 +91,39 @@ export const experiences = [
     ],
     technologies: ["HTML", "CSS", "JavaScript", "UI/UX Design"]
   }
+];
+
+export const skillCategories = [
+    {
+        title: "Frontend Development",
+        icon: Globe,
+        color: "blue",
+        skills: ["JavaScript", "TypeScript", "HTML", "CSS", "ReactJS", "VueJS", "AngularJS", "KnockoutJS", "FluentUI", "Redux", "JSX"]
+    },
+    {
+        title: "Backend Development",
+        icon: Database,
+        color: "green",
+        skills: ["C#", ".NET", "C++", "C", "Python", "NodeJS", "ExpressJS", "MySQL", "GraphQL", "RESTful APIs"]
+    },
+    {
+        title: "Tools & Technologies",
+        icon: Code,
+        color: "purple",
+        skills: ["GIT", "GitBash", "Jest", "Unit Testing", "CI/CD", "Webpack", "Babel", "Visual Studios", "VS Code", "Sublime Text", "Jupyter", "Anaconda", "Playwright"]
+    },
+    {
+        title: "Cloud & DevOps",
+        icon: Smartphone,
+        color: "pink",
+        skills: ["Azure", "Microservices", "Distributed Systems"]
+    },
+    {
+        title: "Programming Concepts",
+        icon: Shield,
+        color: "red",
+        skills: ["OOP", "KQL", "Microservices", "Distributed Systems"]
+    }
 ];
 
 export const projects = [
@@ -153,59 +210,29 @@ export const projects = [
 	}
 ];
 
-export const skillCategories = [
+export const certs = [
+  	{
+		title: "Complete Web Developer Course",
+    tags: ["ReactJS", "Redux + React Hooks", "Node.js", "Express.js", "NPM", "PostgreSQL", "RESTful API", "JavaScript ES6-ES10 ES2020", "CSS3", "HTML5", "Responsive Design", "HTTP/JSON/AJAX"],
+		imageUrl: "https://udemy-certificate.s3.amazonaws.com/image/UC-AGHN0NR0.jpg",
+    screenshots: ["https://udemy-certificate.s3.amazonaws.com/image/UC-AGHN0NR0.jpg"]
+	},
     {
-        title: "Frontend Development",
-        icon: Globe,
-        color: "blue",
-        skills: ["JavaScript", "TypeScript", "HTML", "CSS", "ReactJS", "VueJS", "AngularJS", "KnockoutJS", "FluentUI", "Redux", "JSX"]
-    },
+		title: "Easy to Advanced Data Structures",
+    tags: ["Arrays", "Linked List", "Stacks", "Queues", "Heap/Priority Queues", "Binary Tree/Binary Search Tree", "Union Find/Disjoint Set", "Hash Tables", "Fenwick Trees", "AVL Trees", "Binary Indexed Trees", "Sparse Tables"],
+		imageUrl: "https://udemy-certificate.s3.amazonaws.com/image/UC-3DIW87H2.jpg",
+		screenshots: ["https://udemy-certificate.s3.amazonaws.com/image/UC-3DIW87H2.jpg"]
+	},
     {
-        title: "Backend Development",
-        icon: Database,
-        color: "green",
-        skills: ["C#", ".NET", "C++", "C", "Python", "NodeJS", "ExpressJS", "MySQL", "GraphQL", "RESTful APIs"]
-    },
-    {
-        title: "Tools & Technologies",
-        icon: Code,
-        color: "purple",
-        skills: ["GIT", "GitBash", "Jest", "Unit Testing", "CI/CD", "Webpack", "Babel", "Visual Studios", "VS Code", "Sublime Text", "Jupyter", "Anaconda", "Playwright"]
-    },
-    {
-        title: "Cloud & DevOps",
-        icon: Smartphone,
-        color: "pink",
-        skills: ["Azure", "Microservices", "Distributed Systems"]
-    },
-    {
-        title: "Programming Concepts",
-        icon: Shield,
-        color: "red",
-        skills: ["OOP", "KQL", "Microservices", "Distributed Systems"]
-    }
+		title: "Learn SQL in a simplified manner",
+		tags: ["Create Tables in SQL", "Insert/Update Delete Retrieve with SQL", "Integrity Constraints", "Alter table", "Join Tables", "Grouping of Data"],
+		imageUrl: "https://udemy-certificate.s3.amazonaws.com/image/UC-TK1YFF67.jpg",
+	  screenshots: ["https://udemy-certificate.s3.amazonaws.com/image/UC-TK1YFF67.jpg"]
+	},
+	{
+		title: "The Complete Python Bootcamp From Zero to Hero in Python",
+		tags: ["DSA in Python", "Functions", "Scope", "args / kwargs", "Build-in Functions", "Modules", "File I/O", "Errors and Exceptions", "OOP in Python", "Decorators", "Generators", "Inheritence", "Polymorphism", "Regular Expressions", "Web Scraping"],
+		imageUrl: "https://udemy-certificate.s3.amazonaws.com/image/UC-7b236e3a-2d46-4692-9c7c-c6ccb58cf5ac.jpg",
+		screenshots: ["https://udemy-certificate.s3.amazonaws.com/image/UC-7b236e3a-2d46-4692-9c7c-c6ccb58cf5ac.jpg"]
+	}
 ];
-
-export const getColorClasses = (color) => {
-  const colorMap = {
-    blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
-    green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
-    purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
-    pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
-    red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
-    yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
-  };
-  return colorMap[color] || colorMap.blue;
-};
-
-export const getIconColor = (color) => {
-  const colorMap = {
-    blue: "text-blue-600 dark:text-blue-300",
-    green: "text-green-600 dark:text-green-300",
-    purple: "text-purple-600 dark:text-purple-300",
-    pink: "text-pink-600 dark:text-pink-300",
-    red: "text-red-600 dark:text-red-300",
-    yellow: "text-yellow-600 dark:text-yellow-300"
-  };
-  return colorMap[color] || colorMap.blue;
-};
