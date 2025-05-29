@@ -15,51 +15,51 @@ const Contact = () => {
 
         <div className="font-mono grid place-items-center">
           <div>
-            <h3 className="text-black dark:text-blue-200 text-lg sm:text-2xl font-bold mb-6 sm:mb-8">Get In Touch</h3>
+            <h3 className="text-black dark:text-blue-950 text-lg sm:text-2xl font-bold mb-6 sm:mb-8">Get In Touch</h3>
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-10">
               <div className="flex items-center">
-                <div className="bg-blue-700 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                <div className="bg-yellow-900 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <Mail className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
                   <div className="text-black font-semibold text-sm sm:text-base">Email</div>
-                  <a href="mailto:wahishrey@gmail.com" className="text-blue-700 dark:text-blue-200 hover:text-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="Send email to wahishrey@gmail.com">
+                  <a href="mailto:wahishrey@gmail.com" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="Send email to wahishrey@gmail.com">
                     wahishrey@gmail.com
                   </a>
                 </div>
               </div>
 
               <div className="flex items-center">
-                <div className="bg-blue-700 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                <div className="bg-blue-600 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <Linkedin className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
                   <div className="text-black font-semibold text-sm sm:text-base">LinkedIn</div>
-                  <a href="https://www.linkedin.com/in/shrey-wahi/" target="_blank" rel="noopener noreferrer" className="text-blue-200 hover:text-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View LinkedIn profile">
+                  <a href="https://www.linkedin.com/in/shrey-wahi/" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View LinkedIn profile">
                     /in/shrey-wahi
                   </a>
                 </div>
               </div>
 
               <div className="flex items-center">
-                <div className="bg-blue-700 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                <div className="bg-black p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <Github className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
                   <div className="text-black font-semibold text-sm sm:text-base">GitHub</div>
-                  <a href="https://github.com/dodoshrey" target="_blank" rel="noopener noreferrer" className="text-blue-200 hover:text-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
+                  <a href="https://github.com/dodoshrey" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
                     /dodoshrey
                   </a>
                 </div>
               </div>
 
               <div className="flex items-center">
-                <div className="bg-blue-700 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                <div className="bg-blue-500 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
                   <div className="text-black font-semibold text-sm sm:text-base">Location</div>
-                  <div className="text-gray-200 text-xs sm:text-base">Dublin, Ireland</div>
+                  <div className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 text-xs sm:text-base">Dublin, Ireland</div>
                 </div>
               </div>
             </div>
