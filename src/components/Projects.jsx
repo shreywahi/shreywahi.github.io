@@ -122,7 +122,7 @@ const Projects = () => {
                         {/* Embedded browser/iframe for live demo */}
                         <br />
                         <h2 className="text-2xl font-mono font-bold mb-2 text-center"> 
-                            Scroll down to see the live demo OR => 
+                            Scroll down to see the live demo OR ={">"} 
                             {selectedProject.demoUrl && (
                                 <>
                                     <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
