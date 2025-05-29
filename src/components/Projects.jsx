@@ -118,6 +118,11 @@ const Projects = () => {
                                     GitHub
                                 </a>
                             </Button>
+                        </div>
+                        {/* Embedded browser/iframe for live demo */}
+                        <br />
+                        <h2 className="text-2xl font-mono font-bold mb-2 text-center"> 
+                            Scroll down to see the live demo OR => 
                             {selectedProject.demoUrl && (
                                 <>
                                     <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
@@ -128,8 +133,7 @@ const Projects = () => {
                                     </Button>
                                 </>
                             )}
-                        </div>
-                        {/* Embedded browser/iframe for live demo */}
+                        </h2>
                         {selectedProject.demoUrl && (
                             <div className="mt-4 flex justify-center">
                                 <iframe
