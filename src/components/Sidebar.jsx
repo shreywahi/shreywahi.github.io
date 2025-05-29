@@ -152,10 +152,104 @@ const Sidebar = () => {
         };
     }, [isSidebarOpen]);
 
+    // Listen for resize to force update (for SSR safety)
+    const [windowWidth, setWindowWidth] = useState(
+        typeof window !== "undefined" ? window.innerWidth : 0
+    );
+    useEffect(() => {
+        function handleResize() {
+            setWindowWidth(window.innerWidth);
+        }
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     return (
         <>
-            {/* Desktop Sidebar */}
-            {isSidebarOpen && (
+            {/* Always visible Sidebar for >=1500px */}
+            {(windowWidth >= 1500) && (
+                <aside
+                    ref={desktopSidebarRef}
+                    className="hidden 2xl:flex fixed inset-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex-col justify-between border-r border-blue-300 overflow-y-auto"
+                    role="navigation"
+                    aria-label="Sidebar Navigation"
+                    tabIndex={-1}
+                >
+                    <div>
+                        {/* Close Button hidden for >=1500px */}
+                        {/* <button ... /> */}
+                        <br /><br />
+                        <div
+                            className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
+                            onClick={() => scrollToSection('hero')}
+                            tabIndex={0}
+                            aria-label="Go to Home"
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollToSection('hero'); }}
+                        >
+                            Portfolio
+                        </div>
+                        {/* Navigation */}
+                        <nav className="flex flex-col gap-2 mt-10 px-6" aria-label="Main navigation">
+                            {navLinks.map((link) => (
+                                <button
+                                    key={link.section}
+                                    onClick={() => scrollToSection(link.section)}
+                                    className="text-lg text-white hover:text-blue-700 py-3 px-4 rounded-lg transition-colors text-left font-medium hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label={`Go to ${link.label}`}
+                                    tabIndex={0}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="flex justify-center my-4">
+                            <a
+                                href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg"
+                                className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                aria-label="Download Resume"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                tabIndex={0}
+                            >
+                                Download Resume
+                            </a>
+                        </div>
+                        <div className="flex justify-center my-4">
+                            {mounted && (
+                                <button
+                                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                                    className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label="Toggle theme"
+                                    tabIndex={0}
+                                >
+                                    {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                                    <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {/* Social Links */}
+                    <div className="flex flex-row items-center gap-4 mb-8 px-16">
+                        {socialLinks.map(({ href, icon: Icon, label }) => (
+                            <a
+                                key={label}
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                aria-label={label}
+                                tabIndex={0}
+                            >
+                                <Icon size={24} />
+                            </a>
+                        ))}
+                    </div>
+                </aside>
+            )}
+
+            {/* Toggleable Sidebar for <1500px */}
+            {(windowWidth < 1500) && isSidebarOpen && (
                 <aside
                     ref={desktopSidebarRef}
                     className="hidden md:flex fixed inset-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex-col justify-between border-r border-blue-300 overflow-y-auto"
@@ -164,9 +258,9 @@ const Sidebar = () => {
                     tabIndex={-1}
                 >
                     <div>
-                        {/* Close Button */}
+                        {/* Close Button visible only for <1500px */}
                         <button
-                            className="absolute top-4 right-4 text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="absolute top-4 right-4 text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 2xl:hidden"
                             onClick={() => setIsSidebarOpen(false)}
                             aria-label="Close sidebar"
                             tabIndex={0}
@@ -197,8 +291,7 @@ const Sidebar = () => {
                                     {link.label}
                                 </button>
                             ))}
-                        </nav><br /><br /><br />
-                        {/* Resume Link */}
+                        </nav>
                         <div className="flex justify-center my-4">
                             <a
                                 href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg"
@@ -245,7 +338,7 @@ const Sidebar = () => {
             )}
 
             {/* Mobile Drawer Sidebar */}
-            {isSidebarOpen && (
+            {(windowWidth < 1500) && isSidebarOpen && (
                 <div className="md:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Mobile Sidebar Navigation">
                     {/* Overlay */}
                     <div
@@ -262,9 +355,9 @@ const Sidebar = () => {
                         aria-label="Sidebar Navigation"
                     >
                         <div>
-                            {/* Close Button */}
+                            {/* Close Button visible only for <1500px */}
                             <button
-                                className="absolute top-4 right-4 text-white hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="absolute top-4 right-4 text-white hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 2xl:hidden"
                                 onClick={() => setIsSidebarOpen(false)}
                                 aria-label="Close sidebar"
                                 tabIndex={0}
@@ -272,33 +365,32 @@ const Sidebar = () => {
                                 <X size={28} />
                             </button>
                             <br /><br />
-							<div
-								className="flex items-center justify-center h-24 text-3xl font-bold text-white cursor-pointer"
-								onClick={() => {
-									scrollToSection('hero', setIsSidebarOpen);
-								}}
-								tabIndex={0}
-								aria-label="Go to Home"
-								role="button"
-								onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollToSection('hero', setIsSidebarOpen); }}
-							>
-								Portfolio
-							</div>
-							{/* Navigation */}
-							<nav className="flex flex-col gap-2 mt-10 px-6" aria-label="Main navigation">
-								{navLinks.map((link) => (
-									<button
-										key={link.section}
-										onClick={() => scrollToSection(link.section, setIsSidebarOpen)}
-										className="text-lg text-white py-3 px-4 rounded-lg transition-colors text-left font-medium hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label={`Go to ${link.label}`}
-										tabIndex={0}
-									>
-										{link.label}
-									</button>
-								))}
-							</nav><br /><br /><br />
-                            {/* Resume Link */}
+                            <div
+                                className="flex items-center justify-center h-24 text-3xl font-bold text-white cursor-pointer"
+                                onClick={() => {
+                                    scrollToSection('hero', setIsSidebarOpen);
+                                }}
+                                tabIndex={0}
+                                aria-label="Go to Home"
+                                role="button"
+                                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollToSection('hero', setIsSidebarOpen); }}
+                            >
+                                Portfolio
+                            </div>
+                            {/* Navigation */}
+                            <nav className="flex flex-col gap-2 mt-10 px-6" aria-label="Main navigation">
+                                {navLinks.map((link) => (
+                                    <button
+                                        key={link.section}
+                                        onClick={() => scrollToSection(link.section, setIsSidebarOpen)}
+                                        className="text-lg text-white py-3 px-4 rounded-lg transition-colors text-left font-medium hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        aria-label={`Go to ${link.label}`}
+                                        tabIndex={0}
+                                    >
+                                        {link.label}
+                                    </button>
+                                ))}
+                            </nav>
                             <div className="flex justify-center my-4">
                                 <a
                                     href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg"
@@ -311,57 +403,57 @@ const Sidebar = () => {
                                     Download Resume
                                 </a>
                             </div>
-							{/* Theme Toggle Button */}
-							<div className="flex justify-center my-4">
-								{mounted && (
-									<button
-										onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Toggle theme"
-										tabIndex={0}
-									>
-										{resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-										<span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-									</button>
-								)}
-							</div>
-						</div>
-						{/* Social Links */}
-						<div className="flex flex-row items-center gap-4 mb-8 px-8">
-							{socialLinks.map(({ href, icon: Icon, label }) => (
-								<a
-									key={label}
-									href={href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-white hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-									aria-label={label}
-									tabIndex={0}
-								>
-									<Icon size={24} />
-								</a>
-							))}
-						</div>
-					</aside>
-				</div>
+                            {/* Theme Toggle Button */}
+                            <div className="flex justify-center my-4">
+                                {mounted && (
+                                    <button
+                                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                                        className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        aria-label="Toggle theme"
+                                        tabIndex={0}
+                                    >
+                                        {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                                        <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        {/* Social Links */}
+                        <div className="flex flex-row items-center gap-4 mb-8 px-8">
+                            {socialLinks.map(({ href, icon: Icon, label }) => (
+                                <a
+                                    key={label}
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-white hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label={label}
+                                    tabIndex={0}
+                                >
+                                    <Icon size={24} />
+                                </a>
+                            ))}
+                        </div>
+                    </aside>
+                </div>
             )}
 
-            {/* Sidebar Open Buttons */}
-            {!isSidebarOpen && (
-				<>
-					{/* Desktop */}
-					<SidebarOpenButton
-						className="hidden md:flex"
-						onClick={() => setIsSidebarOpen(true)}
-						ref={openButtonRef}
-					/>
-					{/* Mobile */}
-					<SidebarOpenButton
-						className="md:hidden"
-						onClick={() => setIsSidebarOpen(true)}
-						ref={openButtonRef}
-					/>
-				</>
+            {/* Sidebar Open Buttons, hidden for >=1500px */}
+            {(windowWidth < 1500) && !isSidebarOpen && (
+                <>
+                    {/* Desktop */}
+                    <SidebarOpenButton
+                        className="hidden md:flex 2xl:hidden"
+                        onClick={() => setIsSidebarOpen(true)}
+                        ref={openButtonRef}
+                    />
+                    {/* Mobile */}
+                    <SidebarOpenButton
+                        className="md:hidden 2xl:hidden"
+                        onClick={() => setIsSidebarOpen(true)}
+                        ref={openButtonRef}
+                    />
+                </>
             )}
         </>
     );
