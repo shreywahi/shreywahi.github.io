@@ -68,7 +68,7 @@ const Projects = () => {
             </div>
 
             {/* Modal for Project Details */}
-            <Modal open={!!selectedProject} onClose={() => setSelectedProject(null)} ariaLabel={selectedProject ? selectedProject.title : "Project Details"}>
+            <Modal open={!!selectedProject} onClose={() => { setSelectedProject(null); setShowIframe(false); }} ariaLabel={selectedProject ? selectedProject.title : "Project Details"}>
                 {selectedProject && (
                     <div className="rounded-xl p-0 sm:p-0">
                         <h2 className="text-2xl font-mono font-bold mb-2 text-center">{selectedProject.title}</h2>
@@ -119,14 +119,29 @@ const Projects = () => {
                                 </a>
                             </Button>
                             {selectedProject.demoUrl && (
-                                <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
-                                    <a href={selectedProject.demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                        <ExternalLink size={16} />
-                                        Live Demo
-                                    </a>
-                                </Button>
+                                <>
+                                    <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
+                                        <a href={selectedProject.demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                            <ExternalLink size={16} />
+                                            Open in Browser
+                                        </a>
+                                    </Button>
+                                </>
                             )}
                         </div>
+                        {/* Embedded browser/iframe for live demo */}
+                        {selectedProject.demoUrl && (
+                            <div className="mt-4 flex justify-center">
+                                <iframe
+                                    src={selectedProject.demoUrl}
+                                    title="Live Demo"
+                                    width="100%"
+                                    height="500"
+                                    className="rounded-lg border"
+                                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
             </Modal>
