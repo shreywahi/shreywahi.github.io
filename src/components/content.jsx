@@ -128,6 +128,15 @@ export const skillCategories = [
 
 export const projects = [
   	{
+		title: "Dashboard Monitoring Tool",
+    description: "A mini project showcasing the dashboard development capabilities using React.",
+		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
+		githubUrl: "https://github.com/shreywahi/dashboard",
+		demoUrl: "https://shreywahi.github.io/dashboard",
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749065716/dashboard_zpipsa.jpg",
+		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1749065862/dashboard_kn0teh.mp4"
+	},
+    {
 		title: "Crypto Tracker",
         description: "A cryptocurrency tracker that allows users to search for cryptocurrencies and view their details.",
 		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
