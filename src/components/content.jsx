@@ -127,7 +127,7 @@ export const skillCategories = [
 ];
 
 export const projects = [
-  	{
+  {
 		title: "Dashboard Monitoring Tool",
     description: "A mini project showcasing the dashboard development capabilities using React.",
 		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
@@ -135,6 +135,15 @@ export const projects = [
 		demoUrl: "https://shreywahi.github.io/dashboard",
 		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749065716/dashboard_zpipsa.jpg",
 		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1749065862/dashboard_kn0teh.mp4"
+	},
+    {
+		title: "Online Code Editor",
+		description: "Made a code editor using React.",
+		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
+		githubUrl: "https://github.com/shreywahi/code_editor",
+		demoUrl: "https://shreywahi.github.io/code_editor/",
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749084649/code_editor_luxfl9.jpg",
+		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1749084659/code_editor_xetegd.mp4"
 	},
     {
 		title: "Crypto Tracker",
