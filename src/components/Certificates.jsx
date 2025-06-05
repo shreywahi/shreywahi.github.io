@@ -3,7 +3,8 @@ import { Github, ExternalLink, ArrowUp } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
-import { certs } from './content';
+import { certs as certsData } from './content';
+import DragDrop from "./ui/DragDrop";
 
 const scrollToTop = () => {
     const element = document.getElementById('hero');
@@ -12,6 +13,7 @@ const scrollToTop = () => {
 
 const Certificates = () => {
     const [selectedCert, setselectedCert] = useState(null);
+    const [certs, setCerts] = useState(certsData);
 
     return (
         <section id="certs" className="min-h-[100vh] py-10 sm:py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
@@ -22,17 +24,28 @@ const Certificates = () => {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                    {certs.map((project, index) => (
+                <DragDrop
+                    items={certs}
+                    onChange={setCerts}
+                    className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
+                    renderItem={(project, dragProps, index, isDragged, isDropTarget) => (
                         <Card
-                            key={index}
-                            className="overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center"
-                            style={{ borderRadius: "1rem" }}
+                            key={project.title + index}
+                            className={`overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center
+                                ${isDragged ? "opacity-50 border-dashed border-4 border-blue-700 z-10" : ""}
+                                ${isDropTarget ? "ring-4 ring-blue-400" : ""}
+                            `}
+                            style={{
+                                borderRadius: "1rem",
+                                transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
+                                zIndex: isDragged ? 10 : 1,
+                            }}
                             onClick={() => setselectedCert(project)}
                             role="button"
                             tabIndex={0}
                             aria-label={`View details for ${project.title}`}
                             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setselectedCert(project); }}
+                            {...dragProps}
                         >
                             {project.imageUrl && (
                                 <div className="h-16 sm:h-48 overflow-hidden flex justify-center items-center w-full">
@@ -49,8 +62,8 @@ const Certificates = () => {
                                 <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
                             </CardHeader>
                         </Card>
-                    ))}
-                </div>
+                    )}
+                />
 
                 {/* Proficiency Highlights */}
                 <div className="font-mono mt-8 sm:mt-16 text-center">
