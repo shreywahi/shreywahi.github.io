@@ -1,74 +1,14 @@
-import { useState, useRef } from "react";
-import { Github, ExternalLink, ArrowUp } from 'lucide-react';
+import { useState } from "react";
+import { Github, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
 import { projects as projectsData } from './content';
-
-const scrollToTop = () => {
-    const element = document.getElementById('hero');
-    element?.scrollIntoView({ behavior: 'smooth' });
-};
+import DragDrop from "./ui/DragDrop";
 
 const Projects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [projectList, setProjectList] = useState(projectsData);
-    const [draggedIndex, setDraggedIndex] = useState(null);
-    const [dragOverIndexState, setDragOverIndexState] = useState(null);
-    const dragOverIndex = useRef(null);
-
-    // Helper to get the preview order during drag
-    const getPreviewList = () => {
-        if (
-            draggedIndex !== null &&
-            dragOverIndexState !== null &&
-            draggedIndex !== dragOverIndexState
-        ) {
-            const updated = [...projectList];
-            const [removed] = updated.splice(draggedIndex, 1);
-            updated.splice(dragOverIndexState, 0, removed);
-            return updated;
-        }
-        return projectList;
-    };
-
-    // Drag handlers
-    const onDragStart = (index) => {
-        setDraggedIndex(index);
-        setDragOverIndexState(index);
-    };
-
-    const onDragOver = (index, e) => {
-        e.preventDefault();
-        if (dragOverIndexState !== index) {
-            setDragOverIndexState(index);
-        }
-        dragOverIndex.current = index;
-    };
-
-    const onDrop = () => {
-        if (
-            draggedIndex !== null &&
-            dragOverIndexState !== null &&
-            draggedIndex !== dragOverIndexState
-        ) {
-            const updated = [...projectList];
-            const [removed] = updated.splice(draggedIndex, 1);
-            updated.splice(dragOverIndexState, 0, removed);
-            setProjectList(updated);
-        }
-        setDraggedIndex(null);
-        setDragOverIndexState(null);
-        dragOverIndex.current = null;
-    };
-
-    const onDragEnd = () => {
-        setDraggedIndex(null);
-        setDragOverIndexState(null);
-        dragOverIndex.current = null;
-    };
-
-    const previewList = getPreviewList();
 
     return (
         <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center">
@@ -79,53 +19,44 @@ const Projects = () => {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                    {previewList.map((project, index) => {
-                        // Find the original index for drag events
-                        const originalIndex = projectList.indexOf(project);
-                        const isDragged = draggedIndex === originalIndex;
-                        const isDropTarget = dragOverIndexState === index && draggedIndex !== null && !isDragged;
-                        return (
-                            <Card
-                                key={project.title + index}
-                                className={`overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center
-                                    ${isDragged ? "opacity-50 border-dashed border-4 border-blue-700 z-10" : ""}
-                                    ${isDropTarget ? "ring-4 ring-blue-400" : ""}
-                                `}
-                                style={{
-                                    borderRadius: "1rem",
-                                    transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
-                                    zIndex: isDragged ? 10 : 1,
-                                }}
-                                onClick={() => setSelectedProject(project)}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={`View details for ${project.title}`}
-                                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setSelectedProject(project); }}
-                                draggable
-                                onDragStart={() => onDragStart(originalIndex)}
-                                onDragOver={e => onDragOver(index, e)}
-                                onDrop={onDrop}
-                                onDragEnd={onDragEnd}
-                            >
-                                {project.imageUrl && (
-                                    <div className="h-16 sm:h-48 overflow-hidden flex justify-center items-center w-full">
-                                    	<img
+                <DragDrop
+                    items={projectList}
+                    onChange={setProjectList}
+                    className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
+                    renderItem={(project, dragProps, index, isDragged, isDropTarget) => (
+                        <Card
+                            key={project.title + index}
+                            className={`overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center
+                                ${isDragged ? "opacity-50 border-dashed border-4 border-blue-700 z-10" : ""}
+                                ${isDropTarget ? "ring-4 ring-blue-400" : ""}
+                            `}
+                            style={{
+                                borderRadius: "1rem",
+                                transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
+                                zIndex: isDragged ? 10 : 1,
+                            }}
+                            onClick={() => setSelectedProject(project)}
+                            role="button"
+                            aria-label={`View details for ${project.title}`}
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setSelectedProject(project); }}
+                            {...dragProps}
+                        >
+                            {project.imageUrl && (
+                                <div className="h-16 sm:h-48 overflow-hidden flex justify-center items-center w-full">
+                                    <img
                                         src={project.imageUrl}
                                         alt={project.title}
                                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                         aria-label={`${project.title} screenshot`}
-                                        />
-                                    </div>
-                                )}
-                                
-                                <CardHeader className="w-full flex flex-col items-center text-center">
-                                    <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
-                                </CardHeader>
-                            </Card>
-                        );
-                    })}
-                </div>
+                                    />
+                                </div>
+                            )}
+                            <CardHeader className="w-full flex flex-col items-center text-center">
+                                <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
+                            </CardHeader>
+                        </Card>
+                    )}
+                />
 
                 <div className="text-center font-mono mt-8 sm:mt-12">
                     <Button variant="outline" size="lg" asChild aria-label="View more projects on GitHub">

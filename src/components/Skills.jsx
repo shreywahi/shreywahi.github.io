@@ -1,6 +1,10 @@
-import { skillCategories, getColorClasses, getIconColor } from './content';
+import { useState } from "react";
+import { skillCategories as skillCategoriesData, getColorClasses, getIconColor } from './content';
+import DragDrop from "./ui/DragDrop";
 
 const Skills = () => {
+  const [categories, setCategories] = useState(skillCategoriesData);
+
   return (
     <section id="skills" className="min-h-[100vh] py-10 sm:py-20 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
       <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
@@ -11,10 +15,25 @@ const Skills = () => {
           </h2>
         </div>
 
-        <div className="font-mono grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-          {skillCategories.map((category, index) => (
-            <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 sm:p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-
+        <DragDrop
+          items={categories}
+          onChange={setCategories}
+          className="font-mono grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4"
+          renderItem={(category, dragProps, index, isDragged, isDropTarget) => (
+            <div
+              key={category.title}
+              className={`bg-gray-50 dark:bg-gray-800 rounded-xl p-4 sm:p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1
+                ${isDragged ? "opacity-50 border-dashed border-4 border-blue-700 z-10" : ""}
+                ${isDropTarget ? "ring-4 ring-blue-400" : ""}
+              `}
+              style={{
+                transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
+                zIndex: isDragged ? 10 : 1,
+                borderRadius: "1rem"
+              }}
+              {...dragProps}
+              aria-label={`Drag to reorder ${category.title}`}
+            >
               <div className="flex items-center mb-4 sm:mb-6">
                 <div className={`p-0 sm:p-3 rounded-lg ${
                   category.color === 'blue' ? 'bg-blue-200 dark:bg-blue-900' : 
@@ -39,10 +58,9 @@ const Skills = () => {
                   </span>
                 ))}
               </div>
-
             </div>
-          ))}
-        </div>
+          )}
+        />
 
       </div>
     </section>
