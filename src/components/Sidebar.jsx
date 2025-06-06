@@ -142,18 +142,7 @@ const Sidebar = ({ onNavigate }) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isSidebarOpen]);
-
-    // Always show sidebar open button, sidebar only appears when toggled open
-    const shouldShowSidebarButton = !isSidebarOpen;
-    const shouldShowSidebar = isSidebarOpen;
-
-    // Footer nav links for mobile
-    const footerNavLinks = [
-        { label: 'Home', section: 'hero', icon: Home },
-        { label: 'Projects', section: 'projects', icon: Folder },
-        { label: 'Contact', section: 'contact', icon: MailIcon }
-    ];
-
+    
     return (
         <>
             {/* Sidebar overlay for all devices */}
@@ -167,7 +156,7 @@ const Sidebar = ({ onNavigate }) => {
                     style={
                         screenSize === 'mobile'
                             ? { width: '80vw', maxWidth: 260, right: 'auto' }
-                            : { width: '18rem', maxWidth: '18rem' }
+                            : { width: '16rem', maxWidth: '16rem' }
                     }
                 >
                     <div>
