@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon, Briefcase } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon, Briefcase, MoreHorizontal } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -50,6 +50,9 @@ const Sidebar = ({ onNavigate }) => {
     const sidebarRef = useRef(null);
     const openButtonRef = useRef(null);
     const [screenSize, setScreenSize] = useState('desktop'); // 'mobile' | 'tablet' | 'desktop'
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const moreButtonRef = useRef(null);
+    const moreMenuRef = useRef(null);
 
     useEffect(() => {
         setMounted(true);
@@ -142,7 +145,24 @@ const Sidebar = ({ onNavigate }) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isSidebarOpen]);
-    
+
+    // Hide More menu when clicking outside
+    useEffect(() => {
+        if (!showMoreMenu) return;
+        function handleClickOutside(e) {
+            if (
+                moreMenuRef.current &&
+                !moreMenuRef.current.contains(e.target) &&
+                moreButtonRef.current &&
+                !moreButtonRef.current.contains(e.target)
+            ) {
+                setShowMoreMenu(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showMoreMenu]);
+
     return (
         <>
             {/* Sidebar overlay for all devices */}
@@ -254,7 +274,6 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         <Home size={24} />
-                        <span className="text-xs">Home</span>
                     </button>
                     {/* About button */}
                     <button
@@ -264,7 +283,6 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         <User size={24} />
-                        <span className="text-xs">About Me</span>
                     </button>
                     {/* Experience button */}
                     <button
@@ -274,7 +292,6 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         <Briefcase size={24} />
-                        <span className="text-xs">Experience</span>
                     </button>
                     <button
                         onClick={() => { if (onNavigate) onNavigate('projects'); }}
@@ -283,29 +300,59 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         <Folder size={24} />
-                        <span className="text-xs">Projects</span>
                     </button>
-                    {/* Theme toggle button */}
-                    <button
-                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
-                        aria-label="Toggle theme"
-                        tabIndex={0}
-                    >
-                        {resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
-                        <span className="text-xs">Theme</span>
-                    </button>
-                    {/* Sidebar open button in footer */}
-                    <button
-                        onClick={() => setIsSidebarOpen(true)}
-                        ref={openButtonRef}
-                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
-                        aria-label="Open sidebar"
-                        tabIndex={0}
-                    >
-                        <Menu size={24} />
-                        <span className="text-xs">More</span>
-                    </button>
+                    {/* More button and its popup */}
+                    <div className="relative flex flex-col items-center">
+                        <button
+                            ref={moreButtonRef}
+                            onClick={() => setShowMoreMenu((v) => !v)}
+                            className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                            aria-label="More options"
+                            tabIndex={0}
+                        >
+                            <MoreHorizontal size={24} />
+                        </button>
+                        {showMoreMenu && (
+                            <div
+                                ref={moreMenuRef}
+                                className="absolute bottom-14 flex flex-col items-center gap-2 z-50"
+                            >
+                                <button
+                                    onClick={() => {
+                                        setTheme(resolvedTheme === "dark" ? "light" : "dark");
+                                        setShowMoreMenu(false);
+                                    }}
+                                    className="flex flex-col items-center bg-gray-900 text-white hover:text-blue-400 hover:bg-blue-900 rounded-lg shadow-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label="Toggle theme"
+                                    tabIndex={0}
+                                >
+                                    {resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (onNavigate) onNavigate('contact');
+                                        setShowMoreMenu(false);
+                                    }}
+                                    className="flex flex-col items-center bg-gray-900 text-white hover:text-blue-400 hover:bg-blue-900 rounded-lg shadow-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label="Contact"
+                                    tabIndex={0}
+                                >
+                                    <MailIcon size={24} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsSidebarOpen(true);
+                                        setShowMoreMenu(false);
+                                    }}
+                                    className="flex flex-col items-center bg-gray-900 text-white hover:text-blue-400 hover:bg-blue-900 rounded-lg shadow-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    aria-label="Open sidebar"
+                                    tabIndex={0}
+                                >
+                                    <Menu size={24} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </nav>
             )}
 
