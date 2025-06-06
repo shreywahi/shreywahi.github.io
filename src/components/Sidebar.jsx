@@ -249,18 +249,43 @@ const Sidebar = () => {
                     className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
                     aria-label="Footer Navigation"
                 >
-                    {footerNavLinks.map(({ label, section, icon: Icon }) => (
-                        <button
-                            key={section}
-                            onClick={() => scrollToSection(section)}
-                            className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
-                            aria-label={label}
-                            tabIndex={0}
-                        >
-                            <Icon size={24} />
-                            <span className="text-xs">{label}</span>
-                        </button>
-                    ))}
+                    <button
+                        onClick={() => scrollToSection('hero')}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="Home"
+                        tabIndex={0}
+                    >
+                        <Home size={24} />
+                        <span className="text-xs">Home</span>
+                    </button>
+                    <button
+                        onClick={() => scrollToSection('projects')}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="Projects"
+                        tabIndex={0}
+                    >
+                        <Folder size={24} />
+                        <span className="text-xs">Projects</span>
+                    </button>
+                    <button
+                        onClick={() => scrollToSection('contact')}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="Contact"
+                        tabIndex={0}
+                    >
+                        <MailIcon size={24} />
+                        <span className="text-xs">Contact</span>
+                    </button>
+                    {/* Theme toggle button */}
+                    <button
+                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="Toggle theme"
+                        tabIndex={0}
+                    >
+                        {resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
+                        <span className="text-xs">{resolvedTheme === "dark" ? "Light" : "Dark"}</span>
+                    </button>
                     {/* Sidebar open button in footer */}
                     <button
                         onClick={() => setIsSidebarOpen(true)}
