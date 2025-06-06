@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -23,6 +23,7 @@ const sections = [
 const Index = () => {
   const [activeSection, setActiveSection] = useState("hero");
   const [fade, setFade] = useState(true);
+  const sectionRefs = useRef({});
 
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
@@ -30,20 +31,27 @@ const Index = () => {
     setTimeout(() => {
       setActiveSection(sectionId);
       setFade(true);
+      // Scroll to the section smoothly
+      sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth' });
     }, 300); // match fade duration
   };
-
-  // Find current section
-  const currentSection = sections.find(s => s.id === activeSection)?.component;
 
   return (
     <div>
       <Sidebar onNavigate={handleNavigate} />
       {/* Add responsive left margin to main content so sidebar never overlaps */}
-      <div className="ml-0 lg:ml-64 transition-all duration-300">
-        <div className={`fade-section ${fade ? 'fade-in' : 'fade-out'}`}>
-          {currentSection}
-        </div>
+      <div className="ml-0 lg:ml-64 transition-all duration-300 main-scroll">
+        {sections.map(({ id, component }) => (
+          <section
+            key={id}
+            id={id}
+            ref={el => sectionRefs.current[id] = el}
+            className={`snap-start ${id === activeSection ? `fade-section ${fade ? 'fade-in' : 'fade-out'}` : ''}`}
+            style={{ minHeight: '100vh', width: '100%' }}
+          >
+            {component}
+          </section>
+        ))}
       </div>
     </div>
   );
