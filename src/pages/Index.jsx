@@ -9,17 +9,6 @@ import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
 import '../App.css'; // Import the CSS file for fade effects
 
-// Section mapping
-const sections = [
-  { id: "hero", component: <Hero /> },
-  { id: "about", component: <About /> },
-  { id: "experience", component: <Experience /> },
-  { id: "skills", component: <Skills /> },
-  { id: "projects", component: <Projects /> },
-  { id: "certs", component: <Certificates /> },
-  { id: "contact", component: <Contact /> },
-];
-
 const Index = () => {
   const [activeSection, setActiveSection] = useState("hero");
   const [fade, setFade] = useState(true);
@@ -32,6 +21,17 @@ const Index = () => {
       setFade(true);
     }, 300); // match fade duration
   };
+
+  // Section mapping (must be inside component to access handleNavigate)
+  const sections = [
+    { id: "hero", component: <Hero onNavigate={handleNavigate} /> },
+    { id: "about", component: <About /> },
+    { id: "experience", component: <Experience /> },
+    { id: "skills", component: <Skills /> },
+    { id: "projects", component: <Projects /> },
+    { id: "certs", component: <Certificates /> },
+    { id: "contact", component: <Contact /> },
+  ];
 
   // Find current section
   const currentSection = sections.find(s => s.id === activeSection)?.component;

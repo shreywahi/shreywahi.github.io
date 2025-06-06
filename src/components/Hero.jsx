@@ -1,4 +1,4 @@
-const Hero = () => {
+const Hero = ({ onNavigate }) => {
   return (
     <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 pb-24 sm:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 text-center">
@@ -13,11 +13,11 @@ const Hero = () => {
           
           <p className="text-lg sm:text-xl md:text-3xl font-mono text-gray-900 dark:text-purple-200 leading-relaxed">
             <br></br>
-            Software Engineer with expertise in ReactJS and TypeScript with an interest in front-end development.
+            <b> Software Engineer with expertise in ReactJS and TypeScript with an interest in front-end development. </b>
             <br></br>
             <br></br>
             <br></br>
-            I'm passionate about creating exceptional web experiences and solving complex problems with clean and efficient code. Specialized in designing and developing secure web applications.
+            <b> I'm passionate about creating exceptional web experiences and solving complex problems with clean and efficient code. Specialized in designing and developing secure web applications. </b>
             <br></br>
             <br></br>
             <br></br>
@@ -36,7 +36,14 @@ const Hero = () => {
             </button>
             
             <button 
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => { 
+                if (onNavigate) {
+                  onNavigate('contact');
+                } else {
+                  const el = document.getElementById('contact');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="border-2 border-gray-700 dark:border-gray-200 text-gray-900 dark:text-gray-200 px-10 py-5 rounded-xl text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
               aria-label="Scroll to Contact section"
             >

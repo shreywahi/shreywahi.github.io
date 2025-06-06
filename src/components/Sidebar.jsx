@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, Folder, Mail as MailIcon } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -256,6 +256,16 @@ const Sidebar = ({ onNavigate }) => {
                         <Home size={24} />
                         <span className="text-xs">Home</span>
                     </button>
+                    {/* About button */}
+                    <button
+                        onClick={() => { if (onNavigate) onNavigate('about'); }}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="About"
+                        tabIndex={0}
+                    >
+                        <User size={24} />
+                        <span className="text-xs">About Me</span>
+                    </button>
                     <button
                         onClick={() => { if (onNavigate) onNavigate('projects'); }}
                         className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
@@ -282,7 +292,7 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         {resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
-                        <span className="text-xs">{resolvedTheme === "dark" ? "Light" : "Dark"}</span>
+                        <span className="text-xs">Theme</span>
                     </button>
                     {/* Sidebar open button in footer */}
                     <button
@@ -293,7 +303,7 @@ const Sidebar = ({ onNavigate }) => {
                         tabIndex={0}
                     >
                         <Menu size={24} />
-                        <span className="text-xs">Menu</span>
+                        <span className="text-xs">More</span>
                     </button>
                 </nav>
             )}
