@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { Github, ExternalLink, ArrowUp } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
 import { certs as certsData } from './content';
 import DragDrop from "./ui/DragDrop";
@@ -86,17 +84,6 @@ const Certificates = () => {
                         </div>
 
                     </div>
-                </div>
-
-                {/* Back To Top Button */}
-                <div className="font-mono text-center mt-12 sm:mt-24">
-                    <button
-                        onClick={scrollToTop}
-                        className="animate-bounce text-gray-400 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-base sm:text-lg"
-                        aria-label="Back To Top"
-                    >
-                        <ArrowUp size={28} className="inline-block ml-1" /> Back To Top <ArrowUp size={28} className="inline-block ml-1" />
-                    </button>
                 </div>
             </div>
 
