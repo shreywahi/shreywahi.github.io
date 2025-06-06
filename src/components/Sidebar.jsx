@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon, Briefcase } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -266,6 +266,16 @@ const Sidebar = ({ onNavigate }) => {
                         <User size={24} />
                         <span className="text-xs">About Me</span>
                     </button>
+                    {/* Experience button */}
+                    <button
+                        onClick={() => { if (onNavigate) onNavigate('experience'); }}
+                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+                        aria-label="Experience"
+                        tabIndex={0}
+                    >
+                        <Briefcase size={24} />
+                        <span className="text-xs">Experience</span>
+                    </button>
                     <button
                         onClick={() => { if (onNavigate) onNavigate('projects'); }}
                         className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
@@ -274,15 +284,6 @@ const Sidebar = ({ onNavigate }) => {
                     >
                         <Folder size={24} />
                         <span className="text-xs">Projects</span>
-                    </button>
-                    <button
-                        onClick={() => { if (onNavigate) onNavigate('contact'); }}
-                        className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
-                        aria-label="Contact"
-                        tabIndex={0}
-                    >
-                        <MailIcon size={24} />
-                        <span className="text-xs">Contact</span>
                     </button>
                     {/* Theme toggle button */}
                     <button
