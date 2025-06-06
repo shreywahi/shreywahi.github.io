@@ -11,7 +11,7 @@ const Experience = () => {
       <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
 
         <div className="text-center mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-4xl font-serif md:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+          <h2 className="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
             Professional Experience
           </h2>
         </div>

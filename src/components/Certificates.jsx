@@ -17,7 +17,7 @@ const Certificates = () => {
         <section id="certs" className="min-h-[100vh] py-10 sm:py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="text-center mb-8 sm:mb-16">
-                    <h2 className="text-2xl sm:text-4xl font-serif md:text-5xl font-bold text-orange-400 dark:text-purple-500 mb-4 sm:mb-6">
+                    <h2 className="text-4xl font-serif font-bold text-orange-400 dark:text-purple-500 mb-4 sm:mb-6">
                         Certificates & Proficiency
                     </h2>
                 </div>
