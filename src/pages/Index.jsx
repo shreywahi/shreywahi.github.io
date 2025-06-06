@@ -39,8 +39,11 @@ const Index = () => {
   return (
     <div>
       <Sidebar onNavigate={handleNavigate} />
-      <div className={`fade-section ${fade ? 'fade-in' : 'fade-out'}`}>
-        {currentSection}
+      {/* Add responsive left margin to main content so sidebar never overlaps */}
+      <div className="ml-0 lg:ml-64 transition-all duration-300">
+        <div className={`fade-section ${fade ? 'fade-in' : 'fade-out'}`}>
+          {currentSection}
+        </div>
       </div>
     </div>
   );

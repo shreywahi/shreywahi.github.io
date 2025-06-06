@@ -67,3 +67,11 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* Add this if you are not using Tailwind's ml-64 */
+@media (min-width: 1024px) {
+  .main-content {
+    margin-left: 16rem; /* 256px, same as w-64 */
+    transition: margin-left 0.3s;
+  }
+}
