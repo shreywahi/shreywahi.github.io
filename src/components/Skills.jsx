@@ -6,7 +6,7 @@ const Skills = () => {
   const [categories, setCategories] = useState(skillCategoriesData);
 
   return (
-    <section id="skills" className="min-h-[100vh] py-10 sm:py-20 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
+    <section id="skills" className="min-h-[100vh] py-10 sm:py-20 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">
       <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
 
         <div className="text-center">

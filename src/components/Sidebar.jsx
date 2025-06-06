@@ -30,17 +30,6 @@ const socialLinks = [
 	},
 ];
 
-const scrollToSection = (sectionId, closeMenu) => {
-	const element = document.getElementById(sectionId);
-	if (element) {
-		window.scrollTo({
-			top: element.getBoundingClientRect().top + window.pageYOffset,
-			behavior: 'smooth',
-		});
-	}
-	if (closeMenu) closeMenu(false);
-};
-
 // Sidebar open button component
 const SidebarOpenButton = React.forwardRef(({ className, onClick }, ref) => (
     <button
@@ -54,22 +43,36 @@ const SidebarOpenButton = React.forwardRef(({ className, onClick }, ref) => (
     </button>
 ));
 
-const Sidebar = () => {
+const Sidebar = ({ onNavigate }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const sidebarRef = useRef(null);
     const openButtonRef = useRef(null);
-    const [isMobile, setIsMobile] = useState(false);
+    const [screenSize, setScreenSize] = useState('desktop'); // 'mobile' | 'tablet' | 'desktop'
 
     useEffect(() => {
         setMounted(true);
-        // Detect mobile/tablet
-        const checkMobile = () => setIsMobile(window.innerWidth <= 1024);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        // Detect screen size
+        const checkScreen = () => {
+            const w = window.innerWidth;
+            if (w <= 640) setScreenSize('mobile');
+            else if (w <= 1024) setScreenSize('tablet');
+            else setScreenSize('desktop');
+        };
+        checkScreen();
+        window.addEventListener('resize', checkScreen);
+        return () => window.removeEventListener('resize', checkScreen);
     }, []);
+
+    // Sidebar open state logic
+    useEffect(() => {
+        if (screenSize === 'desktop') {
+            setIsSidebarOpen(true);
+        } else {
+            setIsSidebarOpen(false);
+        }
+    }, [screenSize]);
 
     // Focus trap logic
     useEffect(() => {
@@ -154,33 +157,39 @@ const Sidebar = () => {
     return (
         <>
             {/* Sidebar overlay for all devices */}
-            {isSidebarOpen && (
+            {(isSidebarOpen || screenSize === 'desktop') && (
                 <aside
                     ref={sidebarRef}
-                    className="fixed inset-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col justify-between border-r border-blue-300 overflow-y-auto"
+                    className="fixed top-0 left-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col justify-between border-r border-blue-300 overflow-y-auto"
                     role="navigation"
                     aria-label="Sidebar Navigation"
                     tabIndex={-1}
-                    style={isMobile ? { width: '100%', maxWidth: '100%' } : {}}
+                    style={
+                        screenSize === 'mobile'
+                            ? { width: '80vw', maxWidth: 260, right: 'auto' }
+                            : { width: '18rem', maxWidth: '18rem' }
+                    }
                 >
                     <div>
-                        {/* Close Button */}
-                        <button
-                            className="absolute top-4 right-4 text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            onClick={() => setIsSidebarOpen(false)}
-                            aria-label="Close sidebar"
-                            tabIndex={0}
-                        >
-                            <X size={28} />
-                        </button>
+                        {/* Close Button - only show on mobile/tablet (not desktop) */}
+                        {(screenSize === 'mobile' || screenSize === 'tablet') && isSidebarOpen && (
+                            <button
+                                className="absolute top-4 right-4 text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                onClick={() => setIsSidebarOpen(false)}
+                                aria-label="Close sidebar"
+                                tabIndex={0}
+                            >
+                                <X size={28} />
+                            </button>
+                        )}
                         <br /><br />
                         <div
                             className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
-                            onClick={() => scrollToSection('hero', setIsSidebarOpen)}
+                            onClick={() => { if (onNavigate) onNavigate('hero'); setIsSidebarOpen(false); }}
                             tabIndex={0}
                             aria-label="Go to Home"
                             role="button"
-                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") scrollToSection('hero', setIsSidebarOpen); }}
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { if (onNavigate) onNavigate('hero'); setIsSidebarOpen(false); } }}
                         >
                             Portfolio
                         </div>
@@ -189,7 +198,7 @@ const Sidebar = () => {
                             {navLinks.map((link) => (
                                 <button
                                     key={link.section}
-                                    onClick={() => scrollToSection(link.section, setIsSidebarOpen)}
+                                    onClick={() => { if (onNavigate) onNavigate(link.section); setIsSidebarOpen(false); }}
                                     className="text-lg text-white hover:text-blue-700 py-3 px-4 rounded-lg transition-colors text-left font-medium hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                     aria-label={`Go to ${link.label}`}
                                     tabIndex={0}
@@ -243,14 +252,14 @@ const Sidebar = () => {
                 </aside>
             )}
 
-            {/* Mobile/iPad sticky footer nav */}
-            {isMobile && !isSidebarOpen && (
+            {/* Mobile/iPad/tablet sticky footer nav */}
+            {screenSize === 'mobile' && !isSidebarOpen && (
                 <nav
                     className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
                     aria-label="Footer Navigation"
                 >
                     <button
-                        onClick={() => scrollToSection('hero')}
+                        onClick={() => { if (onNavigate) onNavigate('hero'); }}
                         className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
                         aria-label="Home"
                         tabIndex={0}
@@ -259,7 +268,7 @@ const Sidebar = () => {
                         <span className="text-xs">Home</span>
                     </button>
                     <button
-                        onClick={() => scrollToSection('projects')}
+                        onClick={() => { if (onNavigate) onNavigate('projects'); }}
                         className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
                         aria-label="Projects"
                         tabIndex={0}
@@ -268,7 +277,7 @@ const Sidebar = () => {
                         <span className="text-xs">Projects</span>
                     </button>
                     <button
-                        onClick={() => scrollToSection('contact')}
+                        onClick={() => { if (onNavigate) onNavigate('contact'); }}
                         className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
                         aria-label="Contact"
                         tabIndex={0}
@@ -300,8 +309,8 @@ const Sidebar = () => {
                 </nav>
             )}
 
-            {/* Desktop sidebar open button */}
-            {!isMobile && !isSidebarOpen && (
+            {/* Tablet sidebar open button (not on mobile or desktop) */}
+            {screenSize === 'tablet' && !isSidebarOpen && (
                 <SidebarOpenButton
                     className=""
                     onClick={() => setIsSidebarOpen(true)}
