@@ -77,8 +77,8 @@ const Modal = ({ open, onClose, children, ariaLabel = "Modal Dialog" }) => {
           ×
         </button>
         <div
-          className="overflow-y-auto"
-          style={{ maxHeight: "65vh", scrollbarGutter: "stable both-edges", scrollbarWidth: "thin",  }}
+          className="overflow-y-auto pt-10"
+          style={{ maxHeight: "65vh", scrollbarGutter: "stable both-edges", scrollbarWidth: "thin" }}
         >
           {children}
         </div>
