@@ -11,6 +11,7 @@ const Contact = () => {
           <h2 className="text-4xl font-serif text-green-950 dark:text-white font-bold mb-4 sm:mb-6">
             Let's Work Together
           </h2>
+          <br /><br />
           <p className="font-mono text-base sm:text-xl text-blue-800 dark:text-orange-300 max-w-3xl mx-auto">
             Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.
           </p>

@@ -14,6 +14,8 @@ const Skills = () => {
             Skills & Expertise
           </h2>
         </div>
+        
+        <br /><br />
 
         <DragDrop
           items={categories}
