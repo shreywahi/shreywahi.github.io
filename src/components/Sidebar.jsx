@@ -282,12 +282,44 @@ const Sidebar = ({ onNavigate }) => {
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
 					aria-label="Footer Navigation"
 				>
-					<FooterNavButton icon={Home} label="Home" onClick={() => { if (onNavigate) onNavigate('hero'); }} />
-					<FooterNavButton icon={User} label="About" onClick={() => { if (onNavigate) onNavigate('about'); }} />
-					<FooterNavButton icon={Briefcase} label="Experience" onClick={() => { if (onNavigate) onNavigate('experience'); }} />
-					<FooterNavButton icon={Layers} label="Skills" onClick={() => { if (onNavigate) onNavigate('skills'); }} />
-					
-                    <div className="relative flex flex-col items-center">
+					<button
+						onClick={() => { if (onNavigate) onNavigate('hero'); }}
+						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						aria-label="Home"
+						tabIndex={0}
+					>
+						<Home size={24} />
+						<span className="text-xs mt-1">Home</span>
+					</button>
+					<button
+						onClick={() => { if (onNavigate) onNavigate('about'); }}
+						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						aria-label="About"
+						tabIndex={0}
+					>
+						<User size={24} />
+						<span className="text-xs mt-1">About</span>
+					</button>
+					<button
+						onClick={() => { if (onNavigate) onNavigate('experience'); }}
+						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						aria-label="Experience"
+						tabIndex={0}
+					>
+						<Briefcase size={24} />
+						<span className="text-xs mt-1">Experience</span>
+					</button>
+					<button
+						onClick={() => { if (onNavigate) onNavigate('skills'); }}
+						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						aria-label="Skills"
+						tabIndex={0}
+					>
+						<Layers size={24} />
+						<span className="text-xs mt-1">Skills</span>
+					</button>
+					{/* More button and its popup */}
+					<div className="relative flex flex-col items-center">
 						<button
 							ref={moreButtonRef}
 							onClick={() => setShowMoreMenu((v) => !v)}
@@ -296,58 +328,74 @@ const Sidebar = ({ onNavigate }) => {
 							tabIndex={0}
 						>
 							<MoreHorizontal size={24} />
+							<span className="text-xs mt-1">More</span>
 						</button>
 						{showMoreMenu && (
 							<div
 								ref={moreMenuRef}
 								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
 							>
-								<div className="flex flex-col gap-8 py-1 px-2">
-									<FooterNavButton
-										icon={resolvedTheme === "dark" ? Sun : Moon}
-										label="Theme"
+								<div className="flex flex-col gap-6 py-1 px-2">
+									<button
 										onClick={() => {
 											setTheme(resolvedTheme === "dark" ? "light" : "dark");
 											setShowMoreMenu(false);
 										}}
-										ariaLabel="Toggle theme"
-									/>
-									<FooterNavButton
-										icon={FolderKanban}
-										label="Projects"
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Toggle theme"
+										tabIndex={0}
+									>
+										{resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
+										<span className="text-xs mt-1">Theme</span>
+									</button>
+									<button
 										onClick={() => {
 											if (onNavigate) onNavigate('projects');
 											setShowMoreMenu(false);
 										}}
-										ariaLabel="Projects"
-									/>
-									<FooterNavButton
-										icon={Award}
-										label="Certificates"
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Projects"
+										tabIndex={0}
+									>
+										<FolderKanban size={24} />
+										<span className="text-xs mt-1">Projects</span>
+									</button>
+									<button
 										onClick={() => {
 											if (onNavigate) onNavigate('certs');
 											setShowMoreMenu(false);
 										}}
-										ariaLabel="Certificates"
-									/>
-									<FooterNavButton
-										icon={MailIcon}
-										label="Contact"
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Certificates"
+										tabIndex={0}
+									>
+										<Award size={24} />
+										<span className="text-xs mt-1">Certificates</span>
+									</button>
+									<button
 										onClick={() => {
 											if (onNavigate) onNavigate('contact');
 											setShowMoreMenu(false);
 										}}
-										ariaLabel="Contact"
-									/>
-									<FooterNavButton
-										icon={Menu}
-										label="All Menu"
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Contact"
+										tabIndex={0}
+									>
+										<MailIcon size={24} />
+										<span className="text-xs mt-1">Contact</span>
+									</button>
+									<button
 										onClick={() => {
 											setIsSidebarOpen(true);
 											setShowMoreMenu(false);
 										}}
-										ariaLabel="Open sidebar"
-									/>
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Open sidebar"
+										tabIndex={0}
+									>
+										<Menu size={24} />
+										<span className="text-xs mt-1">All Menu</span>
+									</button>
 								</div>
 							</div>
 						)}
