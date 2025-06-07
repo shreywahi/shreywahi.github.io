@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, Folder, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -7,7 +7,7 @@ const navLinks = [
 	{ label: 'About', section: 'about', icon: User },
 	{ label: 'Experience', section: 'experience', icon: Briefcase },
 	{ label: 'Skills', section: 'skills', icon: Layers },
-	{ label: 'Projects', section: 'projects', icon: Folder },
+	{ label: 'Projects', section: 'projects', icon: FolderKanban }, // changed icon here
 	{ label: 'Certificates', section: 'certs', icon: Award },
 	{ label: 'Contact', section: 'contact', icon: MailIcon }
 ];
@@ -78,7 +78,7 @@ const Sidebar = ({ onNavigate }) => {
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
 	const openButtonRef = useRef(null);
-	const [screenSize, setScreenSize] = useState('desktop'); // 'mobile' | 'tablet' | 'desktop'
+	const [screenSize, setScreenSize] = useState('desktop');
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const moreButtonRef = useRef(null);
 	const moreMenuRef = useRef(null);
@@ -209,17 +209,6 @@ const Sidebar = ({ onNavigate }) => {
 					}
 				>
 					<div>
-						{/* Close Button - only show on mobile/tablet (not desktop) */}
-						{(screenSize === 'mobile' || screenSize === 'tablet') && isSidebarOpen && (
-							<button
-								className="absolute top-4 right-4 text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-								onClick={() => setIsSidebarOpen(false)}
-								aria-label="Close sidebar"
-								tabIndex={0}
-							>
-								<X size={28} />
-							</button>
-						)}
 						<br /><br />
 						<div
 							className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
@@ -287,7 +276,7 @@ const Sidebar = ({ onNavigate }) => {
 				</aside>
 			)}
 
-			{/* Mobile/tablet/medium sticky footer nav */}
+			{/* Mobile/tablet sticky footer nav */}
 			{(screenSize === 'mobile' || screenSize === 'tablet') && !isSidebarOpen && (
 				<nav
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
@@ -296,9 +285,9 @@ const Sidebar = ({ onNavigate }) => {
 					<FooterNavButton icon={Home} label="Home" onClick={() => { if (onNavigate) onNavigate('hero'); }} />
 					<FooterNavButton icon={User} label="About" onClick={() => { if (onNavigate) onNavigate('about'); }} />
 					<FooterNavButton icon={Briefcase} label="Experience" onClick={() => { if (onNavigate) onNavigate('experience'); }} />
-					<FooterNavButton icon={Folder} label="Projects" onClick={() => { if (onNavigate) onNavigate('projects'); }} />
-					{/* More button and its popup */}
-					<div className="relative flex flex-col items-center">
+					<FooterNavButton icon={Layers} label="Skills" onClick={() => { if (onNavigate) onNavigate('skills'); }} />
+					
+                    <div className="relative flex flex-col items-center">
 						<button
 							ref={moreButtonRef}
 							onClick={() => setShowMoreMenu((v) => !v)}
@@ -311,35 +300,55 @@ const Sidebar = ({ onNavigate }) => {
 						{showMoreMenu && (
 							<div
 								ref={moreMenuRef}
-								className="absolute bottom-14 flex flex-col items-center gap-2 z-50"
+								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
 							>
-								<FooterNavButton
-									icon={resolvedTheme === "dark" ? Sun : Moon}
-									label="Theme"
-									onClick={() => {
-										setTheme(resolvedTheme === "dark" ? "light" : "dark");
-										setShowMoreMenu(false);
-									}}
-									ariaLabel="Toggle theme"
-								/>
-								<FooterNavButton
-									icon={MailIcon}
-									label="Contact"
-									onClick={() => {
-										if (onNavigate) onNavigate('contact');
-										setShowMoreMenu(false);
-									}}
-									ariaLabel="Contact"
-								/>
-								<FooterNavButton
-									icon={Menu}
-									label="All Menu"
-									onClick={() => {
-										setIsSidebarOpen(true);
-										setShowMoreMenu(false);
-									}}
-									ariaLabel="Open sidebar"
-								/>
+								<div className="flex flex-col gap-8 py-1 px-2">
+									<FooterNavButton
+										icon={resolvedTheme === "dark" ? Sun : Moon}
+										label="Theme"
+										onClick={() => {
+											setTheme(resolvedTheme === "dark" ? "light" : "dark");
+											setShowMoreMenu(false);
+										}}
+										ariaLabel="Toggle theme"
+									/>
+									<FooterNavButton
+										icon={FolderKanban}
+										label="Projects"
+										onClick={() => {
+											if (onNavigate) onNavigate('projects');
+											setShowMoreMenu(false);
+										}}
+										ariaLabel="Projects"
+									/>
+									<FooterNavButton
+										icon={Award}
+										label="Certificates"
+										onClick={() => {
+											if (onNavigate) onNavigate('certs');
+											setShowMoreMenu(false);
+										}}
+										ariaLabel="Certificates"
+									/>
+									<FooterNavButton
+										icon={MailIcon}
+										label="Contact"
+										onClick={() => {
+											if (onNavigate) onNavigate('contact');
+											setShowMoreMenu(false);
+										}}
+										ariaLabel="Contact"
+									/>
+									<FooterNavButton
+										icon={Menu}
+										label="All Menu"
+										onClick={() => {
+											setIsSidebarOpen(true);
+											setShowMoreMenu(false);
+										}}
+										ariaLabel="Open sidebar"
+									/>
+								</div>
 							</div>
 						)}
 					</div>
