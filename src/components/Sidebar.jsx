@@ -194,19 +194,15 @@ const Sidebar = ({ onNavigate }) => {
 
 	return (
 		<>
-			{/* Sidebar overlay for all devices */}
-			{(isSidebarOpen || screenSize === 'desktop') && (
+			{/* Sidebar only for desktop */}
+			{screenSize === 'desktop' && isSidebarOpen && (
 				<aside
 					ref={sidebarRef}
 					className="fixed top-0 left-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col justify-between border-r border-blue-300 overflow-y-auto"
 					role="navigation"
 					aria-label="Sidebar Navigation"
 					tabIndex={-1}
-					style={
-						screenSize === 'mobile'
-							? { width: '80vw', maxWidth: 260, right: 'auto' }
-							: { width: '16rem', maxWidth: '16rem' }
-					}
+					style={{ width: '16rem', maxWidth: '16rem' }}
 				>
 					<div>
 						<br /><br />
@@ -277,7 +273,7 @@ const Sidebar = ({ onNavigate }) => {
 			)}
 
 			{/* Mobile/tablet sticky footer nav */}
-			{(screenSize === 'mobile' || screenSize === 'tablet') && !isSidebarOpen && (
+			{(screenSize === 'mobile' || screenSize === 'tablet') && (
 				<nav
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
 					aria-label="Footer Navigation"
@@ -383,18 +379,6 @@ const Sidebar = ({ onNavigate }) => {
 									>
 										<MailIcon size={24} />
 										<span className="text-xs mt-1">Contact</span>
-									</button>
-									<button
-										onClick={() => {
-											setIsSidebarOpen(true);
-											setShowMoreMenu(false);
-										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Open sidebar"
-										tabIndex={0}
-									>
-										<Menu size={24} />
-										<span className="text-xs mt-1">All Menu</span>
 									</button>
 								</div>
 							</div>
