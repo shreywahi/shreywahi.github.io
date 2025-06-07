@@ -1,5 +1,10 @@
 {
   "appId": "io.github.dodoshrey",
   "appName": "\u0017Portfolio",
-  "webDir": "dist"
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://shreywahi.github.io/",
+    "cleartext": true
+  }
 }

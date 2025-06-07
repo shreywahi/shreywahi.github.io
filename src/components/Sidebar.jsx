@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers } from 'lucide-react';
+import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers, Smartphone, FileText } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -7,7 +7,7 @@ const navLinks = [
 	{ label: 'About', section: 'about', icon: User },
 	{ label: 'Experience', section: 'experience', icon: Briefcase },
 	{ label: 'Skills', section: 'skills', icon: Layers },
-	{ label: 'Projects', section: 'projects', icon: FolderKanban }, // changed icon here
+	{ label: 'Projects', section: 'projects', icon: FolderKanban },
 	{ label: 'Certificates', section: 'certs', icon: Award },
 	{ label: 'Contact', section: 'contact', icon: MailIcon }
 ];
@@ -45,35 +45,7 @@ function SidebarNavButton({ label, icon: Icon, onClick }) {
 	);
 }
 
-// Footer nav button component
-function FooterNavButton({ icon: Icon, label, onClick, ariaLabel }) {
-	return (
-		<button
-			onClick={onClick}
-			className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
-			aria-label={ariaLabel || label}
-			tabIndex={0}
-		>
-			{Icon && <Icon size={24} />}
-		</button>
-	);
-}
-
-// Sidebar open button component
-const SidebarOpenButton = React.forwardRef(({ className, onClick }, ref) => (
-	<button
-		ref={ref}
-		className={`fixed bottom-6 left-6 z-50 bg-blue-700 text-white p-3 rounded-full shadow-lg hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 ${className}`}
-		onClick={onClick}
-		aria-label="Open sidebar"
-		tabIndex={0}
-	>
-		<Menu size={28} />
-	</button>
-));
-
 const Sidebar = ({ onNavigate }) => {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
@@ -97,84 +69,6 @@ const Sidebar = ({ onNavigate }) => {
 		return () => window.removeEventListener('resize', checkScreen);
 	}, []);
 
-	// Sidebar open state logic
-	useEffect(() => {
-		if (screenSize === 'desktop') {
-			setIsSidebarOpen(true);
-		} else {
-			setIsSidebarOpen(false);
-		}
-	}, [screenSize]);
-
-	// Focus trap logic
-	useEffect(() => {
-		if (!isSidebarOpen) return;
-		const sidebar = sidebarRef.current;
-		if (!sidebar) return;
-		const focusableSelectors = [
-			'a[href]',
-			'button:not([disabled])',
-			'input:not([disabled])',
-			'select:not([disabled])',
-			'textarea:not([disabled])',
-			'[tabindex]:not([tabindex="-1"])'
-		];
-		const focusableEls = sidebar.querySelectorAll(focusableSelectors.join(','));
-		const focusable = Array.from(focusableEls);
-		if (focusable.length) focusable[0].focus();
-		function handleKeyDown(e) {
-			if (e.key === 'Tab') {
-				if (focusable.length === 0) return;
-				const first = focusable[0];
-				const last = focusable[focusable.length - 1];
-				if (e.shiftKey) {
-					if (document.activeElement === first) {
-						e.preventDefault();
-						last.focus();
-					}
-				} else {
-					if (document.activeElement === last) {
-						e.preventDefault();
-						first.focus();
-					}
-				}
-			}
-			if (e.key === "Escape") {
-				setIsSidebarOpen(false);
-			}
-		}
-		document.addEventListener("keydown", handleKeyDown);
-		return () => {
-			document.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [isSidebarOpen]);
-
-	useEffect(() => {
-		if (!isSidebarOpen && openButtonRef.current) {
-			openButtonRef.current.focus();
-		}
-	}, [isSidebarOpen]);
-
-	useEffect(() => {
-		if (!isSidebarOpen) return;
-		function handleClickOutside(e) {
-			const sidebar = sidebarRef.current;
-			if (!sidebar) return;
-			if (!sidebar.contains(e.target)) {
-				setIsSidebarOpen(false);
-				if (e.target && typeof e.target.focus === "function" && e.target.tabIndex >= 0) {
-					setTimeout(() => e.target.focus(), 0);
-				} else if (openButtonRef.current) {
-					setTimeout(() => openButtonRef.current.focus(), 0);
-				}
-			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [isSidebarOpen]);
-
 	// Hide More menu when clicking outside
 	useEffect(() => {
 		if (!showMoreMenu) return;
@@ -195,7 +89,7 @@ const Sidebar = ({ onNavigate }) => {
 	return (
 		<>
 			{/* Sidebar only for desktop */}
-			{screenSize === 'desktop' && isSidebarOpen && (
+			{screenSize === 'desktop' && (
 				<aside
 					ref={sidebarRef}
 					className="fixed top-0 left-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col justify-between border-r border-blue-300 overflow-y-auto"
@@ -208,11 +102,17 @@ const Sidebar = ({ onNavigate }) => {
 						<br /><br />
 						<div
 							className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
-							onClick={() => { if (onNavigate) onNavigate('hero'); setIsSidebarOpen(false); }}
+							onClick={() => {
+								if (onNavigate) onNavigate('hero');
+							}}
 							tabIndex={0}
 							aria-label="Go to Home"
 							role="button"
-							onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { if (onNavigate) onNavigate('hero'); setIsSidebarOpen(false); } }}
+							onKeyDown={e => {
+								if (e.key === "Enter" || e.key === " ") {
+									if (onNavigate) onNavigate('hero');
+								}
+							}}
 						>
 							Portfolio
 						</div>
@@ -223,7 +123,9 @@ const Sidebar = ({ onNavigate }) => {
 									key={link.section}
 									label={link.label}
 									icon={link.icon}
-									onClick={() => { if (onNavigate) onNavigate(link.section); setIsSidebarOpen(false); }}
+									onClick={() => {
+										if (onNavigate) onNavigate(link.section);
+									}}
 								/>
 							))}
 						</nav>
@@ -237,6 +139,18 @@ const Sidebar = ({ onNavigate }) => {
 								tabIndex={0}
 							>
 								Download Resume
+							</a>
+						</div>
+						<div className="flex justify-center my-4">
+							<a
+								href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0"
+								className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+								aria-label="Download Apk"
+								target="_blank"
+								rel="noopener noreferrer"
+								tabIndex={0}
+							>
+								Download Apk
 							</a>
 						</div>
 						<div className="flex justify-center my-4">
@@ -379,6 +293,34 @@ const Sidebar = ({ onNavigate }) => {
 									>
 										<MailIcon size={24} />
 										<span className="text-xs mt-1">Contact</span>
+									</button>
+									{/* Download Resume */}
+									<button
+										onClick={() => {
+											window.open("https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg", "_blank", "noopener,noreferrer");
+											setShowMoreMenu(false);
+										}}
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Download Resume"
+										tabIndex={0}
+									>
+										{/* Use a document icon for resume */}
+										<FileText size={24} />
+										<span className="text-xs mt-1">Download Resume</span>
+									</button>
+									{/* Download Apk */}
+									<button
+										onClick={() => {
+											window.open("https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0", "_blank", "noopener,noreferrer");
+											setShowMoreMenu(false);
+										}}
+										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Download Apk"
+										tabIndex={0}
+									>
+										{/* Use a smartphone icon for APK */}
+										<Smartphone size={24} />
+										<span className="text-xs mt-1">Download Apk</span>
 									</button>
 								</div>
 							</div>
