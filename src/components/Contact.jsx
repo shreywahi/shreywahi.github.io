@@ -22,7 +22,6 @@ const Contact = () => {
 
         <div className="font-mono grid place-items-center">
           <div>
-            <h3 className="text-black dark:text-blue-950 text-lg sm:text-2xl font-bold mb-6 sm:mb-8">Get In Touch</h3>
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-10">
               <div className="flex items-center">
                 <div className="bg-yellow-900 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
