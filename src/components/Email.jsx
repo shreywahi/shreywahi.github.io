@@ -46,15 +46,29 @@ const Email = () => {
       onSubmit={sendEmail}
       className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-10 max-w-md mx-auto flex flex-col gap-4"
     >
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="name">Name</label>
-        <input
-          className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
-          type="text"
-          name="name"
-          id="name"
-          required
-        />
+      <div className="flex flex-row gap-4">
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="name">Name</label>
+          <input
+            className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
+            type="text"
+            name="name"
+            id="name"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="number">Phone No</label>
+          <input
+            className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
+            type="tel"
+            name="number"
+            id="number"
+            pattern="^\+?\d{7,15}$"
+            inputMode="numeric"
+            title="Phone number should be 7-15 digits, digits only, optional + at start"
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-1">
         <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="email">Email</label>
@@ -63,18 +77,6 @@ const Email = () => {
           type="email"
           name="email"
           id="email"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="number">Phone No</label>
-        <input
-          className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
-          type="tel"
-          name="number"
-          id="number"
-          pattern="^\+?\d{7,15}$"
-          inputMode="numeric"
-          title="Phone number should be 7-15 digits, digits only, optional + at start"
         />
       </div>
       <input type="hidden" name="time" />
