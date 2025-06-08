@@ -20,7 +20,7 @@ const Contact = () => {
 
         <Email />
 
-        <div className="font-mono flex flex-row md:flex-row gap-4 sm:gap-6 md:gap-10 items-center justify-center mt-8 flex items-center">
+        <div className="font-mono flex flex-row md:flex-row gap-4 sm:gap-6 md:gap-10 justify-center mt-8 items-center">
           <div className="bg-yellow-900 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
             <Mail className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
