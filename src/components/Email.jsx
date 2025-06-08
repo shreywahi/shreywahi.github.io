@@ -44,7 +44,7 @@ const Email = () => {
     <form
       ref={form}
       onSubmit={sendEmail}
-      className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-10 max-w-md mx-auto flex flex-col gap-4"
+      className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-8 max-w-md mx-auto flex flex-col gap-4"
     >
       <div className="flex flex-row gap-4">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
