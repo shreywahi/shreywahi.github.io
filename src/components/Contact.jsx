@@ -1,4 +1,5 @@
-import { Mail, Linkedin, Github, MapPin } from 'lucide-react';
+import { Mail, Linkedin, Github } from 'lucide-react';
+import Email from './Email';
 
 const Contact = () => {
   return (
@@ -9,13 +10,15 @@ const Contact = () => {
       <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-16">
           <h2 className="text-4xl font-serif text-green-950 dark:text-white font-bold mb-4 sm:mb-6">
-            Let's Work Together
+            To Get In Touch
           </h2>
-          <br /><br />
-          <p className="font-mono text-base sm:text-xl text-blue-800 dark:text-orange-300 max-w-3xl mx-auto">
+          <br />
+          <p className="font-mono text-base sm:text-xl text-black dark:text-orange-300 max-w-3xl mx-auto">
             Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.
           </p>
         </div>
+
+        <Email />
 
         <div className="font-mono grid place-items-center">
           <div>
@@ -32,7 +35,7 @@ const Contact = () => {
                   </a>
                 </div>
               </div>
-
+              
               <div className="flex items-center">
                 <div className="bg-blue-600 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <Linkedin className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -49,21 +52,14 @@ const Contact = () => {
                 <div className="bg-black p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                   <Github className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div className="text-black font-semibold text-sm sm:text-base">GitHub</div>
+                <div className="text-black font-semibold text-sm sm:text-base">
+                  <div>GitHub</div>
+                  <a href="https://github.com/shreywahi" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
+                    /shreywahi
+                  </a>{" and "} 
                   <a href="https://github.com/dodoshrey" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
                     /dodoshrey
                   </a>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <div className="bg-blue-500 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-                  <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <div className="text-black font-semibold text-sm sm:text-base">Location</div>
-                  <div className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 text-xs sm:text-base">Dublin, Ireland</div>
                 </div>
               </div>
             </div>
@@ -71,7 +67,7 @@ const Contact = () => {
         </div>
 
         <div className="font-mono mt-8 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-700 text-center">
-          <p className="text-gray-300 text-xs sm:text-base">
+          <p className="text-black dark:text-gray-300 text-xs sm:text-base">
             © 2025 Shrey Wahi. Built with ReactJS, Vite and passion for great user experiences.
           </p>
         </div>
