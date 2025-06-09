@@ -3,20 +3,19 @@ import { Github, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
-import { projects as projectsData } from './content';
 import DragDrop from "./ui/DragDrop";
 
-const Projects = ({ onSectionChange }) => {
+const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => {
+    // Editable project list
     const [selectedProject, setSelectedProject] = useState(() => {
         if (typeof window !== "undefined") {
             const saved = localStorage.getItem('openProjectModalTitle');
             if (saved) {
-                return projectsData.find(project => project.title === saved) || null;
+                return projectList.find(project => project.title === saved) || null;
             }
         }
         return null;
     });
-    const [projectList, setProjectList] = useState(projectsData);
     const [searchQuery, setSearchQuery] = useState("");
 
     // Persist modal state to localStorage
@@ -34,7 +33,7 @@ const Projects = ({ onSectionChange }) => {
         if (typeof window === "undefined") return;
         const saved = localStorage.getItem('openProjectModalTitle');
         if (saved && !selectedProject) {
-            const project = projectsData.find(project => project.title === saved);
+            const project = projectList.find(project => project.title === saved);
             if (project) setSelectedProject(project);
         }
     }, []);
@@ -73,6 +72,27 @@ const Projects = ({ onSectionChange }) => {
         }
     };
 
+    // Admin editing state
+    const [editIdx, setEditIdx] = useState(null);
+    const [editData, setEditData] = useState(null);
+
+    const startEdit = idx => {
+        setEditIdx(idx);
+        setEditData(JSON.parse(JSON.stringify(projectList[idx])));
+    };
+    const cancelEdit = () => {
+        setEditIdx(null);
+        setEditData(null);
+    };
+    const saveEdit = idx => {
+        if (!setProjectList) return;
+        const newList = projectList.slice();
+        newList[idx] = editData;
+        setProjectList(newList);
+        setEditIdx(null);
+        setEditData(null);
+    };
+
     return (
         <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
@@ -91,44 +111,89 @@ const Projects = ({ onSectionChange }) => {
                     />
                 </div>
 
-                <DragDrop
-                    items={filteredProjects}
-                    onChange={handleDragDrop}
-                    className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
-                    renderItem={(project, dragProps, index, isDragged, isDropTarget) => (
-                        <Card
-                            key={project.title + index}
-                            className={`overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center
-                                ${isDragged ? "opacity-50 border-dashed border-4 border-blue-700 z-10" : ""}
-                                ${isDropTarget ? "ring-4 ring-blue-400" : ""}
-                            `}
-                            style={{
-                                borderRadius: "1rem",
-                                transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
-                                zIndex: isDragged ? 10 : 1,
-                            }}
-                            onClick={() => setSelectedProject(project)}
-                            role="button"
-                            aria-label={`View details for ${project.title}`}
-                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setSelectedProject(project); }}
-                            {...dragProps}
-                        >
-                            {project.imageUrl && (
-                                <div className="h-16 sm:h-48 overflow-hidden flex justify-center items-center w-full">
-                                    <img
-                                        src={project.imageUrl}
-                                        alt={project.title}
-                                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                                        aria-label={`${project.title} screenshot`}
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                    {filteredProjects.map((project, idx) => {
+                        const realIdx = projectList.findIndex(p => p.title === project.title);
+                        return isAdmin && editIdx === realIdx ? (
+                            <div key={project.title + idx} className="p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-blue-400">
+                                <input
+                                    value={editData.title}
+                                    onChange={e => setEditData({ ...editData, title: e.target.value })}
+                                    className="w-full mb-2 p-2 rounded border"
+                                />
+                                <textarea
+                                    value={editData.description}
+                                    onChange={e => setEditData({ ...editData, description: e.target.value })}
+                                    className="w-full mb-2 p-2 rounded border"
+                                />
+                                <input
+                                    value={editData.githubUrl}
+                                    onChange={e => setEditData({ ...editData, githubUrl: e.target.value })}
+                                    className="w-full mb-2 p-2 rounded border"
+                                    placeholder="GitHub URL"
+                                />
+                                <input
+                                    value={editData.demoUrl}
+                                    onChange={e => setEditData({ ...editData, demoUrl: e.target.value })}
+                                    className="w-full mb-2 p-2 rounded border"
+                                    placeholder="Demo URL"
+                                />
+                                <input
+                                    value={editData.imageUrl}
+                                    onChange={e => setEditData({ ...editData, imageUrl: e.target.value })}
+                                    className="w-full mb-2 p-2 rounded border"
+                                    placeholder="Image URL"
+                                />
+                                <div>
+                                    <label>Tags (comma separated):</label>
+                                    <input
+                                        value={editData.tags.join(', ')}
+                                        onChange={e => setEditData({ ...editData, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                                        className="w-full mb-2 p-2 rounded border"
                                     />
                                 </div>
-                            )}
-                            <CardHeader className="w-full flex flex-col items-center text-center">
-                                <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
-                            </CardHeader>
-                        </Card>
-                    )}
-                />
+                                <button onClick={() => saveEdit(realIdx)} className="mr-2">Save</button>
+                                <button onClick={cancelEdit}>Cancel</button>
+                            </div>
+                        ) : (
+                            <Card
+                                key={project.title + idx}
+                                className={`overflow-hidden h-full flex flex-col border-2 border-red-500 dark:border-blue-900 transition-all duration-300 hover:shadow-2xl bg-orange-200 dark:bg-gray-800 cursor-pointer items-center text-center`}
+                                style={{
+                                    borderRadius: "1rem",
+                                    transition: "transform 200ms cubic-bezier(.4,2,.6,1), box-shadow 200ms",
+                                    zIndex: 1,
+                                }}
+                                onClick={() => setSelectedProject(project)}
+                                role="button"
+                                aria-label={`View details for ${project.title}`}
+                                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setSelectedProject(project); }}
+                            >
+                                {project.imageUrl && (
+                                    <div className="h-16 sm:h-48 overflow-hidden flex justify-center items-center w-full">
+                                        <img
+                                            src={project.imageUrl}
+                                            alt={project.title}
+                                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                            aria-label={`${project.title} screenshot`}
+                                        />
+                                    </div>
+                                )}
+                                <CardHeader className="w-full flex flex-col items-center text-center">
+                                    <CardTitle className="text-lg sm:text-xl font-mono items-center text-center">{project.title}</CardTitle>
+                                </CardHeader>
+                                {isAdmin && (
+                                    <button
+                                        className="mt-2 px-2 py-1 bg-gray-300 rounded"
+                                        onClick={e => { e.stopPropagation(); startEdit(realIdx); }}
+                                    >
+                                        Edit
+                                    </button>
+                                )}
+                            </Card>
+                        );
+                    })}
+                </div>
 
                 <div className="text-center font-mono mt-8 sm:mt-12">
                     <Button variant="outline" size="lg" asChild aria-label="View more projects on GitHub">

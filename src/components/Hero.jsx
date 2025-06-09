@@ -1,29 +1,62 @@
-const Hero = ({ onNavigate }) => {
+import { useState, useEffect } from "react";
+
+const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDesc }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [tempName, setTempName] = useState(heroName);
+  const [tempDesc, setTempDesc] = useState(heroDesc);
+
+  // Keep temp fields in sync with props when entering edit mode or when props change
+  useEffect(() => {
+    if (editMode) {
+      setTempName(heroName);
+      setTempDesc(heroDesc);
+    }
+  }, [editMode, heroName, heroDesc]);
+
   return (
-    <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 pb-24 sm:pb-0">
+    <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-blue-950 pb-24 sm:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 text-center">
         <div className="animate-fade-in">
           <br /><br />
-          <h1 className="text-6xl sm:text-8xl font-serif text-gray-900 dark:text-white mb-6 tracking-tight">
-            Shrey
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400">
-              {" "}Wahi{" "}
-            </span>
-          </h1>
-          
-          <p className="text-lg sm:text-xl md:text-3xl font-mono text-gray-900 dark:text-purple-200 leading-relaxed">
-            <br></br>
-            <br></br>
-            <b> Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions. </b>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-          </p>
-          
+          {isAdmin && editMode ? (
+            <div>
+              <input
+                value={tempName}
+                onChange={e => setTempName(e.target.value)}
+                className="w-full mb-2 p-2 rounded border text-4xl font-serif text-center"
+                placeholder="Your Name"
+              />
+              <textarea
+                value={tempDesc}
+                onChange={e => setTempDesc(e.target.value)}
+                className="w-full mb-2 p-2 rounded border text-lg font-mono"
+                rows={4}
+                placeholder="Hero Description"
+              />
+              <button onClick={() => { setHeroName(tempName); setHeroDesc(tempDesc); setEditMode(false); }} className="mr-2">Save</button>
+              <button onClick={() => setEditMode(false)}>Cancel</button>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-6xl sm:text-8xl font-serif text-gray-900 dark:text-white mb-6 tracking-tight">
+                {heroName && heroName.split(" ")[0]}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400">
+                  {" "}{heroName && heroName.split(" ").slice(1).join(" ")}{" "}
+                </span>
+              </h1>
+              <p className="text-lg sm:text-xl md:text-3xl font-mono text-gray-900 dark:text-purple-200 leading-relaxed">
+                <br />
+                <b>{heroDesc}</b>
+                <br /><br /><br /><br />
+              </p>
+              {isAdmin && !editMode && (
+                <button onClick={() => setEditMode(true)} style={{ marginBottom: 16 }}>Edit</button>
+              )}
+            </>
+          )}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-8 sm:mb-16">
             
-            <button 
+            <button
               className="bg-blue-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               aria-label="Download Resume"
             >
@@ -31,8 +64,7 @@ const Hero = ({ onNavigate }) => {
                 Download Resume
               </a>
             </button>
-
-            <button 
+            <button
               className="bg-yellow-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               aria-label="Download Apk"
             >
@@ -40,9 +72,8 @@ const Hero = ({ onNavigate }) => {
                 Download Apk
               </a>
             </button>
-            
-            <button 
-              onClick={() => { 
+            <button
+              onClick={() => {
                 if (onNavigate) {
                   onNavigate('contact');
                 } else {
@@ -55,7 +86,6 @@ const Hero = ({ onNavigate }) => {
             >
               Get In Touch
             </button>
-            
           </div>
         </div>
       </div>

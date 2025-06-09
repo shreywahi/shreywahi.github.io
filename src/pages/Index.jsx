@@ -7,7 +7,36 @@ import Skills from '../components/Skills';
 import Projects from '../components/Projects';
 import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
-import '../App.css'; // Import the CSS file for fade effects
+import '../App.css';
+// --- Firebase imports ---
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+// --- Centralized content ---
+import {
+  experiences as defaultExperiences,
+  skillCategories as defaultSkillCategories,
+  projects as defaultProjects,
+  certs as defaultCerts,
+  defaultHeroName,
+  defaultHeroDesc,
+  defaultAboutText,
+  defaultContactHeading,
+  defaultContactIntro,
+} from '../components/content';
+
+// --- Firebase config (replace with your own config) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDZapUFZ9iMMg0V3AloagwlwVmltiV-VUk",
+  authDomain: "my-portfolio-758ad.firebaseapp.com",
+  projectId: "my-portfolio-758ad",
+  storageBucket: "my-portfolio-758ad.firebasestorage.app",
+  messagingSenderId: "441895330074",
+  appId: "1:441895330074:web:992b67a5393d5d98754ca3",
+  measurementId: "G-X6RLKPR6SY"
+  // ...other config...
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 const Index = () => {
   // Read last section from localStorage or default to 'hero'
@@ -20,6 +49,35 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState(getInitialSection);
   const [fade, setFade] = useState(true);
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1024);
+
+  // --- Admin mode state using Firebase Auth ---
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // --- Centralized content state ---
+  const [heroName, setHeroName] = useState(defaultHeroName);
+  const [heroDesc, setHeroDesc] = useState(defaultHeroDesc);
+  const [aboutText, setAboutText] = useState(defaultAboutText);
+  const [categories, setCategories] = useState(defaultSkillCategories);
+  const [experiences, setExperiences] = useState(defaultExperiences);
+  const [projectList, setProjectList] = useState(defaultProjects);
+  const [certList, setCertList] = useState(defaultCerts);
+  const [contactHeading, setContactHeading] = useState(defaultContactHeading);
+  const [contactIntro, setContactIntro] = useState(defaultContactIntro);
+
+  // Listen to Firebase auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdmin(!!user);
+      if (!user) {
+        setShowLogin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Save activeSection to localStorage whenever it changes
   useEffect(() => {
@@ -75,21 +133,151 @@ const Index = () => {
 
   // Section mapping (must be inside component to access handleNavigate)
   const sections = [
-    { id: "hero", component: <Hero onNavigate={handleNavigate} /> },
-    { id: "about", component: <About /> },
-    { id: "experience", component: <Experience /> },
-    { id: "skills", component: <Skills /> },
-    { id: "projects", component: <Projects onSectionChange={setActiveSection} /> },
-    { id: "certs", component: <Certificates onSectionChange={setActiveSection} /> },
-    { id: "contact", component: <Contact /> },
+    {
+      id: "hero",
+      component: (
+        <Hero
+          onNavigate={handleNavigate}
+          isAdmin={isAdmin}
+          heroName={heroName}
+          setHeroName={setHeroName}
+          heroDesc={heroDesc}
+          setHeroDesc={setHeroDesc}
+        />
+      ),
+    },
+    {
+      id: "about",
+      component: (
+        <About
+          isAdmin={isAdmin}
+          aboutText={aboutText}
+          setAboutText={setAboutText}
+        />
+      ),
+    },
+    {
+      id: "experience",
+      component: (
+        <Experience
+          isAdmin={isAdmin}
+          experiences={experiences}
+          setExperiences={setExperiences}
+        />
+      ),
+    },
+    {
+      id: "skills",
+      component: (
+        <Skills
+          isAdmin={isAdmin}
+          categories={categories}
+          setCategories={setCategories}
+        />
+      ),
+    },
+    {
+      id: "projects",
+      component: (
+        <Projects
+          onSectionChange={setActiveSection}
+          isAdmin={isAdmin}
+          projectList={projectList}
+          setProjectList={setProjectList}
+        />
+      ),
+    },
+    {
+      id: "certs",
+      component: (
+        <Certificates
+          onSectionChange={setActiveSection}
+          isAdmin={isAdmin}
+          certList={certList}
+          setCertList={setCertList}
+        />
+      ),
+    },
+    {
+      id: "contact",
+      component: (
+        <Contact
+          isAdmin={isAdmin}
+          heading={contactHeading}
+          setHeading={setContactHeading}
+          intro={contactIntro}
+          setIntro={setContactIntro}
+        />
+      ),
+    },
   ];
 
   // Find current section
   const currentSection = sections.find(s => s.id === activeSection)?.component;
 
+  // --- Admin login form using Firebase Auth ---
+  const renderAdminLogin = () => (
+    <div style={{
+      position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+      background: "rgba(0,0,0,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center"
+    }}>
+      <form
+        onSubmit={async e => {
+          e.preventDefault();
+          setLoginError("");
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            setShowLogin(false);
+            setEmail("");
+            setPassword("");
+          } catch (err) {
+            setLoginError("Incorrect email or password");
+          }
+        }}
+        style={{ background: "#fff", padding: 32, borderRadius: 12, minWidth: 320, boxShadow: "0 4px 32px #0004" }}
+      >
+        <h2>Admin Login</h2>
+        <input
+          type="email"
+          placeholder="Enter admin email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          style={{ width: "100%", padding: 8, margin: "8px 0" }}
+        />
+        <input
+          type="password"
+          placeholder="Enter admin password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          style={{ width: "100%", padding: 8, margin: "8px 0" }}
+        />
+        {loginError && <div style={{ color: "red", marginBottom: 8 }}>{loginError}</div>}
+        <button type="submit" style={{ padding: "8px 16px" }}>Login</button>
+        <button type="button" style={{ marginLeft: 8 }} onClick={() => setShowLogin(false)}>Cancel</button>
+      </form>
+    </div>
+  );
+
   return (
     <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
       <Sidebar onNavigate={handleNavigate} activeSection={activeSection} />
+      <button
+        style={{
+          position: "fixed", top: 12, right: 12, zIndex: 1000,
+          background: isAdmin ? "#e53e3e" : "#3182ce", color: "#fff",
+          border: "none", borderRadius: 8, padding: "8px 16px", cursor: "pointer"
+        }}
+        onClick={() => {
+          if (isAdmin) {
+            signOut(auth);
+          } else {
+            setShowLogin(true);
+          }
+        }}
+      >
+        {isAdmin ? "Exit Admin" : "Admin Login"}
+      </button>
+      {showLogin && renderAdminLogin()}
       {isDesktop ? (
         <main
           className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"

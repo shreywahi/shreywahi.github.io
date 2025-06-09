@@ -1,7 +1,26 @@
+import { useState, useEffect } from "react";
 import { Linkedin, Github } from 'lucide-react';
 import Email from './Email';
 
-const Contact = () => {
+const defaultHeading = "To Get In Touch";
+const defaultIntro = "Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.";
+
+const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [tempHeading, setTempHeading] = useState(heading);
+  const [tempIntro, setTempIntro] = useState(intro);
+
+  useEffect(() => {
+    localStorage.setItem("contactHeading", heading);
+  }, [heading]);
+  useEffect(() => {
+    localStorage.setItem("contactIntro", intro);
+  }, [intro]);
+  useEffect(() => {
+    setTempHeading(heading);
+    setTempIntro(intro);
+  }, [editMode, heading, intro]);
+
   return (
     <section
       id="contact"
@@ -9,13 +28,38 @@ const Contact = () => {
     >
       <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-16">
-          <h2 className="text-4xl font-serif text-green-950 dark:text-white font-bold mb-4 sm:mb-6">
-            To Get In Touch
-          </h2>
-          <br />
-          <p className="font-mono text-base sm:text-xl text-black dark:text-orange-300 max-w-3xl mx-auto">
-            Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.
-          </p>
+          {isAdmin && editMode ? (
+            <div>
+              <input
+                value={tempHeading}
+                onChange={e => setTempHeading(e.target.value)}
+                className="w-full mb-2 p-2 rounded border text-2xl font-serif text-center"
+                placeholder="Contact Heading"
+              />
+              <textarea
+                value={tempIntro}
+                onChange={e => setTempIntro(e.target.value)}
+                className="w-full mb-2 p-2 rounded border font-mono"
+                rows={2}
+                placeholder="Contact Intro"
+              />
+              <button onClick={() => { setHeading(tempHeading); setIntro(tempIntro); setEditMode(false); }} className="mr-2">Save</button>
+              <button onClick={() => setEditMode(false)}>Cancel</button>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-4xl font-serif text-green-950 dark:text-white font-bold mb-4 sm:mb-6">
+                {heading}
+              </h2>
+              <br />
+              <p className="font-mono text-base sm:text-xl text-black dark:text-orange-300 max-w-3xl mx-auto">
+                {intro}
+              </p>
+              {isAdmin && !editMode && (
+                <button onClick={() => setEditMode(true)} style={{ marginTop: 12 }}>Edit</button>
+              )}
+            </>
+          )}
         </div>
 
         <Email />

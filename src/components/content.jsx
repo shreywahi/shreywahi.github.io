@@ -1,29 +1,16 @@
 import { Code, Database, Globe, Smartphone, Shield } from 'lucide-react';
 
-export const getColorClasses = (color) => {
-  const colorMap = {
-    blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
-    green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
-    purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
-    pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
-    red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
-    yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
-  };
-  return colorMap[color] || colorMap.blue;
-};
+// Hero
+export const defaultHeroName = "Shrey Wahi";
 
-export const getIconColor = (color) => {
-  const colorMap = {
-    blue: "text-blue-600 dark:text-blue-300",
-    green: "text-green-600 dark:text-green-300",
-    purple: "text-purple-600 dark:text-purple-300",
-    pink: "text-pink-600 dark:text-pink-300",
-    red: "text-red-600 dark:text-red-300",
-    yellow: "text-yellow-600 dark:text-yellow-300"
-  };
-  return colorMap[color] || colorMap.blue;
-};
+export const defaultHeroDesc = "Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions.";
 
+// About
+export const defaultAboutText = `I am a Software Engineer at Microsoft, specializing in UX Engineering. I leverage my expertise in frontend development to craft secure, intuitive, and high-performance web applications. My approach blends creative design principles with robust technical execution, consistently prioritizing an exceptional user experience alongside stringent security measures.
+
+With over four years of experience, I am proficient in ReactJS, TypeScript, and various cloud technologies. My daily work involves enhancing security solutions and designing user interfaces that safeguard millions of users without compromising on a seamless experience. I also focus on optimizing application performance and architecting scalable frontend solutions.`;
+
+// Experience
 export const experiences = [
   {
     title: "Software Engineer - Level 60",
@@ -93,6 +80,7 @@ export const experiences = [
   }
 ];
 
+// Skill Categories
 export const skillCategories = [
     {
         title: "Frontend Development",
@@ -126,6 +114,7 @@ export const skillCategories = [
     }
 ];
 
+// Projects
 export const projects = [
   {
 		title: "Dashboard Monitoring Tool",
@@ -217,6 +206,7 @@ export const projects = [
 	}
 ];
 
+// Certificates
 export const certs = [
   	{
 		title: "Complete Web Developer Course",
@@ -243,3 +233,33 @@ export const certs = [
 		screenshots: ["https://udemy-certificate.s3.amazonaws.com/image/UC-7b236e3a-2d46-4692-9c7c-c6ccb58cf5ac.jpg"]
 	}
 ];
+
+// Contact
+export const defaultContactHeading = "To Get In Touch";
+
+export const defaultContactIntro = "Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.";
+
+// Utility functions for colors and icons
+export const getColorClasses = (color) => {
+  const colorMap = {
+    blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
+    green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
+    purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
+    pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
+    red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
+    yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
+  };
+  return colorMap[color] || colorMap.blue;
+};
+
+export const getIconColor = (color) => {
+  const colorMap = {
+    blue: "text-blue-600 dark:text-blue-300",
+    green: "text-green-600 dark:text-green-300",
+    purple: "text-purple-600 dark:text-purple-300",
+    pink: "text-pink-600 dark:text-pink-300",
+    red: "text-red-600 dark:text-red-300",
+    yellow: "text-yellow-600 dark:text-yellow-300"
+  };
+  return colorMap[color] || colorMap.blue;
+};
