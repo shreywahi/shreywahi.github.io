@@ -32,12 +32,19 @@ const Index = () => {
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth > 1024);
+      // On resize, scroll to the correct section if desktop
+      if (window.innerWidth > 1024) {
+        setTimeout(() => {
+          const el = document.getElementById(activeSection);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
+      }
     };
     window.addEventListener('resize', handleResize);
     // Set initial value
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [activeSection]);
 
   // On mount or when isDesktop changes, scroll to the correct section if desktop
   useEffect(() => {
@@ -51,13 +58,12 @@ const Index = () => {
 
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
+    setActiveSection(sectionId);
     if (isDesktop) {
-      // Scroll to section on desktop
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
       }
-      setActiveSection(sectionId); // Also update activeSection for persistence
     } else {
       setFade(false);
       setTimeout(() => {
@@ -73,8 +79,8 @@ const Index = () => {
     { id: "about", component: <About /> },
     { id: "experience", component: <Experience /> },
     { id: "skills", component: <Skills /> },
-    { id: "projects", component: <Projects /> },
-    { id: "certs", component: <Certificates /> },
+    { id: "projects", component: <Projects onSectionChange={setActiveSection} /> },
+    { id: "certs", component: <Certificates onSectionChange={setActiveSection} /> },
     { id: "contact", component: <Contact /> },
   ];
 
@@ -83,7 +89,7 @@ const Index = () => {
 
   return (
     <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
-      <Sidebar onNavigate={handleNavigate} />
+      <Sidebar onNavigate={handleNavigate} activeSection={activeSection} />
       {isDesktop ? (
         <main
           className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"

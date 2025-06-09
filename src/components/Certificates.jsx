@@ -9,7 +9,7 @@ const scrollToTop = () => {
     element?.scrollIntoView({ behavior: 'smooth' });
 };
 
-const Certificates = () => {
+const Certificates = ({ onSectionChange }) => {
     const [selectedCert, setselectedCert] = useState(() => {
         if (typeof window !== "undefined") {
             const saved = localStorage.getItem('openCertModalTitle');
@@ -41,6 +41,13 @@ const Certificates = () => {
             if (cert) setselectedCert(cert);
         }
     }, []);
+
+    // When modal opens, notify parent to set section to "certs"
+    useEffect(() => {
+        if (selectedCert && onSectionChange) {
+            onSectionChange("certs");
+        }
+    }, [selectedCert, onSectionChange]);
 
     return (
         <section id="certs" className="min-h-[100vh] py-10 sm:py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">

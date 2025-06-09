@@ -6,7 +6,7 @@ import Modal from "./ui/Modal";
 import { projects as projectsData } from './content';
 import DragDrop from "./ui/DragDrop";
 
-const Projects = () => {
+const Projects = ({ onSectionChange }) => {
     const [selectedProject, setSelectedProject] = useState(() => {
         if (typeof window !== "undefined") {
             const saved = localStorage.getItem('openProjectModalTitle');
@@ -38,6 +38,13 @@ const Projects = () => {
             if (project) setSelectedProject(project);
         }
     }, []);
+
+    // When modal opens, notify parent to set section to "projects"
+    useEffect(() => {
+        if (selectedProject && onSectionChange) {
+            onSectionChange("projects");
+        }
+    }, [selectedProject, onSectionChange]);
 
     // Filter projects by name (case-insensitive) for display only
     const filteredProjects = projectList.filter(project =>

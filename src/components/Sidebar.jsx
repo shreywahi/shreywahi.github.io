@@ -31,21 +31,21 @@ const socialLinks = [
 ];
 
 // Sidebar nav button component
-function SidebarNavButton({ label, icon: Icon, onClick }) {
-	return (
-		<button
-			onClick={onClick}
-			className="flex items-center gap-3 text-lg text-white hover:text-blue-700 py-3 px-4 rounded-lg transition-colors text-left font-medium hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-			aria-label={`Go to ${label}`}
-			tabIndex={0}
-		>
-			{Icon && <Icon size={22} />}
-			<span>{label}</span>
-		</button>
-	);
-}
+const SidebarNavButton = ({ label, icon: Icon, onClick, active }) => (
+	<button
+		onClick={onClick}
+		className={`flex items-center gap-3 text-lg py-3 px-4 rounded-lg transition-colors text-left font-medium focus:outline-none focus:ring-2 focus:ring-blue-400
+			${active ? "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" : "text-white hover:text-blue-700 hover:bg-blue-100"}
+		`}
+		aria-label={`Go to ${label}`}
+		tabIndex={0}
+	>
+		{Icon && <Icon size={22} />}
+		<span>{label}</span>
+	</button>
+);
 
-const Sidebar = ({ onNavigate }) => {
+const Sidebar = ({ onNavigate, activeSection }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
@@ -126,6 +126,7 @@ const Sidebar = ({ onNavigate }) => {
 									onClick={() => {
 										if (onNavigate) onNavigate(link.section);
 									}}
+									active={activeSection === link.section}
 								/>
 							))}
 						</nav>
@@ -194,7 +195,11 @@ const Sidebar = ({ onNavigate }) => {
 				>
 					<button
 						onClick={() => { if (onNavigate) onNavigate('hero'); }}
-						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${activeSection === 'hero'
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
 						aria-label="Home"
 						tabIndex={0}
 					>
@@ -203,7 +208,11 @@ const Sidebar = ({ onNavigate }) => {
 					</button>
 					<button
 						onClick={() => { if (onNavigate) onNavigate('about'); }}
-						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${activeSection === 'about'
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
 						aria-label="About"
 						tabIndex={0}
 					>
@@ -212,7 +221,11 @@ const Sidebar = ({ onNavigate }) => {
 					</button>
 					<button
 						onClick={() => { if (onNavigate) onNavigate('experience'); }}
-						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${activeSection === 'experience'
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
 						aria-label="Experience"
 						tabIndex={0}
 					>
@@ -221,7 +234,11 @@ const Sidebar = ({ onNavigate }) => {
 					</button>
 					<button
 						onClick={() => { if (onNavigate) onNavigate('skills'); }}
-						className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${activeSection === 'skills'
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
 						aria-label="Skills"
 						tabIndex={0}
 					>
@@ -233,7 +250,11 @@ const Sidebar = ({ onNavigate }) => {
 						<button
 							ref={moreButtonRef}
 							onClick={() => setShowMoreMenu((v) => !v)}
-							className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 px-2"
+							className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+								${showMoreMenu
+									? 'text-blue-400'
+									: 'text-white hover:text-blue-400'}
+							`}
 							aria-label="More options"
 							tabIndex={0}
 						>
@@ -263,7 +284,11 @@ const Sidebar = ({ onNavigate }) => {
 											if (onNavigate) onNavigate('projects');
 											setShowMoreMenu(false);
 										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
+											${activeSection === 'projects'
+												? 'text-blue-400'
+												: 'text-white hover:text-blue-400'}
+										`}
 										aria-label="Projects"
 										tabIndex={0}
 									>
@@ -275,7 +300,11 @@ const Sidebar = ({ onNavigate }) => {
 											if (onNavigate) onNavigate('certs');
 											setShowMoreMenu(false);
 										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
+											${activeSection === 'certs'
+												? 'text-blue-400'
+												: 'text-white hover:text-blue-400'}
+										`}
 										aria-label="Certificates"
 										tabIndex={0}
 									>
@@ -287,7 +316,11 @@ const Sidebar = ({ onNavigate }) => {
 											if (onNavigate) onNavigate('contact');
 											setShowMoreMenu(false);
 										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
+											${activeSection === 'contact'
+												? 'text-blue-400'
+												: 'text-white hover:text-blue-400'}
+										`}
 										aria-label="Contact"
 										tabIndex={0}
 									>
