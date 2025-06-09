@@ -133,8 +133,7 @@ export const projects = [
 		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/shreywahi/dashboard",
 		demoUrl: "https://shreywahi.github.io/dashboard",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749065716/dashboard_zpipsa.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1749065862/dashboard_kn0teh.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749065716/dashboard_zpipsa.jpg"
 	},
     {
 		title: "Online Code Editor",
@@ -142,8 +141,7 @@ export const projects = [
 		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/shreywahi/code_editor",
 		demoUrl: "https://shreywahi.github.io/code_editor/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749084649/code_editor_luxfl9.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1749084659/code_editor_xetegd.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749084649/code_editor_luxfl9.jpg"
 	},
     {
 		title: "Crypto Tracker",
@@ -151,8 +149,7 @@ export const projects = [
 		tags: ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/dodoshrey/crypto",
 		demoUrl: "https://dodoshrey.github.io/crypto",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748442893/crypto_tracker_icfxbf.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748442898/crypto_tracker_ff4vhl.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748442893/crypto_tracker_icfxbf.jpg"
 	},
     {
 		title: "Robot Name Search App",
@@ -160,8 +157,7 @@ export const projects = [
 		tags: ["ReactJS", "Node.js", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/dodoshrey/robots",
 		demoUrl: "https://dodoshrey.github.io/robots",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/robots_hdtguk.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441381/robots_ujwcxo.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/robots_hdtguk.jpg"
 	},
     {
 		title: "Tic Tac Toe",
@@ -169,8 +165,7 @@ export const projects = [
 		tags: ["ReactJS", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/dodoshrey/tic-tac-toe",
 		demoUrl: "https://dodoshrey.github.io/tic-tac-toe/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/tic_tac_toe_lmkrcm.jpg",
-	    videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441364/tic_tac_toe_xj9ppp.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/tic_tac_toe_lmkrcm.jpg"
 	},
 	{
 		title: "Budget Calculator",
@@ -178,8 +173,7 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/budget-calculator-app",
 		demoUrl: "https://dodoshrey.github.io/budget-calculator-app/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/budget_calculator_qrd3np.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441365/budget_calculator_dsenty.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/budget_calculator_qrd3np.jpg"
 	},
 	{
 		title: "Pig Game",
@@ -187,8 +181,7 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5", "Responsive Design"],
 		githubUrl: "https://github.com/dodoshrey/pig-game",
 		demoUrl: "https://dodoshrey.github.io/pig-game/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/pig_game_zptoaj.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441379/pig_game_qpqm3f.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/pig_game_zptoaj.jpg"
 	},
 	{
 		title: "DOM Manipulation Example",
@@ -196,8 +189,7 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/DOM-Manupulation-Example",
 		demoUrl: "https://dodoshrey.github.io/DOM-Manupulation-Example",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/DOM_Manipulation_xwdy6i.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441360/DOM_Manipulation_totkvh.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/DOM_Manipulation_xwdy6i.jpg"
 	},
 	{
 		title: "Furniture Shopping Site",
@@ -205,8 +197,7 @@ export const projects = [
 		tags: ["JavaScript", "CSS3", "HTML5"],
 		githubUrl: "https://github.com/dodoshrey/first-site",
 		demoUrl: "https://dodoshrey.github.io/first-site/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/furniture_shop_wiwkdz.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441363/furniture_shop_esrryb.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/furniture_shop_wiwkdz.jpg"
 	},
 	{
 		title: "Basic Template for Website",
@@ -214,8 +205,7 @@ export const projects = [
 		tags: ["HTML5", "CSS3"],
 		githubUrl: "https://github.com/dodoshrey/basic-template-for-a-website",
 		demoUrl: "https://dodoshrey.github.io/basic-template-for-a-website/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/basic_template_czaefq.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441362/basic_template_likgzy.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/basic_template_czaefq.jpg"
 	},
 	{
 		title: "Animation Using Hover",
@@ -223,8 +213,7 @@ export const projects = [
 		tags: ["HTML5", "CSS3"],
 		githubUrl: "https://github.com/dodoshrey/Example-of-using-hover-command-HTML-CSS",
 		demoUrl: "https://dodoshrey.github.io/Example-of-using-hover-command-HTML-CSS/",
-		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441349/hover_animation_ctwhj3.jpg",
-		videoUrl: "https://res.cloudinary.com/dhynxy2n3/video/upload/v1748441352/hover_animation_qhrmk5.mp4"
+		imageUrl: "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441349/hover_animation_ctwhj3.jpg"
 	}
 ];
 

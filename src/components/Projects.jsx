@@ -41,7 +41,7 @@ const Projects = () => {
     return (
         <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
-                <div className="text-center mb-8 sm:mb-16">
+                <div className="text-center mb-8">
                     <h2 className="text-4xl font-serif font-bold text-green-950 dark:text-white mb-4 sm:mb-6">
                         Personal Projects
                     </h2>
@@ -51,7 +51,7 @@ const Projects = () => {
                         placeholder="Search projects by name..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full max-w-md mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-6 text-black dark:text-white dark:bg-gray-800 dark:border-gray-700"
+                        className="w-full max-w-md mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white dark:bg-gray-800 dark:border-gray-700"
                         aria-label="Search projects"
                     />
                 </div>
@@ -114,7 +114,25 @@ const Projects = () => {
             <Modal open={!!selectedProject} onClose={() => { setSelectedProject(null); }} ariaLabel={selectedProject ? selectedProject.title : "Project Details"}>
                 {selectedProject && (
                     <div className="rounded-xl p-0 sm:p-0">
-                        <h2 className="text-2xl font-mono font-bold mb-2 text-center">{selectedProject.title}</h2>
+                        <div className="flex flex-col sm:items-center sm:justify-between mb-2 gap-2">
+                            <h2 className="text-2xl font-mono font-bold text-center sm:text-left mb-0">{selectedProject.title}</h2>
+                            <div className="flex gap-2 justify-center sm:justify-end">
+                                <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View on GitHub">
+                                    <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                        <Github size={16} />
+                                        GitHub
+                                    </a>
+                                </Button>
+                                {selectedProject.demoUrl && (
+                                    <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
+                                        <a href={selectedProject.demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                            <ExternalLink size={16} />
+                                            Open in Browser
+                                        </a>
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
 
                         <div className="font-mono flex flex-wrap gap-2 mb-4 justify-center">
                             {selectedProject.tags.map((tag, i) => (
@@ -139,54 +157,52 @@ const Projects = () => {
                             </div>
                         )}
 
-                        {/* Video Demo */}
-                        {selectedProject.videoUrl && (
-                            <div className="mb-4 flex justify-center">
-                                <iframe
-                                    src={selectedProject.videoUrl}
-                                    title="Project Video Demo"
-                                    width="100%"
-                                    height="315"
-                                    className="rounded-lg"
-                                    allow="autoplay; encrypted-media"
-                                    allowFullScreen
-                                ></iframe>
-                            </div>
-                        )}
-
-                        <div className="flex font-mono gap-3 mt-4 justify-center">
-                            <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View on GitHub">
-                                <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                    <Github size={16} />
-                                    GitHub
-                                </a>
-                            </Button>
-                        </div>
                         {/* Embedded browser/iframe for live demo */}
-                        <br />
-                        <h2 className="text-2xl font-mono font-bold mb-2 text-center"> 
-                            Scroll down to see the live demo OR ={"> "} 
-                            {selectedProject.demoUrl && (
-                                <>
-                                    <Button className="bg-blue-700 dark:bg-blue-900 text-white dark:text-blue-200" variant="outline" size="sm" asChild aria-label="View live demo">
-                                        <a href={selectedProject.demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                            <ExternalLink size={16} />
-                                            Open in Browser
-                                        </a>
-                                    </Button>
-                                </>
-                            )}
-                        </h2>
                         {selectedProject.demoUrl && (
                             <div className="mt-4 flex justify-center">
-                                <iframe
-                                    src={selectedProject.demoUrl}
-                                    title="Live Demo"
-                                    width="100%"
-                                    height="500"
-                                    className="rounded-lg border"
-                                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                                />
+                                <div
+                                    className="bg-gray-200 dark:bg-gray-900 rounded-lg shadow-lg border border-gray-400 dark:border-gray-700 w-full"
+                                    style={{ maxWidth: '100%', margin: "0 auto" }}
+                                >
+                                    {/* Fake browser bar */}
+                                    <div className="flex items-center px-3 py-2 bg-gray-300 dark:bg-gray-800 rounded-t-lg border-b border-gray-400 dark:border-gray-700">
+                                        <span className="flex gap-1 mr-3">
+                                            <span className="w-3 h-3 rounded-full bg-red-400 inline-block"></span>
+                                            <span className="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
+                                            <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                                        </span>
+                                        <span className="flex-1 text-xs truncate bg-white dark:bg-gray-700 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
+                                            {selectedProject.demoUrl}
+                                        </span>
+                                    </div>
+                                    {/* Responsive desktop-like iframe */}
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            aspectRatio: "16/9",
+                                            background: "black",
+                                            position: "relative",
+                                        }}
+                                    >
+                                        <iframe
+                                            src={selectedProject.demoUrl}
+                                            title="Live Demo"
+                                            width="100%"
+                                            height="100%"
+                                            className="rounded-b-lg border-0"
+                                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                border: 0,
+                                                background: "white",
+                                                position: "absolute",
+                                                top: 0,
+                                                left: 0,
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

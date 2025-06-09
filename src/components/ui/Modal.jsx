@@ -62,7 +62,7 @@ const Modal = ({ open, onClose, children, ariaLabel = "Modal Dialog" }) => {
     >
       <div
         ref={modalRef}
-        className="bg-blue-400 dark:bg-gray-800 rounded-xl shadow-4xl max-w-4xl w-full p-3 sm:p-6 relative"
+        className="bg-blue-400 dark:bg-gray-800 rounded-xl shadow-4xl w-full max-w-screen-2xl p-3 sm:p-6 relative"
         style={{ maxHeight: "80vh" }}
         role="dialog"
         aria-modal="true"
