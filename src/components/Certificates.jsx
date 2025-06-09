@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import Modal from "./ui/Modal";
 import { certs as certsData } from './content';
@@ -10,8 +10,37 @@ const scrollToTop = () => {
 };
 
 const Certificates = () => {
-    const [selectedCert, setselectedCert] = useState(null);
+    const [selectedCert, setselectedCert] = useState(() => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem('openCertModalTitle');
+            if (saved) {
+                // Find the cert by title
+                return certsData.find(cert => cert.title === saved) || null;
+            }
+        }
+        return null;
+    });
     const [certs, setCerts] = useState(certsData);
+
+    // Persist modal state to localStorage
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (selectedCert && selectedCert.title) {
+            localStorage.setItem('openCertModalTitle', selectedCert.title);
+        } else {
+            localStorage.removeItem('openCertModalTitle');
+        }
+    }, [selectedCert]);
+
+    // Restore modal state on mount
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const saved = localStorage.getItem('openCertModalTitle');
+        if (saved && !selectedCert) {
+            const cert = certsData.find(cert => cert.title === saved);
+            if (cert) setselectedCert(cert);
+        }
+    }, []);
 
     return (
         <section id="certs" className="min-h-[100vh] py-10 sm:py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">

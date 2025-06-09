@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Github, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -7,9 +7,37 @@ import { projects as projectsData } from './content';
 import DragDrop from "./ui/DragDrop";
 
 const Projects = () => {
-    const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedProject, setSelectedProject] = useState(() => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem('openProjectModalTitle');
+            if (saved) {
+                return projectsData.find(project => project.title === saved) || null;
+            }
+        }
+        return null;
+    });
     const [projectList, setProjectList] = useState(projectsData);
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Persist modal state to localStorage
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (selectedProject && selectedProject.title) {
+            localStorage.setItem('openProjectModalTitle', selectedProject.title);
+        } else {
+            localStorage.removeItem('openProjectModalTitle');
+        }
+    }, [selectedProject]);
+
+    // Restore modal state on mount
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const saved = localStorage.getItem('openProjectModalTitle');
+        if (saved && !selectedProject) {
+            const project = projectsData.find(project => project.title === saved);
+            if (project) setSelectedProject(project);
+        }
+    }, []);
 
     // Filter projects by name (case-insensitive) for display only
     const filteredProjects = projectList.filter(project =>

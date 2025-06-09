@@ -1,10 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Briefcase, Calendar, ArrowRight } from 'lucide-react';
 import Modal from "./ui/Modal";
 import { experiences } from './content';
 
 const Experience = () => {
-  const [openModalIndex, setOpenModalIndex] = useState(null);
+  // Use localStorage for persistence and SSR guard
+  const getInitialModalIndex = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem('openExperienceModalIndex');
+      return saved !== null ? Number(saved) : null;
+    }
+    return null;
+  };
+  const [openModalIndex, setOpenModalIndex] = useState(getInitialModalIndex);
+
+  // Persist modal state to localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (openModalIndex !== null) {
+      localStorage.setItem('openExperienceModalIndex', openModalIndex);
+    } else {
+      localStorage.removeItem('openExperienceModalIndex');
+    }
+  }, [openModalIndex]);
+
+  // Restore modal state on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem('openExperienceModalIndex');
+    if (saved !== null && openModalIndex === null) {
+      setOpenModalIndex(Number(saved));
+    }
+  }, []);
 
   return (
     <section id="experience" className="min-h-[100vh] py-10 sm:py-20 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
