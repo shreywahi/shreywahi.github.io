@@ -9,6 +9,34 @@ import DragDrop from "./ui/DragDrop";
 const Projects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [projectList, setProjectList] = useState(projectsData);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    // Filter projects by name (case-insensitive) for display only
+    const filteredProjects = projectList.filter(project =>
+        project.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Custom handler to update the order in the full list, not just filtered
+    const handleDragDrop = (newFilteredOrder) => {
+        if (!searchQuery) {
+            // No filter: update the whole list
+            setProjectList(newFilteredOrder);
+        } else {
+            // Filtered: update only the filtered items' order in the full list
+            const filteredIds = filteredProjects.map(p => p.title);
+            const newOrder = [];
+            let filteredIdx = 0;
+            for (let i = 0; i < projectList.length; i++) {
+                if (filteredIds.includes(projectList[i].title)) {
+                    newOrder.push(newFilteredOrder[filteredIdx]);
+                    filteredIdx++;
+                } else {
+                    newOrder.push(projectList[i]);
+                }
+            }
+            setProjectList(newOrder);
+        }
+    };
 
     return (
         <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
@@ -17,11 +45,20 @@ const Projects = () => {
                     <h2 className="text-4xl font-serif font-bold text-green-950 dark:text-white mb-4 sm:mb-6">
                         Personal Projects
                     </h2>
+                    {/* Search Bar */}
+                    <input
+                        type="text"
+                        placeholder="Search projects by name..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="w-full max-w-md mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-6 text-black dark:text-white dark:bg-gray-800 dark:border-gray-700"
+                        aria-label="Search projects"
+                    />
                 </div>
 
                 <DragDrop
-                    items={projectList}
-                    onChange={setProjectList}
+                    items={filteredProjects}
+                    onChange={handleDragDrop}
                     className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
                     renderItem={(project, dragProps, index, isDragged, isDropTarget) => (
                         <Card
@@ -74,7 +111,7 @@ const Projects = () => {
             </div>
 
             {/* Modal for Project Details */}
-            <Modal open={!!selectedProject} onClose={() => { setSelectedProject(null); setShowIframe(false); }} ariaLabel={selectedProject ? selectedProject.title : "Project Details"}>
+            <Modal open={!!selectedProject} onClose={() => { setSelectedProject(null); }} ariaLabel={selectedProject ? selectedProject.title : "Project Details"}>
                 {selectedProject && (
                     <div className="rounded-xl p-0 sm:p-0">
                         <h2 className="text-2xl font-mono font-bold mb-2 text-center">{selectedProject.title}</h2>
