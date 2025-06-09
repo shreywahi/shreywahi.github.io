@@ -1,13 +1,17 @@
 import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import toast, { Toaster } from 'react-hot-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?\d{7,15}$/;
 
+const RECAPTCHA_SITE_KEY = "6LcG-ForAAAAAEXLnvaJ2R8atrPFkqPTZ3VFSL8h";
+
 const Email = () => {
   const form = useRef();
   const [formMessage, setFormMessage] = useState('');
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const setFocus = (element) => {
     if (element && typeof element.focus === 'function') {
@@ -82,6 +86,11 @@ const Email = () => {
       timeInput.value = new Date().toLocaleString();
     }
 
+    if (!captchaToken) {
+      setFormMessage("Please complete the CAPTCHA.");
+      return;
+    }
+
     emailjs.sendForm('service_1zmivyt', 'template_o5oexfe', form.current, '1HA7VZDfP_0OwENgH')
       .then(() => {
         form.current.reset();
@@ -146,6 +155,13 @@ const Email = () => {
           />
         </div>
         <input type="hidden" name="time" />
+        <div className="flex justify-center">
+          <ReCAPTCHA
+            sitekey={RECAPTCHA_SITE_KEY}
+            onChange={token => setCaptchaToken(token)}
+            theme="light"
+          />
+        </div>
         {formMessage && (
           <div className="text-red-600 font-medium text-sm mb-2 text-center">{formMessage}</div>
         )}
