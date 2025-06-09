@@ -1,4 +1,4 @@
-import { Mail, Linkedin, Github } from 'lucide-react';
+import { Linkedin, Github } from 'lucide-react';
 import Email from './Email';
 
 const Contact = () => {
@@ -20,18 +20,6 @@ const Contact = () => {
 
         <Email />
 
-        <div className="font-mono flex flex-row md:flex-row gap-2 sm:gap-6 md:gap-2 justify-center mt-8 items-center">
-          <div className="bg-yellow-900 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-            <Mail className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-          <div>
-            <div className="text-black font-semibold text-sm sm:text-base">Email</div>
-            <a href="mailto:wahishrey@gmail.com" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="Send email to wahishrey@gmail.com">
-              wahishrey@gmail.com
-            </a>
-          </div>
-        </div>
-
         <div className="font-mono flex flex-row md:flex-row gap-4 sm:gap-6 md:gap-10 items-center justify-center mt-8">          
           <div className="flex items-center">
             <div className="bg-blue-600 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
@@ -50,7 +38,7 @@ const Contact = () => {
               <Github className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="text-black font-semibold text-sm sm:text-base">
-              <div>GitHub</div>
+              <div>GitHub Accounts</div>
               <a href="https://github.com/shreywahi" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-800 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
                 /shreywahi
               </a>{" and "} 
