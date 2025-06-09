@@ -1,8 +1,15 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 
 const Email = () => {
   const form = useRef();
+  const [formMessage, setFormMessage] = useState('');
+
+  const setFocus = (element) => {
+    if (element && typeof element.focus === 'function') {
+      element.focus();
+    }
+  };
 
   const sendEmail = (e) => {
     e.preventDefault();
@@ -12,20 +19,57 @@ const Email = () => {
     const number = form.current.querySelector('input[name="number"]').value.trim();
     const message = form.current.querySelector('textarea[name="message"]').value.trim();
 
-    // Phone number validation: only digits, optional + at start, 7-15 digits
-    const phoneValid = number === "" || /^\+?\d{7,15}$/.test(number);
-
-    // At least one of email or phone must be filled
-    if (!name || !message || (!email && !number)) {
-      alert("Please fill out your name and the message you want to send with at least one contact info.");
+    // Validate input fields
+    if (!name && !email && !number && !message) {
+      setFormMessage("Enter your name and message along with email or number.");
+      setFocus(form.current.querySelector('input[name="name"]'));
       return;
     }
-
-    if (!phoneValid) {
-      alert("Please enter a valid phone number (digits only, 7-15 characters).");
+    else if (name) {
+      if (message) {
+        if (!email && !number) {
+          setFormMessage(`Hi ${name}, share your contact information!`);
+          setFocus(form.current.querySelector('input[name="email"]'));
+          return;
+        }
+        else {
+          const phonePattern = /^\+?\d{7,15}$/;
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (number && !phonePattern.test(number)) {
+            setFormMessage(`Hi ${name}, please enter a valid phone number (7-15 digits, optional + at start).`);
+            setFocus(form.current.querySelector('input[name="number"]'));
+            return;
+          }
+          else if (email && !emailPattern.test(email)) {
+            setFormMessage(`Hi ${name}, please enter a valid email address.`);
+            setFocus(form.current.querySelector('input[name="email"]'));
+            return;
+          }
+        }
+      }
+      else if (!message){
+        if (email || number) {
+          setFormMessage(`Hi ${name}, enter your message.`);
+          setFocus(form.current.querySelector('input[name="message"]'));
+          return;
+        }
+        else {
+          setFormMessage(`Hi ${name}, enter your message and share your contact information.`);
+          setFocus(form.current.querySelector('textarea[name="message"]'));
+          return;
+        }
+      }
+    }
+    else if (!name) {
+      setFormMessage("Hi, enter your name.");
       return;
     }
-
+    // for edge cases
+    else {
+      setFormMessage("Unknown error occurred. Please try again.");
+      return;
+    }
+    
     // Set the time input value to current time before sending
     const timeInput = form.current.querySelector('input[name="time"]');
     if (timeInput) {
@@ -33,10 +77,12 @@ const Email = () => {
     }
 
     emailjs.sendForm('service_1zmivyt', 'template_o5oexfe', form.current, '1HA7VZDfP_0OwENgH')
-      .then((result) => {
-          console.log(result.text);
+      .then(() => {
+          form.current.reset();
+          setFormMessage("Your message has been sent successfully!");
       }, (error) => {
           console.log(error.text);
+          setFormMessage("An error occurred while sending your message. Please try again.");
       });
   };
 
@@ -44,6 +90,9 @@ const Email = () => {
     <form
       ref={form}
       onSubmit={sendEmail}
+      noValidate
+      autoComplete="off"
+      aria-label="Contact Form"
       className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-8 max-w-xs sm:max-w-md mx-auto flex flex-col gap-4"
     >
       <div className="flex flex-row gap-4">
@@ -54,11 +103,10 @@ const Email = () => {
             type="text"
             name="name"
             id="name"
-            required
           />
         </div>
         <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="number">Phone No</label>
+          <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="number">Phone Number</label>
           <input
             className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
             type="tel"
@@ -71,7 +119,7 @@ const Email = () => {
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="email">Email</label>
+        <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="email">Email Address</label>
         <input
           className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition"
           type="email"
@@ -79,19 +127,21 @@ const Email = () => {
           id="email"
         />
       </div>
-      <input type="hidden" name="time" />
       <div className="flex flex-col gap-1">
         <label className="font-semibold text-gray-700 dark:text-gray-200" htmlFor="message">Message</label>
         <textarea
           className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:bg-gray-800 dark:text-white transition resize-none min-h-[80px]"
           name="message"
           id="message"
-          required
         />
       </div>
+      <input type="hidden" name="time" />
+      {formMessage && (
+        <div className="text-red-600 font-medium text-sm mb-2 text-center">{formMessage}</div>
+      )}
       <input
         type="submit"
-        value="Send"
+        value="Send Message"
         className="mt-2 bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-6 rounded-md transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
     </form>

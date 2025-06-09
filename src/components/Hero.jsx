@@ -13,11 +13,8 @@ const Hero = ({ onNavigate }) => {
           
           <p className="text-lg sm:text-xl md:text-3xl font-mono text-gray-900 dark:text-purple-200 leading-relaxed">
             <br></br>
-            <b> Software Engineer with expertise in ReactJS and TypeScript with an interest in front-end development. </b>
             <br></br>
-            <br></br>
-            <br></br>
-            <b> I'm passionate about creating exceptional web experiences and solving complex problems with clean and efficient code. Specialized in designing and developing secure web applications. </b>
+            <b> Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions. </b>
             <br></br>
             <br></br>
             <br></br>
