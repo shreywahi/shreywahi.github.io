@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^\+?\d{7,15}$/;
+
 const Email = () => {
   const form = useRef();
   const [formMessage, setFormMessage] = useState('');
@@ -11,6 +14,52 @@ const Email = () => {
     }
   };
 
+  const validateFields = ({ name, email, number, message }) => {
+    if (!name && !email && !number && !message) {
+      return {
+        message: "Enter your name and message along with email or number.",
+        focus: 'input[name="name"]'
+      };
+    }
+    if (!name) {
+      return {
+        message: "Hi, enter your name.",
+        focus: 'input[name="name"]'
+      };
+    }
+    if (!message) {
+      if (email || number) {
+        return {
+          message: `Hi ${name}, enter your message.`,
+          focus: 'textarea[name="message"]'
+        };
+      }
+      return {
+        message: `Hi ${name}, enter your message and share your contact information.`,
+        focus: 'textarea[name="message"]'
+      };
+    }
+    if (!email && !number) {
+      return {
+        message: `Hi ${name}, share your contact information!`,
+        focus: 'input[name="email"]'
+      };
+    }
+    if (number && !PHONE_PATTERN.test(number)) {
+      return {
+        message: `Hi ${name}, please enter a valid phone number (7-15 digits, optional + at start).`,
+        focus: 'input[name="number"]'
+      };
+    }
+    if (email && !EMAIL_PATTERN.test(email)) {
+      return {
+        message: `Hi ${name}, please enter a valid email address.`,
+        focus: 'input[name="email"]'
+      };
+    }
+    return null;
+  };
+
   const sendEmail = (e) => {
     e.preventDefault();
 
@@ -19,57 +68,13 @@ const Email = () => {
     const number = form.current.querySelector('input[name="number"]').value.trim();
     const message = form.current.querySelector('textarea[name="message"]').value.trim();
 
-    // Validate input fields
-    if (!name && !email && !number && !message) {
-      setFormMessage("Enter your name and message along with email or number.");
-      setFocus(form.current.querySelector('input[name="name"]'));
+    const validation = validateFields({ name, email, number, message });
+    if (validation) {
+      setFormMessage(validation.message);
+      setFocus(form.current.querySelector(validation.focus));
       return;
     }
-    else if (name) {
-      if (message) {
-        if (!email && !number) {
-          setFormMessage(`Hi ${name}, share your contact information!`);
-          setFocus(form.current.querySelector('input[name="email"]'));
-          return;
-        }
-        else {
-          const phonePattern = /^\+?\d{7,15}$/;
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (number && !phonePattern.test(number)) {
-            setFormMessage(`Hi ${name}, please enter a valid phone number (7-15 digits, optional + at start).`);
-            setFocus(form.current.querySelector('input[name="number"]'));
-            return;
-          }
-          else if (email && !emailPattern.test(email)) {
-            setFormMessage(`Hi ${name}, please enter a valid email address.`);
-            setFocus(form.current.querySelector('input[name="email"]'));
-            return;
-          }
-        }
-      }
-      else if (!message){
-        if (email || number) {
-          setFormMessage(`Hi ${name}, enter your message.`);
-          setFocus(form.current.querySelector('input[name="message"]'));
-          return;
-        }
-        else {
-          setFormMessage(`Hi ${name}, enter your message and share your contact information.`);
-          setFocus(form.current.querySelector('textarea[name="message"]'));
-          return;
-        }
-      }
-    }
-    else if (!name) {
-      setFormMessage("Hi, enter your name.");
-      return;
-    }
-    // for edge cases
-    else {
-      setFormMessage("Unknown error occurred. Please try again.");
-      return;
-    }
-    
+
     // Set the time input value to current time before sending
     const timeInput = form.current.querySelector('input[name="time"]');
     if (timeInput) {
@@ -78,11 +83,11 @@ const Email = () => {
 
     emailjs.sendForm('service_1zmivyt', 'template_o5oexfe', form.current, '1HA7VZDfP_0OwENgH')
       .then(() => {
-          form.current.reset();
-          setFormMessage("Your message has been sent successfully!");
+        form.current.reset();
+        setFormMessage("Your message has been sent successfully!");
       }, (error) => {
-          console.log(error.text);
-          setFormMessage("An error occurred while sending your message. Please try again.");
+        console.log(error.text);
+        setFormMessage("An error occurred while sending your message. Please try again.");
       });
   };
 
