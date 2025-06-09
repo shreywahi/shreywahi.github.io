@@ -33,8 +33,8 @@ const Hero = ({ onNavigate }) => {
             </button>
 
             <button 
-              className="bg-blue-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              aria-label="Download Resume"
+              className="bg-yellow-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+              aria-label="Download Apk"
             >
               <a href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0">
                 Download Apk
