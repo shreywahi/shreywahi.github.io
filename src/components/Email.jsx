@@ -6,7 +6,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?\d{7,15}$/;
 
-const RECAPTCHA_SITE_KEY = "6LcG-ForAAAAAEXLnvaJ2R8atrPFkqPTZ3VFSL8h";
+const RECAPTCHA_SITE_KEY = "6Le5-lorAAAAAIkSmCTQyDM7dJaSYUV98hKRtBZT";
 
 const Email = () => {
   const form = useRef();
