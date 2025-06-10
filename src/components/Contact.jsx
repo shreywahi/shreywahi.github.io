@@ -2,9 +2,6 @@ import { useState, useEffect } from "react";
 import { Linkedin, Github } from 'lucide-react';
 import Email from './Email';
 
-const defaultHeading = "To Get In Touch";
-const defaultIntro = "Ready to bring your next project to life? I'd love to hear about your ideas and discuss how we can collaborate.";
-
 const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
   const [editMode, setEditMode] = useState(false);
   const [tempHeading, setTempHeading] = useState(heading);
