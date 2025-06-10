@@ -24,8 +24,18 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
                   style={{ width: "100%", fontFamily: "monospace", fontSize: "1rem", marginBottom: 8 }}
                 />
                 <div>
-                  <button onClick={() => { setAboutText(tempText); setEditMode(false); }} style={{ marginRight: 8 }}>Save</button>
-                  <button onClick={() => setEditMode(false)}>Cancel</button>
+                  <button
+                    onClick={() => { setAboutText(tempText); setEditMode(false); }}
+                    className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditMode(false)}
+                    className="px-4 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             ) : (
@@ -34,7 +44,12 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
                   <p key={i} className="text-base sm:text-lg font-mono text-purple-500 dark:text-orange-400 leading-relaxed text-justify">{line}</p>
                 ))}
                 {isAdmin && !editMode && (
-                  <button onClick={() => { setTempText(aboutText); setEditMode(true); }} style={{ marginTop: 12 }}>Edit</button>
+                  <button
+                    onClick={() => { setTempText(aboutText); setEditMode(true); }}
+                    className="mt-3 px-4 py-2 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
+                  >
+                    Edit
+                  </button>
                 )}
               </>
             )}

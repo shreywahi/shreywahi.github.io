@@ -40,8 +40,18 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
                 rows={2}
                 placeholder="Contact Intro"
               />
-              <button onClick={() => { setHeading(tempHeading); setIntro(tempIntro); setEditMode(false); }} className="mr-2">Save</button>
-              <button onClick={() => setEditMode(false)}>Cancel</button>
+              <button
+                onClick={() => { setHeading(tempHeading); setIntro(tempIntro); setEditMode(false); }}
+                className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditMode(false)}
+                className="px-4 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
             </div>
           ) : (
             <>
@@ -53,7 +63,13 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
                 {intro}
               </p>
               {isAdmin && !editMode && (
-                <button onClick={() => setEditMode(true)} style={{ marginTop: 12 }}>Edit</button>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="mt-3 px-4 py-2 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
+                  style={{ marginTop: 12 }}
+                >
+                  Edit
+                </button>
               )}
             </>
           )}

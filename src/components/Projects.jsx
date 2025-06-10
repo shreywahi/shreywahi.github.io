@@ -152,8 +152,18 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                                         className="w-full mb-2 p-2 rounded border"
                                     />
                                 </div>
-                                <button onClick={() => saveEdit(realIdx)} className="mr-2">Save</button>
-                                <button onClick={cancelEdit}>Cancel</button>
+                                <button
+                                    onClick={() => saveEdit(realIdx)}
+                                    className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={cancelEdit}
+                                    className="px-4 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition"
+                                >
+                                    Cancel
+                                </button>
                             </div>
                         ) : (
                             <Card
@@ -184,7 +194,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                                 </CardHeader>
                                 {isAdmin && (
                                     <button
-                                        className="mt-2 px-2 py-1 bg-gray-300 rounded"
+                                        className="mt-2 px-4 py-2 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
                                         onClick={e => { e.stopPropagation(); startEdit(realIdx); }}
                                     >
                                         Edit

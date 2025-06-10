@@ -33,8 +33,18 @@ const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDes
                 rows={4}
                 placeholder="Hero Description"
               />
-              <button onClick={() => { setHeroName(tempName); setHeroDesc(tempDesc); setEditMode(false); }} className="mr-2">Save</button>
-              <button onClick={() => setEditMode(false)}>Cancel</button>
+              <button
+                onClick={() => { setHeroName(tempName); setHeroDesc(tempDesc); setEditMode(false); }}
+                className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditMode(false)}
+                className="px-4 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
             </div>
           ) : (
             <>
@@ -50,7 +60,13 @@ const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDes
                 <br /><br /><br /><br />
               </p>
               {isAdmin && !editMode && (
-                <button onClick={() => setEditMode(true)} style={{ marginBottom: 16 }}>Edit</button>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="mb-4 px-4 py-2 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
+                  style={{ marginBottom: 16 }}
+                >
+                  Edit
+                </button>
               )}
             </>
           )}
