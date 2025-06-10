@@ -211,7 +211,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                     })}
                 </div>
 
-                <div className="text-center font-mono mt-8 sm:mt-12">
+                <div className="text-center font-mono mt-8 sm:mt-12 mb-8 sm:mb-12">
                     <Button variant="outline" size="lg" asChild aria-label="View more projects on GitHub">
                         <a
                         href="https://github.com/dodoshrey"
