@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers, Smartphone, FileText } from 'lucide-react';
+import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers, Smartphone, FileText, LogIn, LogOut } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -45,7 +45,7 @@ const SidebarNavButton = ({ label, icon: Icon, onClick, active }) => (
 	</button>
 );
 
-const Sidebar = ({ onNavigate, activeSection }) => {
+const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, auth }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
@@ -130,6 +130,30 @@ const Sidebar = ({ onNavigate, activeSection }) => {
 								/>
 							))}
 						</nav>
+						{/* Admin Login/Exit Admin button (desktop) */}
+						<div className="flex justify-center my-4">
+							{!isAdmin ? (
+								<button
+									onClick={() => setShowLogin(true)}
+									className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+									aria-label="Admin Login"
+									tabIndex={0}
+								>
+									<LogIn size={20} />
+									<span>Admin Login</span>
+								</button>
+							) : (
+								<button
+									onClick={() => signOut(auth)}
+									className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+									aria-label="Exit Admin"
+									tabIndex={0}
+								>
+									<LogOut size={20} />
+									<span>Exit Admin</span>
+								</button>
+							)}
+						</div>
 						<div className="flex justify-center my-4">
 							<a
 								href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg"
@@ -355,6 +379,34 @@ const Sidebar = ({ onNavigate, activeSection }) => {
 										<Smartphone size={24} />
 										<span className="text-xs mt-1">Download Apk</span>
 									</button>
+									{/* Admin Login/Exit Admin button (mobile/tablet) */}
+									{!isAdmin ? (
+										<button
+											onClick={() => {
+												setShowLogin(true);
+												setShowMoreMenu(false);
+											}}
+											className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+											aria-label="Admin Login"
+											tabIndex={0}
+										>
+											<LogIn size={20} />
+											<span className="text-xs mt-1">Admin Login</span>
+										</button>
+									) : (
+										<button
+											onClick={() => {
+												signOut(auth);
+												setShowMoreMenu(false);
+											}}
+											className="flex flex-col items-center text-white hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+											aria-label="Exit Admin"
+											tabIndex={0}
+										>
+											<LogOut size={20} />
+											<span className="text-xs mt-1">Exit Admin</span>
+										</button>
+									)}
 								</div>
 							</div>
 						)}

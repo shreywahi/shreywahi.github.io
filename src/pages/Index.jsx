@@ -334,23 +334,14 @@ const Index = () => {
 
   return (
     <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
-      <Sidebar onNavigate={handleNavigate} activeSection={activeSection} />
-      <button
-        style={{
-          position: "fixed", top: 12, right: 12, zIndex: 1000,
-          background: isAdmin ? "#e53e3e" : "#3182ce", color: "#fff",
-          border: "none", borderRadius: 8, padding: "8px 16px", cursor: "pointer"
-        }}
-        onClick={() => {
-          if (isAdmin) {
-            signOut(auth);
-          } else {
-            setShowLogin(true);
-          }
-        }}
-      >
-        {isAdmin ? "Exit Admin" : "Admin Login"}
-      </button>
+      <Sidebar
+        onNavigate={handleNavigate}
+        activeSection={activeSection}
+        setShowLogin={setShowLogin}
+        isAdmin={isAdmin}
+        signOut={signOut}
+        auth={auth}
+      />
       {showLogin && renderAdminLogin()}
       {isDesktop ? (
         <main
