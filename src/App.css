@@ -39,17 +39,21 @@
 
 .main-scroll {
   height: 100vh;
-  scroll-snap-type: y mandatory;
   overflow-y: auto;
-  /* Optional: hide scrollbar for cleaner look */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  /* Remove scroll-snap-type and hide scrollbar for natural scrolling */
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
 }
 .main-scroll::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  background: #e0e7ef;
+}
+.main-scroll::-webkit-scrollbar-thumb {
+  background: #b6c6e2;
+  border-radius: 8px;
 }
 .snap-start {
-  scroll-snap-align: start;
+  /* Remove scroll-snap-align for natural scrolling */
   min-height: 100vh;
 }
 

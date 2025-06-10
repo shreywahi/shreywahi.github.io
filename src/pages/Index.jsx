@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -39,16 +39,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const Index = () => {
-  // Read last section from localStorage or default to 'hero'
+  // Initialize with a function to ensure localStorage is read only once on mount
   const getInitialSection = () => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('activeSection') || 'hero';
     }
     return 'hero';
   };
+  
   const [activeSection, setActiveSection] = useState(getInitialSection);
   const [fade, setFade] = useState(true);
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1024);
+  
+  // Keep a stable reference to the current active section
+  const activeSectionRef = useRef(activeSection);
+  
+  // Update ref when state changes
+  useEffect(() => {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
 
   // --- Admin mode state using Firebase Auth ---
   const [isAdmin, setIsAdmin] = useState(false);
@@ -86,27 +95,63 @@ const Index = () => {
     }
   }, [activeSection]);
 
-  // Responsive layout: update isDesktop on resize
+  // Add a ref to track if user has manually scrolled
+  const userScrolledRef = useRef(false);
+  
+  // Handle resize with a stable reference to active section
   useEffect(() => {
+    let resizeTimer;
+    
     const handleResize = () => {
-      setIsDesktop(window.innerWidth > 1024);
-      // On resize, scroll to the correct section if desktop
-      if (window.innerWidth > 1024) {
-        setTimeout(() => {
-          const el = document.getElementById(activeSection);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 0);
-      }
+      // Clear any pending timers to avoid multiple rapid calls
+      clearTimeout(resizeTimer);
+      
+      // Set a small delay to ensure we're not responding to every pixel change
+      resizeTimer = setTimeout(() => {
+        const wasDesktop = isDesktop;
+        const nowDesktop = window.innerWidth > 1024;
+        
+        if (wasDesktop !== nowDesktop) {
+          // Update isDesktop state first
+          setIsDesktop(nowDesktop);
+          
+          // When switching to desktop, make sure we're showing the correct section
+          if (!wasDesktop && nowDesktop) {
+            // Force read from localStorage to ensure we have the latest value
+            const currentSection = localStorage.getItem('activeSection') || 'hero';
+            
+            // Only update if needed
+            if (currentSection !== activeSectionRef.current) {
+              setActiveSection(currentSection);
+            }
+            
+            // Reset user scroll flag when transitioning
+            userScrolledRef.current = false;
+            
+            // Then scroll to it after a small delay to ensure DOM is updated
+            setTimeout(() => {
+              const el = document.getElementById(currentSection);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+        }
+      }, 50);
     };
+    
+    // Add resize listener
     window.addEventListener('resize', handleResize);
-    // Set initial value
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeSection]);
+    
+    // Clean up
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isDesktop]); // Only depend on isDesktop to avoid loops
 
-  // On mount or when isDesktop changes, scroll to the correct section if desktop
+  // Scroll to active section when desktop changes or section changes
+  // But only for programmatic navigation, not for scroll tracking
   useEffect(() => {
-    if (isDesktop && typeof window !== 'undefined') {
+    if (isDesktop && typeof window !== 'undefined' && !userScrolledRef.current) {
       const el = document.getElementById(activeSection);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -116,6 +161,10 @@ const Index = () => {
 
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
+    // When user clicks navigation, we reset the scroll flag
+    // because this is intentional navigation, not scroll tracking
+    userScrolledRef.current = false;
+    
     setActiveSection(sectionId);
     if (isDesktop) {
       const el = document.getElementById(sectionId);
@@ -332,6 +381,89 @@ const Index = () => {
     </div>
   );
 
+  // Remove scroll snap for natural scrolling and restore section tracking only
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
+    
+    // Add a wheel event listener to detect user scrolling
+    const handleWheel = () => {
+      userScrolledRef.current = true;
+    };
+    
+    const handleScroll = () => {
+      // Only track sections if user has scrolled
+      if (!userScrolledRef.current) return;
+      
+      let found = false;
+      for (let id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= window.innerHeight * 0.4 && rect.bottom > window.innerHeight * 0.2) {
+            if (activeSection !== id) setActiveSection(id);
+            found = true;
+            break;
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchmove', handleWheel, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleWheel);
+      window.removeEventListener('scroll', handleScroll);
+    };
+    // eslint-disable-next-line
+  }, [isDesktop, activeSection]);
+
+  // Section tracking for sidebar (desktop only) using Intersection Observer
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
+    const sectionElements = sectionIds
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+
+    if (sectionElements.length === 0) return;
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        // Only update based on intersection if user has scrolled
+        if (!userScrolledRef.current) return;
+        
+        // Find all intersecting entries
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          const topSection = visible[0].target.id;
+          if (topSection && topSection !== activeSection) {
+            setActiveSection(topSection);
+          }
+        }
+      },
+      {
+        root: null,
+        threshold: 0.3, // 30% of section visible
+      }
+    );
+
+    sectionElements.forEach(el => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+    // eslint-disable-next-line
+  }, [isDesktop, /* do not depend on activeSection here */]);
+
   return (
     <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
       <Sidebar
@@ -348,9 +480,10 @@ const Index = () => {
           className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"
           style={{ minHeight: '100vh', height: '100vh' }}
         >
+          {/* Remove scroll snap classes */}
           <div>
             {sections.map(({ id, component }) => (
-              <section id={id} key={id} className="snap-start min-h-screen">
+              <section id={id} key={id} className="min-h-screen">
                 {component}
               </section>
             ))}
