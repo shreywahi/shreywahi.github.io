@@ -217,10 +217,18 @@ const Index = () => {
 
   // --- Admin login form using Firebase Auth ---
   const renderAdminLogin = () => (
-    <div style={{
-      position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-      background: "rgba(0,0,0,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center"
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0, left: 0, width: "100vw", height: "100vh",
+        background: "rgba(30, 41, 59, 0.85)", // dark blue overlay
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backdropFilter: "blur(4px)",
+      }}
+    >
       <form
         onSubmit={async e => {
           e.preventDefault();
@@ -234,26 +242,92 @@ const Index = () => {
             setLoginError("Incorrect email or password");
           }
         }}
-        style={{ background: "#fff", padding: 32, borderRadius: 12, minWidth: 320, boxShadow: "0 4px 32px #0004" }}
+        style={{
+          background: "linear-gradient(135deg, #fff 60%, #dbeafe 100%)", // light blue gradient
+          color: "#1e293b",
+          padding: 36,
+          borderRadius: 18,
+          minWidth: 340,
+          boxShadow: "0 8px 40px #0006",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
       >
-        <h2>Admin Login</h2>
+        <h2 style={{
+          color: "#2563eb",
+          fontWeight: 700,
+          fontSize: 28,
+          marginBottom: 18,
+          letterSpacing: 1,
+        }}>Admin Login</h2>
         <input
           type="email"
           placeholder="Enter admin email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          style={{ width: "100%", padding: 8, margin: "8px 0" }}
+          style={{
+            width: "100%",
+            padding: 10,
+            margin: "10px 0",
+            borderRadius: 8,
+            border: "1px solid #cbd5e1",
+            fontSize: 16,
+            background: "#f1f5f9",
+          }}
         />
         <input
           type="password"
           placeholder="Enter admin password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          style={{ width: "100%", padding: 8, margin: "8px 0" }}
+          style={{
+            width: "100%",
+            padding: 10,
+            margin: "10px 0",
+            borderRadius: 8,
+            border: "1px solid #cbd5e1",
+            fontSize: 16,
+            background: "#f1f5f9",
+          }}
         />
-        {loginError && <div style={{ color: "red", marginBottom: 8 }}>{loginError}</div>}
-        <button type="submit" style={{ padding: "8px 16px" }}>Login</button>
-        <button type="button" style={{ marginLeft: 8 }} onClick={() => setShowLogin(false)}>Cancel</button>
+        {loginError && <div style={{ color: "#dc2626", marginBottom: 10 }}>{loginError}</div>}
+        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+          <button
+            type="submit"
+            style={{
+              padding: "10px 24px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: "pointer",
+              boxShadow: "0 2px 8px #2563eb22",
+              transition: "background 0.2s",
+            }}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            style={{
+              padding: "10px 24px",
+              background: "#e5e7eb",
+              color: "#1e293b",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: "pointer",
+              transition: "background 0.2s",
+            }}
+            onClick={() => setShowLogin(false)}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );
