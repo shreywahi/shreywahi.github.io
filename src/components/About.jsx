@@ -21,7 +21,17 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
                   value={tempText}
                   onChange={e => setTempText(e.target.value)}
                   rows={10}
-                  style={{ width: "100%", fontFamily: "monospace", fontSize: "1rem", marginBottom: 8 }}
+                  style={{
+                    width: "100%",
+                    fontFamily: "monospace",
+                    fontSize: "1rem",
+                    marginBottom: 8,
+                    background: "#f9fafb",
+                    color: "#222",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: 8,
+                    padding: 12,
+                  }}
                 />
                 <div>
                   <button

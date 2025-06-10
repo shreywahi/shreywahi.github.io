@@ -86,6 +86,7 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
                                     onChange={e => setEditData({ ...editData, title: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
                                     placeholder="Certificate Title"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <div>
                                     <label>Tags (comma separated):</label>
@@ -93,6 +94,7 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
                                         value={editData.tags.join(', ')}
                                         onChange={e => setEditData({ ...editData, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                                         className="w-full mb-2 p-2 rounded border"
+                                        style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                     />
                                 </div>
                                 <input
@@ -100,6 +102,7 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
                                     onChange={e => setEditData({ ...editData, imageUrl: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
                                     placeholder="Image URL"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <div>
                                     <label>Screenshots (JSON array):</label>
@@ -111,6 +114,7 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
                                             } catch {}
                                         }}
                                         className="w-full mb-2 p-2 rounded border"
+                                        style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                     />
                                 </div>
                                 <button

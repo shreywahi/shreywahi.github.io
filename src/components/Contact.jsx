@@ -32,6 +32,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
                 onChange={e => setTempHeading(e.target.value)}
                 className="w-full mb-2 p-2 rounded border text-2xl font-serif text-center"
                 placeholder="Contact Heading"
+                style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
               />
               <textarea
                 value={tempIntro}
@@ -39,6 +40,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
                 className="w-full mb-2 p-2 rounded border font-mono"
                 rows={2}
                 placeholder="Contact Intro"
+                style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
               />
               <button
                 onClick={() => { setHeading(tempHeading); setIntro(tempIntro); setEditMode(false); }}

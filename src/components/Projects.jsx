@@ -120,29 +120,34 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                                     value={editData.title}
                                     onChange={e => setEditData({ ...editData, title: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <textarea
                                     value={editData.description}
                                     onChange={e => setEditData({ ...editData, description: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <input
                                     value={editData.githubUrl}
                                     onChange={e => setEditData({ ...editData, githubUrl: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
                                     placeholder="GitHub URL"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <input
                                     value={editData.demoUrl}
                                     onChange={e => setEditData({ ...editData, demoUrl: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
                                     placeholder="Demo URL"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <input
                                     value={editData.imageUrl}
                                     onChange={e => setEditData({ ...editData, imageUrl: e.target.value })}
                                     className="w-full mb-2 p-2 rounded border"
                                     placeholder="Image URL"
+                                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                 />
                                 <div>
                                     <label>Tags (comma separated):</label>
@@ -150,6 +155,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                                         value={editData.tags.join(', ')}
                                         onChange={e => setEditData({ ...editData, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                                         className="w-full mb-2 p-2 rounded border"
+                                        style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                                     />
                                 </div>
                                 <button

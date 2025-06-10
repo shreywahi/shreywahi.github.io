@@ -25,6 +25,7 @@ const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDes
                 onChange={e => setTempName(e.target.value)}
                 className="w-full mb-2 p-2 rounded border text-4xl font-serif text-center"
                 placeholder="Your Name"
+                style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
               />
               <textarea
                 value={tempDesc}
@@ -32,6 +33,7 @@ const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDes
                 className="w-full mb-2 p-2 rounded border text-lg font-mono"
                 rows={4}
                 placeholder="Hero Description"
+                style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
               />
               <button
                 onClick={() => { setHeroName(tempName); setHeroDesc(tempDesc); setEditMode(false); }}

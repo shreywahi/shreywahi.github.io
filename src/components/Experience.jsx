@@ -44,26 +44,31 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                     value={editData.title}
                     onChange={e => setEditData({ ...editData, title: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
+                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
                   <input
                     value={editData.company}
                     onChange={e => setEditData({ ...editData, company: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
+                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
                   <input
                     value={editData.period}
                     onChange={e => setEditData({ ...editData, period: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
+                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
                   <input
                     value={editData.location}
                     onChange={e => setEditData({ ...editData, location: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
+                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
                   <textarea
                     value={editData.description}
                     onChange={e => setEditData({ ...editData, description: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
+                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
                   <div>
                     <label>Achievements (one per line):</label>
@@ -71,6 +76,7 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                       value={editData.achievements.join('\n')}
                       onChange={e => setEditData({ ...editData, achievements: e.target.value.split('\n') })}
                       className="w-full mb-2 p-2 rounded border"
+                      style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                     />
                   </div>
                   {editData.projects && (
@@ -85,6 +91,7 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                         }}
                         className="w-full mb-2 p-2 rounded border"
                         rows={4}
+                        style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                       />
                     </div>
                   )}
@@ -94,6 +101,7 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                       value={editData.technologies.join(', ')}
                       onChange={e => setEditData({ ...editData, technologies: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                       className="w-full mb-2 p-2 rounded border"
+                      style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                     />
                   </div>
                   <button
