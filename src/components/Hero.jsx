@@ -77,24 +77,26 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
               )}
             </>
           )}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-8 sm:mb-16">
-              <button
-              className="bg-blue-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-16">
+            <button
+              className="bg-blue-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
               aria-label="Download Resume PDF"
             >
-              <a href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg" className="flex items-center gap-3">
+              <a href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg" className="flex items-center justify-center gap-3">
                 <Download size={24} />
                 Resume PDF
               </a>
-            </button>            <button
-              className="bg-yellow-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+            </button>            
+            <button
+              className="bg-yellow-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
               aria-label="Get WebApp Apk"
             >
-              <a href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0" className="flex items-center gap-3">
+              <a href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0" className="flex items-center justify-center gap-3">
                 <Smartphone size={24} />
                 Portfolio Apk
               </a>
-            </button><button
+            </button>
+            <button
               onClick={() => {
                 if (onNavigate) {
                   onNavigate('contact');
@@ -103,9 +105,9 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="border-2 border-gray-700 dark:border-gray-200 text-gray-900 dark:text-gray-200 px-10 py-5 rounded-xl text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center"
+              className="border-2 border-gray-700 dark:border-gray-200 text-gray-900 dark:text-gray-200 px-10 py-5 rounded-xl text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center w-full sm:w-auto"
               aria-label="Scroll to Contact section"
-            >
+              >
               <Mail size={24} />
               Get In Touch
             </button>
