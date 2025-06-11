@@ -113,21 +113,7 @@ const AdminPanel = ({ isAdmin }) => {
           </div>
         </label>
       </div>
-      
-      {/* Show helpful message for localhost development */}
-      {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
-        <div className="mb-4 p-3 bg-yellow-900 bg-opacity-50 border border-yellow-600 rounded-md text-xs">
-          <p className="font-semibold text-yellow-200 mb-2">📍 Localhost Development Mode</p>
-          <p className="text-yellow-100 mb-2">
-            Google API key requests are blocked on localhost. You have two options:
-          </p>
-          <ol className="text-yellow-100 text-xs list-decimal list-inside space-y-1">
-            <li>Sign in to Google (authenticated access works on localhost)</li>
-            <li>Configure your API key to allow localhost referrers in Google Cloud Console</li>
-          </ol>
-        </div>
-      )}
-      
+            
       <button
         onClick={handleReset}
         className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md mb-2"

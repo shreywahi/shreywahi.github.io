@@ -201,7 +201,6 @@ export const signInToGoogle = async () => {
   try {
     if (!gapi.auth2) await initDriveClient();
     
-    console.log('Starting Google authentication flow...');
     const user = await gapi.auth2.getAuthInstance().signIn({
       prompt: 'select_account' // Force account selection each time
     });
@@ -248,13 +247,11 @@ export const isSignedInToGoogle = async () => {
 export const fetchContentFromDrive = async () => {
   // Check if we should skip Drive entirely - check localStorage first
   if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
-    console.log('fetchContentFromDrive: Using local content mode (localStorage setting)');
     return defaultContent;
   }
   
   // Check if we should skip Drive entirely
   if (forceLocalContent || checkForCspErrors()) {
-    console.log('fetchContentFromDrive: Using local content mode (CSP or force flag)');
     return defaultContent;
   }
   
@@ -265,42 +262,34 @@ export const fetchContentFromDrive = async () => {
      window.location.hostname === '');
   
   if (isLocalhost) {
-    console.log('fetchContentFromDrive: Localhost detected - prioritizing authenticated access');
-    
     // For localhost, try authenticated fetch first since API key is blocked
     try {
       if (gapi.client && gapi.client.drive && gapi.auth2) {
         const authInstance = gapi.auth2.getAuthInstance();
         if (authInstance && authInstance.isSignedIn.get()) {
-          console.log('fetchContentFromDrive: Using authenticated fetch for localhost');
           return await fetchFromDriveAuthenticated();
         } else {
-          console.log('fetchContentFromDrive: User not signed in, falling back to local content for localhost');
           return defaultContent;
         }
       } else {
-        console.log('fetchContentFromDrive: Google API not initialized, using local content for localhost');
         return defaultContent;
       }
     } catch (error) {
-      console.warn('fetchContentFromDrive: Authenticated fetch failed on localhost, using local content:', error);
+      console.warn('Authenticated fetch failed on localhost, using local content:', error);
       return defaultContent;
     }
   } else {
     // For production, try various methods
-    console.log('fetchContentFromDrive: Production environment detected');
-    
     // Try authenticated fetch first if available
     try {
       if (gapi.client && gapi.client.drive && gapi.auth2) {
         const authInstance = gapi.auth2.getAuthInstance();
         if (authInstance && authInstance.isSignedIn.get()) {
-          console.log('fetchContentFromDrive: Using authenticated fetch for production');
           return await fetchFromDriveAuthenticated();
         }
       }
     } catch (error) {
-      console.warn('fetchContentFromDrive: Authenticated fetch not available, falling back to API key:', error);
+      console.warn('Authenticated fetch not available, falling back to API key:', error);
     }
     
     // Fall back to direct API key fetch for production
@@ -477,7 +466,6 @@ const tryAlternativeUrls = async () => {
 export const updateAndReplaceDriveFile = async (sectionName, newSectionData, fileName = 'content.json') => {
   try {
     if (!gapi.client || !gapi.client.drive) {
-      console.log('updateAndReplaceDriveFile: gapi.client.drive not ready, calling initDriveClient...');
       await initDriveClient();
       if (!gapi.client || !gapi.client.drive) {
         throw new Error('Google Drive client could not be initialized.');
@@ -486,45 +474,43 @@ export const updateAndReplaceDriveFile = async (sectionName, newSectionData, fil
     
     const authInstance = gapi.auth2.getAuthInstance();
     if (!authInstance.isSignedIn.get()) {
-      console.log('updateAndReplaceDriveFile: User not signed in, calling signInToGoogle...');
       await signInToGoogle();
     }
     
     if (!authInstance.isSignedIn.get()) {
-      console.error('updateAndReplaceDriveFile: Failed to sign in or user is still not signed in after attempt.');
+      console.error('Failed to sign in or user is still not signed in after attempt.');
       throw new Error('User not signed in after attempting to sign in.');
-    }    // First, fetch the current content from Drive
-    console.log('[updateAndReplaceDriveFile] Fetching current content from Drive...');
+    }// First, fetch the current content from Drive
     let currentContent;
     try {
       currentContent = await fetchContentFromDrive();
       
       // Validate that we didn't get an error response
       if (currentContent && currentContent.error) {
-        console.warn('[updateAndReplaceDriveFile] Received error response from Drive, using default content:', currentContent.error);
+        console.warn('Received error response from Drive, using default content');
         currentContent = defaultContent;
       }
       
       // Ensure we have valid content structure
       if (!currentContent || typeof currentContent !== 'object' || Object.keys(currentContent).length === 0) {
-        console.warn('[updateAndReplaceDriveFile] Invalid or empty content received, using default content');
+        console.warn('Invalid or empty content received, using default content');
         currentContent = defaultContent;
       }
       
     } catch (error) {
-      console.warn('[updateAndReplaceDriveFile] Failed to fetch current content, using default:', error);
+      console.warn('Failed to fetch current content, using default:', error);
       currentContent = defaultContent;
-    }    // Update the specific section
+    }
+
+    // Update the specific section
     const updatedContent = {
       ...currentContent,
       [sectionName]: { ...(currentContent[sectionName] || {}), ...newSectionData }
     };
 
-    console.log('[updateAndReplaceDriveFile] Updated content to save:', JSON.parse(JSON.stringify(updatedContent)));
-
     // Validate the updated content before saving
     if (updatedContent.error) {
-      console.error('[updateAndReplaceDriveFile] Content contains error - not saving:', updatedContent.error);
+      console.error('Content contains error - not saving');
       throw new Error('Cannot save content that contains error data');
     }
 
@@ -557,32 +543,30 @@ export const saveAndReplaceDriveFile = async (contentData, fileName = 'content.j
     
     if (!authInstance.isSignedIn.get()) {
       console.error('saveAndReplaceDriveFile: Failed to sign in or user is still not signed in after attempt.');
-      throw new Error('User not signed in after attempting to sign in.');
-    }
+      throw new Error('User not signed in after attempting to sign in.');    }
     
-    console.log('[saveAndReplaceDriveFile] Effective fileName:', fileName); 
-    console.log('[saveAndReplaceDriveFile] Received contentData (object):', JSON.parse(JSON.stringify(contentData))); 
-      const stringifiedContent = JSON.stringify(contentData, null, 2);
-    console.log('[saveAndReplaceDriveFile] Stringified contentData for body:', stringifiedContent);
+    const stringifiedContent = JSON.stringify(contentData, null, 2);
     
     // Validate content before upload
     if (!contentData || Object.keys(contentData).length === 0 || stringifiedContent === '{}' || stringifiedContent.length < 10) { 
-      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData is empty or minimal. Aborting problematic upload. Stringified content:', stringifiedContent);
+      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData is empty or minimal. Aborting problematic upload.');
       throw new Error('Attempted to save empty or invalid content. Please check the data source.');
     }
     
     // Check if content contains error data
     if (contentData.error) {
-      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData contains error response. Aborting upload. Error:', contentData.error);
+      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData contains error response. Aborting upload.');
       throw new Error('Attempted to save error response as content. Please check the data source.');
-    }    // Get the current file ID
+    }
+    
+    // Get the current file ID
     const currentFileId = getCurrentDriveFileId();
     if (!currentFileId) {
       console.error('[saveAndReplaceDriveFile] No current file ID found, cannot update existing file');
       throw new Error('No file ID available to update. Please check the configuration.');
     }
 
-    console.log(`Updating existing file (ID: ${currentFileId}) with new content...`);
+
     
     // Use the resumable upload method to update the existing file
     const boundary = '-------314159265358979323846';
@@ -610,21 +594,16 @@ export const saveAndReplaceDriveFile = async (contentData, fileName = 'content.j
       'headers': {
         'Content-Type': 'multipart/related; boundary="' + boundary + '"'
       },
-      'body': multipartRequestBody
-    });
-    
-    console.log('[saveAndReplaceDriveFile] File metadata being sent:', metadata);
+      'body': multipartRequestBody    });
     
     const updateResponse = await request;
-    
-    const updatedFile = updateResponse.result;
+      const updatedFile = updateResponse.result;
     if (!updatedFile || !updatedFile.id) {
       console.error('Failed to update existing file, response:', updateResponse);
       throw new Error('Failed to update existing file on Google Drive.');
     }
-    console.log(`Successfully updated existing file: ${updatedFile.name} (ID: ${updatedFile.id})`);
 
-    console.log('Content saved to existing file successfully on Google Drive.');
+
     return updatedFile;
   } catch (error) {
     console.error('Error in saveAndReplaceDriveFile:', error);
@@ -663,11 +642,9 @@ export const saveAndReplaceDriveFile = async (contentData, fileName = 'content.j
         
         const createResponse = await createRequest;
         const newFile = createResponse.result;
-        
-        if (newFile && newFile.id) {
-          console.log(`Successfully created new file: ${newFile.name} (ID: ${newFile.id})`);
+          if (newFile && newFile.id) {
+          console.log(`Successfully created new file: ${newFile.name}`);
           updateCurrentDriveFileId(newFile.id);
-          console.log('Content saved to a new file and file reference updated successfully on Google Drive.');
           return newFile;
         }
       } catch (createError) {
