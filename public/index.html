@@ -1,13 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Portfolio</title>
-  <!-- Existing head content -->
-</head>
-<body>
-  <!-- Body content -->
-  <div id="root"></div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      IMPORTANT: Add the Content-Security-Policy meta tag below.
+      This is a basic example. You should adjust it based on the full CSP string
+      suggested by your application's AdminPanel/cspHelper.js,
+      ensuring it includes all necessary sources for your app and Google's services.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://apis.google.com https://accounts.google.com https://www.gstatic.com 'unsafe-inline' 'unsafe-eval' blob: data:;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://www.gstatic.com;
+    font-src 'self' https://fonts.gstatic.com data:;
+    img-src 'self' data: https://*.googleusercontent.com https://www.gstatic.com;
+    connect-src 'self' https://www.googleapis.com https://accounts.google.com https://cors-anywhere.herokuapp.com;
+    frame-src 'self' https://accounts.google.com https://apis.google.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    report-uri https://accounts.google.com/_/IdpIFrameHttp/cspreport/fine-allowlist;
+">
+    <title>Shrey Wahi - Portfolio</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

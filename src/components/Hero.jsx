@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDesc }) => {
+const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
   const [editMode, setEditMode] = useState(false);
   const [tempName, setTempName] = useState(heroName);
   const [tempDesc, setTempDesc] = useState(heroDesc);
@@ -34,9 +34,13 @@ const Hero = ({ onNavigate, isAdmin, heroName, setHeroName, heroDesc, setHeroDes
                 rows={4}
                 placeholder="Hero Description"
                 style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
-              />
-              <button
-                onClick={() => { setHeroName(tempName); setHeroDesc(tempDesc); setEditMode(false); }}
+              />              <button
+                onClick={async () => { 
+                  if (updateHero) {
+                    await updateHero(tempName, tempDesc);
+                  }
+                  setEditMode(false); 
+                }}
                 className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
               >
                 Save

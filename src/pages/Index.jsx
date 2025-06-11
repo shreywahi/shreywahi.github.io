@@ -26,7 +26,7 @@ import {
   defaultContactIntro,
 } from '../utils/contentLoader';
 import { useContentManager } from '../hooks/useContentManager';
-import { fetchContentFromDrive, saveContentToDrive, signInToGoogle } from '../utils/driveContentManager';
+import { saveAndReplaceDriveFile, signInToGoogle } from '../utils/driveContentManager';
 import { logCspSuggestion } from '../utils/cspHelper';
 
 // --- Firebase config (replace with your own config) ---
@@ -72,7 +72,7 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [password, setPassword] = useState("");
 
   // --- Centralized content state ---
-  const { content, updateContent, loading } = useContentManager(isAdmin);
+  const { content, updateContent, loading } = useContentManager(isAdmin); // `content` is the state from the hook
   
   const [heroName, setHeroName] = useState('');
   const [heroDesc, setHeroDesc] = useState('');
@@ -92,9 +92,9 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   // Add a ref to track if user has manually scrolled
   const userScrolledRef = useRef(false);
   
-  // Update state when content loads
+  // Update state when content loads from useContentManager
   useEffect(() => {
-    if (!loading) {
+    if (!loading && content) {
       setHeroName(content.hero?.name || '');
       setHeroDesc(content.hero?.description || '');
       setAboutText(content.about?.text || '');
@@ -104,6 +104,10 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       setCertList(content.certificates || []);
       setContactHeading(content.contact?.heading || '');
       setContactIntro(content.contact?.intro || '');
+      // Ensure colorMap and iconColorMap are also set if they are part of `content`
+      // For example:
+      // setColorMapState(content.colorMap || {}); 
+      // setIconColorMapState(content.iconColorMap || {});
     }
   }, [content, loading]);
 
@@ -279,13 +283,16 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       }, 300); // match fade duration
     }
   };
-
   // Create wrapped update functions
   const updateHero = async (name, desc) => {
-    const updated = await updateContent('hero', { ...content.hero, name, description: desc });
+    const updated = await updateContent('hero', { 
+      ...content.hero, 
+      name: name !== undefined ? name : heroName, 
+      description: desc !== undefined ? desc : heroDesc 
+    });
     if (updated) {
-      setHeroName(name);
-      setHeroDesc(desc);
+      if (name !== undefined) setHeroName(name);
+      if (desc !== undefined) setHeroDesc(desc);
     }
   };
   
@@ -297,15 +304,12 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   // Section mapping (must be inside component to access handleNavigate)
   const sections = [
     {
-      id: "hero",
-      component: (
-        <Hero
+      id: "hero",      component: (        <Hero
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
           heroName={heroName}
-          setHeroName={(name) => updateHero(name, heroDesc)}
           heroDesc={heroDesc}
-          setHeroDesc={(desc) => updateHero(heroName, desc)}
+          updateHero={updateHero}
         />
       ),
     },
@@ -503,47 +507,39 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       setDriveSaving(true);
       setDriveMessage({ type: 'info', text: 'Saving content to Google Drive...' });
       
-      // Sign in if needed (this will trigger the OAuth consent screen)
-      await signInToGoogle();
+      await signInToGoogle(); // Ensure user is signed in
       
-      // Construct the complete content object
-      const completeContent = {
-        hero: {
-          name: heroName,
-          description: heroDesc
-        },
-        about: {
-          text: aboutText
-        },
-        skillCategories: categories,
-        experiences: experiences,
-        projects: projectList,
-        certificates: certList,
-        contact: {
-          heading: contactHeading,
-          intro: contactIntro
-        },
-        // Include the color maps and any other static content
-        colorMap: {
-          blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
-          green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
-          purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
-          pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
-          red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
-          yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
-        },
-        iconColorMap: {
-          blue: "text-blue-600 dark:text-blue-300",
-          green: "text-green-600 dark:text-green-300",
-          purple: "text-purple-600 dark:text-purple-300",
-          pink: "text-pink-600 dark:text-pink-300",
-          red: "text-red-600 dark:text-red-300",
-          yellow: "text-yellow-600 dark:text-yellow-300"
-        }
+      // Prepare the data to save directly from the `content` object from useContentManager.
+      // This `content` object should hold the most up-to-date, complete portfolio data.
+      const dataToSave = {
+        hero: content.hero,
+        about: content.about,
+        skillCategories: content.skillCategories,
+        experiences: content.experiences,
+        projects: content.projects,
+        certificates: content.certificates,
+        contact: content.contact,
+        // Assuming colorMap and iconColorMap are part of the `content` object
+        // loaded from content.json / Drive. If they are not, and you intend them
+        // to be static, you might need to merge them differently or ensure they
+        // are part of the `content` structure managed by `useContentManager`.
+        colorMap: content.colorMap || { /* default static colorMap if not in content */ },
+        iconColorMap: content.iconColorMap || { /* default static iconColorMap if not in content */ }
       };
+
+      // It's crucial that `content.hero`, `content.about`, etc., contain the actual data.
+      // The `content` object from `useContentManager` might also include `loading` and `error` keys.
+      // The structure above cherry-picks the known data sections.
+      // If `content` itself is purely the data object (without loading/error at the root),
+      // you could potentially do: const dataToSave = { ...content }; (after ensuring no metadata)
+
+      console.log("Data being sent by saveContentToDriveHandler:", JSON.stringify(dataToSave, null, 2));
       
-      // Save to Google Drive
-      await saveContentToDrive(completeContent);
+      if (Object.keys(dataToSave.hero || {}).length === 0 && Object.keys(dataToSave.about || {}).length === 0) {
+        console.warn("Warning: Data being saved appears to be largely empty. Check content state from useContentManager.");
+      }
+
+      await saveAndReplaceDriveFile(dataToSave); 
       
       setDriveMessage({ type: 'success', text: 'Content saved to Google Drive successfully!' });
       setTimeout(() => setDriveMessage(null), 3000);

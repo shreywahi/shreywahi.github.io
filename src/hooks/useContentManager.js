@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { initContentFromDrive, getContent } from '../utils/contentLoader';
-import { saveContentToDrive, isSignedInToGoogle, signInToGoogle } from '../utils/driveContentManager';
+import { saveAndReplaceDriveFile, isSignedInToGoogle, signInToGoogle, updateAndReplaceDriveFile } from '../utils/driveContentManager';
 
 export function useContentManager(isAdmin) {
   // Start with content from the module state to prevent blank screen
@@ -56,35 +56,40 @@ export function useContentManager(isAdmin) {
       isMounted = false;
     };
   }, []);
-  
   // Function to update content (for admin mode)
   const updateContent = async (section, newData) => {
     if (!isAdmin) return false;
     
+    // Update the state first for immediate UI feedback
+    setContentState(prev => ({
+      ...prev,
+      [section]: { ...(prev[section] || {}), ...newData },
+    }));
+
+    // Save to Drive using the dedicated update function
     try {
-      // Update local state first for immediate feedback
-      setContentState(prev => ({
-        ...prev,
-        [section]: newData
-      }));
-      
       // Check if signed in to Google
       const signedIn = await isSignedInToGoogle();
       if (!signedIn) {
         await signInToGoogle();
       }
       
-      // Prepare the full content for saving
-      const updatedContent = {
-        ...contentState,
-        [section]: newData
-      };
-      
-      // Save to Google Drive
-      await saveContentToDrive(updatedContent);
+      // Use the dedicated update function that fetches current content first
+      await updateAndReplaceDriveFile(section, newData);
       return true;
     } catch (error) {
       console.error('Failed to update content:', error);
+      // Revert the state change on error
+      setContentState(prev => {
+        const reverted = { ...prev };
+        // Remove the failed update
+        if (reverted[section]) {
+          Object.keys(newData).forEach(key => {
+            delete reverted[section][key];
+          });
+        }
+        return reverted;
+      });
       return false;
     }
   };

@@ -2,13 +2,18 @@ import { gapi } from 'gapi-script';
 import defaultContentData from '../data/content.json';
 import { logCspSuggestion } from './cspHelper';
 import { fetchWithCorsProxy } from './corsProxy';
+import { GOOGLE_API_CONFIG } from '../config'; // Import the configuration
 
-// Replace with your actual Google API credentials
-const API_KEY = 'AIzaSyA0XN9LpLvaFKOEINnOOVYnfOQe59fZ0vs'; // The API Key you created
-const CLIENT_ID = '936180176580-tkbp6kt3q1pp2o6urobfu9aa163bpcrt.apps.googleusercontent.com'; // The OAuth Client ID you created
-const DRIVE_FILE_ID = '1VmYPnA5Mp8pPurA9Dk4XERG7xGRBwU2p'; // The ID from your Drive file URL
+// Use configuration from config.js
+const API_KEY = GOOGLE_API_CONFIG.API_KEY;
+const CLIENT_ID = GOOGLE_API_CONFIG.CLIENT_ID;
+// const DRIVE_FILE_ID = GOOGLE_API_CONFIG.DRIVE_FILE_ID; // This will be managed dynamically
+const INITIAL_DRIVE_FILE_ID = GOOGLE_API_CONFIG.DRIVE_FILE_ID; // Store the initial ID
 const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+// const REDIRECT_URI = 'https://developers.google.com/oauthplayground'; // Keep if still needed for testing, but not directly used by gapi client
+// const REFRESH_TOKEN = '1//04_ig9YZZpBJgCgYIARAAGAQSNwF-L9Iryk3lHQTRMlHZBNGLalbHKDK-WRnyK1QSEIdC9AGfMWhco0T0a9S2Ftx7-IshVR2ZQKE'; // Keep if still needed for testing
 
 // Use the imported content.json as default content
 const defaultContent = defaultContentData;
@@ -44,6 +49,8 @@ const checkForCspErrors = () => {
     
     return false;
   } catch (e) {
+    // If any error occurs during check, assume no CSP error to avoid breaking functionality
+    // console.warn('Error in checkForCspErrors:', e); // Optional: for debugging
     return false;
   }
 };
@@ -237,35 +244,118 @@ export const isSignedInToGoogle = async () => {
   }
 };
 
-// Replace the fetchContentFromDrive function with this CORS-proxy version
+// Replace the fetchContentFromDrive function with this authenticated version
 export const fetchContentFromDrive = async () => {
   // Check if we should skip Drive entirely - check localStorage first
   if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
+    console.log('fetchContentFromDrive: Using local content mode (localStorage setting)');
     return defaultContent;
   }
   
   // Check if we should skip Drive entirely
   if (forceLocalContent || checkForCspErrors()) {
+    console.log('fetchContentFromDrive: Using local content mode (CSP or force flag)');
     return defaultContent;
   }
   
-  // Check if we're on localhost
+  // Check if we're on localhost - use different strategy
   const isLocalhost = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || 
      window.location.hostname === '127.0.0.1' || 
      window.location.hostname === '');
   
   if (isLocalhost) {
-    return await fetchFromDriveWithProxy();
+    console.log('fetchContentFromDrive: Localhost detected - prioritizing authenticated access');
+    
+    // For localhost, try authenticated fetch first since API key is blocked
+    try {
+      if (gapi.client && gapi.client.drive && gapi.auth2) {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (authInstance && authInstance.isSignedIn.get()) {
+          console.log('fetchContentFromDrive: Using authenticated fetch for localhost');
+          return await fetchFromDriveAuthenticated();
+        } else {
+          console.log('fetchContentFromDrive: User not signed in, falling back to local content for localhost');
+          return defaultContent;
+        }
+      } else {
+        console.log('fetchContentFromDrive: Google API not initialized, using local content for localhost');
+        return defaultContent;
+      }
+    } catch (error) {
+      console.warn('fetchContentFromDrive: Authenticated fetch failed on localhost, using local content:', error);
+      return defaultContent;
+    }
   } else {
+    // For production, try various methods
+    console.log('fetchContentFromDrive: Production environment detected');
+    
+    // Try authenticated fetch first if available
+    try {
+      if (gapi.client && gapi.client.drive && gapi.auth2) {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (authInstance && authInstance.isSignedIn.get()) {
+          console.log('fetchContentFromDrive: Using authenticated fetch for production');
+          return await fetchFromDriveAuthenticated();
+        }
+      }
+    } catch (error) {
+      console.warn('fetchContentFromDrive: Authenticated fetch not available, falling back to API key:', error);
+    }
+    
+    // Fall back to direct API key fetch for production
     return await fetchFromDriveDirect();
+  }
+};
+
+// Authenticated fetch using gapi client
+const fetchFromDriveAuthenticated = async () => {
+  try {
+    const fileIdToFetch = getCurrentDriveFileId();
+    if (!fileIdToFetch) {
+      console.warn('fetchFromDriveAuthenticated: No Drive File ID available.');
+      return defaultContent;
+    }
+    
+    const response = await gapi.client.drive.files.get({
+      fileId: fileIdToFetch,
+      alt: 'media'
+    });
+    
+    if (!response.body) {
+      throw new Error('No body in response');
+    }
+    
+    try {
+      const driveContent = JSON.parse(response.body);
+      
+      // Check if the response is an error object from Google API
+      if (driveContent.error) {
+        console.error('fetchFromDriveAuthenticated: Google API returned error:', driveContent.error);
+        throw new Error(`Google API Error: ${driveContent.error.message || 'Unknown error'}`);
+      }
+      
+      return driveContent;
+    } catch (parseError) {
+      console.error('fetchFromDriveAuthenticated: Failed to parse JSON response. Content:', response.body, parseError);
+      return defaultContent;
+    }
+    
+  } catch (error) {
+    console.error('Error fetching content from Drive with authentication:', error);
+    return defaultContent;
   }
 };
 
 // Direct fetch for production
 const fetchFromDriveDirect = async () => {
   try {
-    const apiUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media&key=${API_KEY}`;
+    const fileIdToFetch = getCurrentDriveFileId();
+    if (!fileIdToFetch) {
+      console.warn('fetchFromDriveDirect: No Drive File ID available.');
+      return defaultContent;
+    }
+    const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileIdToFetch}?alt=media&key=${API_KEY}`;
     
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -283,6 +373,7 @@ const fetchFromDriveDirect = async () => {
     const driveContent = JSON.parse(contentText);
     return driveContent;
   } catch (error) {
+    console.error('Error fetching content directly from Drive:', error); // Added error logging
     return defaultContent;
   }
 };
@@ -290,31 +381,72 @@ const fetchFromDriveDirect = async () => {
 // CORS proxy fetch for localhost
 const fetchFromDriveWithProxy = async () => {
   try {
-    // Try the public download URL first
-    const publicUrl = `https://drive.google.com/uc?export=download&id=${DRIVE_FILE_ID}`;
+    const fileIdToFetch = getCurrentDriveFileId();
+    if (!fileIdToFetch) {
+      console.warn('fetchFromDriveWithProxy: No Drive File ID available.');
+      return await tryAlternativeUrls(); // or return defaultContent
+    }
+    const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileIdToFetch}?alt=media&key=${API_KEY}`;
     
-    const response = await fetchWithCorsProxy(publicUrl);
+    const response = await fetchWithCorsProxy(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
     
     if (!response.ok) {
+      // Log the status and response text for better debugging if proxy fails
+      const errorText = await response.text();
+      console.error(`fetchFromDriveWithProxy: API request via proxy failed with status ${response.status}. Response: ${errorText}`);
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const contentText = await response.text();
     
-    // Check if the response looks like HTML (Google's download page)
+    // Check if the response looks like HTML (could be an error page from the proxy or Google)
     if (contentText.trim().startsWith('<!DOCTYPE html') || contentText.trim().startsWith('<html')) {
-      // Try alternative approach with manual file URL
+      console.warn('fetchFromDriveWithProxy: Received HTML content, possibly an error page. Falling back.');
       return await tryAlternativeUrls();
     }
-    
-    try {
+      try {
       const driveContent = JSON.parse(contentText);
+      
+      // Check if the response is an error object from Google API
+      if (driveContent.error) {
+        console.error('fetchFromDriveWithProxy: Google API returned error:', driveContent.error);
+        
+        // Check if this is an API key referrer error on localhost
+        const isLocalhost = typeof window !== 'undefined' && 
+          (window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' || 
+           window.location.hostname === '');
+             if (isLocalhost && driveContent.error.message && driveContent.error.message.includes('referer')) {
+          console.warn('fetchFromDriveWithProxy: API key referrer blocked on localhost, switching to local content mode');
+          console.info('💡 For localhost development, you have two options:');
+          console.info('   1. Sign in to Google in admin mode to use authenticated access');
+          console.info('   2. Configure your Google API key to allow localhost referrers');
+          console.info('   Using local content for now.');
+          try {
+            localStorage.setItem('useLocalContent', 'true');
+          } catch (storageError) {
+            // Ignore storage errors
+          }
+          forceLocalContent = true;
+          return defaultContent;
+        }
+        
+        throw new Error(`Google API Error: ${driveContent.error.message || 'Unknown error'}`);
+      }
+      
       return driveContent;
     } catch (parseError) {
+      console.error('fetchFromDriveWithProxy: Failed to parse JSON response. Content:', contentText, parseError);
       return await tryAlternativeUrls();
     }
     
   } catch (error) {
+    console.error('fetchFromDriveWithProxy: Error fetching or processing content via proxy.', error);
     return await tryAlternativeUrls();
   }
 };
@@ -341,50 +473,223 @@ const tryAlternativeUrls = async () => {
   return defaultContent;
 };
 
-// Save content to Google Drive
-export const saveContentToDrive = async (contentData) => {
+// Enhanced save function that first fetches current content, then updates it
+export const updateAndReplaceDriveFile = async (sectionName, newSectionData, fileName = 'content.json') => {
   try {
-    if (!gapi.client) await initDriveClient();
+    if (!gapi.client || !gapi.client.drive) {
+      console.log('updateAndReplaceDriveFile: gapi.client.drive not ready, calling initDriveClient...');
+      await initDriveClient();
+      if (!gapi.client || !gapi.client.drive) {
+        throw new Error('Google Drive client could not be initialized.');
+      }
+    }
     
-    // Check if signed in
-    if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+    const authInstance = gapi.auth2.getAuthInstance();
+    if (!authInstance.isSignedIn.get()) {
+      console.log('updateAndReplaceDriveFile: User not signed in, calling signInToGoogle...');
       await signInToGoogle();
     }
     
-    // Convert content to JSON string
-    const contentBlob = new Blob([JSON.stringify(contentData, null, 2)], {
-      type: 'application/json'
-    });
-    
-    // Create a form data object for the file
-    const metadata = {
-      name: 'content.json',
-      mimeType: 'application/json',
+    if (!authInstance.isSignedIn.get()) {
+      console.error('updateAndReplaceDriveFile: Failed to sign in or user is still not signed in after attempt.');
+      throw new Error('User not signed in after attempting to sign in.');
+    }    // First, fetch the current content from Drive
+    console.log('[updateAndReplaceDriveFile] Fetching current content from Drive...');
+    let currentContent;
+    try {
+      currentContent = await fetchContentFromDrive();
+      
+      // Validate that we didn't get an error response
+      if (currentContent && currentContent.error) {
+        console.warn('[updateAndReplaceDriveFile] Received error response from Drive, using default content:', currentContent.error);
+        currentContent = defaultContent;
+      }
+      
+      // Ensure we have valid content structure
+      if (!currentContent || typeof currentContent !== 'object' || Object.keys(currentContent).length === 0) {
+        console.warn('[updateAndReplaceDriveFile] Invalid or empty content received, using default content');
+        currentContent = defaultContent;
+      }
+      
+    } catch (error) {
+      console.warn('[updateAndReplaceDriveFile] Failed to fetch current content, using default:', error);
+      currentContent = defaultContent;
+    }    // Update the specific section
+    const updatedContent = {
+      ...currentContent,
+      [sectionName]: { ...(currentContent[sectionName] || {}), ...newSectionData }
     };
-    
-    // Use the Drive API to update the file
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', contentBlob);
-    
-    // Execute the update request
-    const accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
-    const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_FILE_ID}?uploadType=multipart`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      body: form
-    });
-    
-    const result = await response.json();
-    console.log('Content updated successfully', result);
-    return result;
+
+    console.log('[updateAndReplaceDriveFile] Updated content to save:', JSON.parse(JSON.stringify(updatedContent)));
+
+    // Validate the updated content before saving
+    if (updatedContent.error) {
+      console.error('[updateAndReplaceDriveFile] Content contains error - not saving:', updatedContent.error);
+      throw new Error('Cannot save content that contains error data');
+    }
+
+    // Now save the updated content
+    return await saveAndReplaceDriveFile(updatedContent, fileName);
+
   } catch (error) {
-    console.error('Error saving content to Drive:', error);
+    console.error('Error in updateAndReplaceDriveFile:', error);
     throw error;
   }
 };
+
+// Save content by creating a new file, deleting the old one, and updating the file ID reference.
+// Save content by updating the existing file instead of creating a new one
+export const saveAndReplaceDriveFile = async (contentData, fileName = 'content.json') => {
+  try {
+    if (!gapi.client || !gapi.client.drive) {
+      console.log('saveAndReplaceDriveFile: gapi.client.drive not ready, calling initDriveClient...');
+      await initDriveClient();
+      if (!gapi.client || !gapi.client.drive) {
+        throw new Error('Google Drive client could not be initialized.');
+      }
+    }
+    
+    const authInstance = gapi.auth2.getAuthInstance();
+    if (!authInstance.isSignedIn.get()) {
+      console.log('saveAndReplaceDriveFile: User not signed in, calling signInToGoogle...');
+      await signInToGoogle();
+    }
+    
+    if (!authInstance.isSignedIn.get()) {
+      console.error('saveAndReplaceDriveFile: Failed to sign in or user is still not signed in after attempt.');
+      throw new Error('User not signed in after attempting to sign in.');
+    }
+    
+    console.log('[saveAndReplaceDriveFile] Effective fileName:', fileName); 
+    console.log('[saveAndReplaceDriveFile] Received contentData (object):', JSON.parse(JSON.stringify(contentData))); 
+      const stringifiedContent = JSON.stringify(contentData, null, 2);
+    console.log('[saveAndReplaceDriveFile] Stringified contentData for body:', stringifiedContent);
+    
+    // Validate content before upload
+    if (!contentData || Object.keys(contentData).length === 0 || stringifiedContent === '{}' || stringifiedContent.length < 10) { 
+      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData is empty or minimal. Aborting problematic upload. Stringified content:', stringifiedContent);
+      throw new Error('Attempted to save empty or invalid content. Please check the data source.');
+    }
+    
+    // Check if content contains error data
+    if (contentData.error) {
+      console.error('[saveAndReplaceDriveFile] CRITICAL: contentData contains error response. Aborting upload. Error:', contentData.error);
+      throw new Error('Attempted to save error response as content. Please check the data source.');
+    }    // Get the current file ID
+    const currentFileId = getCurrentDriveFileId();
+    if (!currentFileId) {
+      console.error('[saveAndReplaceDriveFile] No current file ID found, cannot update existing file');
+      throw new Error('No file ID available to update. Please check the configuration.');
+    }
+
+    console.log(`Updating existing file (ID: ${currentFileId}) with new content...`);
+    
+    // Use the resumable upload method to update the existing file
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+    
+    const metadata = {
+      'name': fileName,
+      'mimeType': 'application/json'
+    };
+    
+    const multipartRequestBody =
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      JSON.stringify(metadata) +
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      stringifiedContent +
+      close_delim;
+
+    const request = gapi.client.request({
+      'path': `https://www.googleapis.com/upload/drive/v3/files/${currentFileId}`,
+      'method': 'PATCH',
+      'params': {'uploadType': 'multipart'},
+      'headers': {
+        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+      },
+      'body': multipartRequestBody
+    });
+    
+    console.log('[saveAndReplaceDriveFile] File metadata being sent:', metadata);
+    
+    const updateResponse = await request;
+    
+    const updatedFile = updateResponse.result;
+    if (!updatedFile || !updatedFile.id) {
+      console.error('Failed to update existing file, response:', updateResponse);
+      throw new Error('Failed to update existing file on Google Drive.');
+    }
+    console.log(`Successfully updated existing file: ${updatedFile.name} (ID: ${updatedFile.id})`);
+
+    console.log('Content saved to existing file successfully on Google Drive.');
+    return updatedFile;
+  } catch (error) {
+    console.error('Error in saveAndReplaceDriveFile:', error);
+      // If the update failed because the file doesn't exist, try creating a new one
+    if (error.result && error.result.error && error.result.error.code === 404) {
+      console.warn('Original file not found, creating a new file instead...');
+      try {
+        // Recreate the multipart body for the fallback
+        const boundary = '-------314159265358979323846';
+        const delimiter = "\r\n--" + boundary + "\r\n";
+        const close_delim = "\r\n--" + boundary + "--";
+        
+        const metadata = {
+          'name': fileName,
+          'mimeType': 'application/json'
+        };
+        
+        const fallbackMultipartBody =
+          delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(metadata) +
+          delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          stringifiedContent +
+          close_delim;
+        
+        const createRequest = gapi.client.request({
+          'path': 'https://www.googleapis.com/upload/drive/v3/files',
+          'method': 'POST',
+          'params': {'uploadType': 'multipart'},
+          'headers': {
+            'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+          },
+          'body': fallbackMultipartBody
+        });
+        
+        const createResponse = await createRequest;
+        const newFile = createResponse.result;
+        
+        if (newFile && newFile.id) {
+          console.log(`Successfully created new file: ${newFile.name} (ID: ${newFile.id})`);
+          updateCurrentDriveFileId(newFile.id);
+          console.log('Content saved to a new file and file reference updated successfully on Google Drive.');
+          return newFile;
+        }
+      } catch (createError) {
+        console.error('Failed to create fallback file:', createError);
+      }
+    }
+    
+    if (error.result && error.result.error) {
+      console.error('Detailed error from API:', error.result.error);
+      const apiError = new Error(error.result.error.message || `Drive API operation failed. Status: ${error.status || 'unknown'}`);
+      apiError.details = error.result.error;
+      throw apiError;
+    }    // If it's the custom error from the check above, rethrow it as is.
+    if (error.message === 'Attempted to save empty or invalid content. Please check the data source.') {
+      throw error;
+    }
+    throw error; // Re-throw other errors
+  }
+};
+
+// Remove or comment out the old saveContentToDrive function.
+// export const saveContentToDrive = async (contentData) => { ... }
 
 // Expose Google Auth status check for UI components
 export const getGoogleAuthStatus = async () => {
@@ -431,12 +736,42 @@ export const toggleLocalContentMode = (useLocalContent) => {
 
 // Add a function to force refresh content state
 export const resetContentState = () => {
-  hasCspError = false;
-  forceLocalContent = false;
+  console.log('Resetting Drive content manager state...');
   isInitialized = false;
   hasLoggedSignInStatus = false;
+  hasCspError = false;
+  forceLocalContent = false; 
   if (typeof window !== 'undefined') {
     window.googleCspBlocked = false;
-    window.cspErrors = [];
+    if (window.cspErrors) {
+      window.cspErrors = [];
+    }
+    localStorage.removeItem('useLocalContent');
+    localStorage.removeItem('dynamicDriveFileId'); // Reset dynamic file ID
   }
+  currentDriveFileIdInMemory = INITIAL_DRIVE_FILE_ID; // Reset in-memory ID to initial
+  // Potentially trigger a re-fetch or UI update if needed
+};
+
+let currentDriveFileIdInMemory = INITIAL_DRIVE_FILE_ID;
+
+// Function to get the current effective Drive File ID
+export const getCurrentDriveFileId = () => {
+  if (typeof window !== 'undefined') {
+    const storedFileId = localStorage.getItem('dynamicDriveFileId');
+    if (storedFileId) {
+      currentDriveFileIdInMemory = storedFileId;
+      return storedFileId;
+    }
+  }
+  return currentDriveFileIdInMemory;
+};
+
+// Function to update and persist the Drive File ID
+const updateCurrentDriveFileId = (newFileId) => {
+  currentDriveFileIdInMemory = newFileId;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dynamicDriveFileId', newFileId);
+  }
+  console.log(`Current Drive File ID updated to: ${newFileId}.`);
 };
