@@ -13,28 +13,39 @@ let hasLogged = false;
 // Flag to track if we've tried to load from Drive
 let hasTried = false;
 
-// Function to initialize content - starts with local content.json
+// Function to initialize content - tries Drive first, falls back to local content.json
 export const initContentFromDrive = async () => {
-  // Always start with local content.json for initial load
+  // Always start with local content as immediate fallback
+  contentData = defaultContentData;
+  
   if (!hasLogged) {
-    console.log('Loading initial content from content.json');
-    contentData = defaultContentData;
+    console.log('Initializing content - trying Google Drive first...');
     hasLogged = true;
-    return contentData;
+    
+    try {
+      // Try to load from Drive first (without authentication)
+      const driveContent = await loadContentFromDrive();
+      console.log('Successfully loaded initial content from Google Drive');
+      return driveContent;
+    } catch (error) {
+      console.log('Failed to load from Drive during initialization, using local content.json:', error.message);
+      // Return local content as fallback
+      return contentData;
+    }
   }
   
   // This can be called later to load from Drive if needed
   return contentData;
 };
 
-// Function to load content from Drive (only called when needed for admin operations)
+// Function to load content from Drive (can be called during initialization or admin operations)
 export const loadContentFromDrive = async () => {
   try {
-    console.log('Loading content from Google Drive for admin operations');
+    console.log('Loading content from Google Drive...');
     
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error('TIMEOUT'));
+        reject(new Error('Drive request timed out after 10 seconds'));
       }, 10000);
     });
     
@@ -48,13 +59,14 @@ export const loadContentFromDrive = async () => {
       try {
         localStorage.setItem('cachedContent', JSON.stringify(contentData));
         localStorage.setItem('contentCacheTime', Date.now().toString());
+        console.log('Content cached successfully');
       } catch (e) {
-        // Ignore cache errors
+        console.warn('Failed to cache content:', e.message);
       }
       
       return contentData;
     } else {
-      throw new Error('Invalid content received from Drive');
+      throw new Error('Invalid or empty content received from Drive');
     }
   } catch (error) {
     console.error('Failed to load content from Drive:', error.message);

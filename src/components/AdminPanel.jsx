@@ -113,7 +113,7 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
           </button>        </div>
       )}      <div className="mb-4 p-3 bg-slate-700 rounded-md">
         <p className="text-sm font-semibold mb-1">📂 Content Source</p>
-        <p className="text-xs">Content loads from local files initially. Use "Load Latest from Drive" to get current Drive content, or "Save to Google Drive" to save changes.</p>
+        <p className="text-xs">Content loads from Google Drive first, then falls back to local files if Drive is unavailable. Use "Save to Google Drive" to save changes.</p>
       </div>
       
       <button

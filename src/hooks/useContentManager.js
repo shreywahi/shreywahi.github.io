@@ -20,8 +20,7 @@ export function useContentManager(isAdmin) {
     // Initialize content
   useEffect(() => {
     let isMounted = true;
-    
-    async function loadContent() {
+      async function loadContent() {
       try {
         // Check if we should load from Drive (after reset)
         const shouldLoadFromDrive = localStorage.getItem('loadFromDriveOnStart') === 'true';
@@ -34,12 +33,13 @@ export function useContentManager(isAdmin) {
           
           try {
             content = await loadContentFromDrive();
-            console.log('Successfully loaded content from Drive');
+            console.log('Successfully loaded content from Drive after reset');
           } catch (driveError) {
-            console.error('Failed to load from Drive, falling back to local:', driveError);
+            console.error('Failed to load from Drive after reset, falling back to local:', driveError);
             content = await initContentFromDrive();
           }
         } else {
+          // Normal initialization - this now tries Drive first, then falls back to local
           content = await initContentFromDrive();
         }
         
@@ -57,6 +57,7 @@ export function useContentManager(isAdmin) {
           });
         }
       } catch (error) {
+        console.error('Error during content loading:', error);
         if (isMounted) {
           setContentState(prev => ({
             ...prev,
