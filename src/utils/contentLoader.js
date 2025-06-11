@@ -1,15 +1,10 @@
 import { Code, Database, Globe, Smartphone, Shield } from 'lucide-react';
-import { fetchContentFromDrive, toggleLocalContentMode } from './driveContentManager';
-import defaultContentData from '../data/content.json';
+import { fetchContentFromDrive } from './driveContentManager';
 
-// Initial default content from local JSON
-const defaultContent = defaultContentData;
+// State to hold the content data - will be populated from Drive
+let contentData = {};
 
-// State to hold the content data
-let contentData = { ...defaultContent };
-
-// ENABLE Google Drive integration (can be disabled for troubleshooting)
-const DISABLE_GOOGLE_DRIVE = false; // Set to false to enable Google Drive
+// Remove the DISABLE_GOOGLE_DRIVE flag since we only use Google Drive now
 
 // Flag to control logging
 let hasLogged = false;
@@ -17,30 +12,16 @@ let hasLogged = false;
 // Flag to track if we've tried to load from Drive
 let hasTried = false;
 
-// Function to initialize content from Drive or local file
+// Function to initialize content from Drive only
 export const initContentFromDrive = async () => {
-  // Always check localStorage first - this is the key fix
-  if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
-    contentData = { ...defaultContent };
-    hasLogged = true;
-    return contentData;
-  }
-
   try {
-    if (DISABLE_GOOGLE_DRIVE) {
-      contentData = { ...defaultContent };
-      hasLogged = true;
-      return contentData;
-    }
-    
-    // Increase timeout and add better error handling
+    // Fetch from Drive with a timeout
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('TIMEOUT'));
-      }, 10000); // Increased to 10 seconds
+      }, 10000); // 10 seconds timeout
     });
     
-    // Fetch from Drive with a timeout
     const driveContentPromise = fetchContentFromDrive();
     
     // Race the fetch against the timeout
@@ -52,16 +33,10 @@ export const initContentFromDrive = async () => {
     // Mark that we've tried to load from Drive
     hasTried = true;
     
-    // Check if we got real content or just the default fallback
-    if (driveContent && driveContent !== defaultContent && typeof driveContent === 'object' && Object.keys(driveContent).length > 1) {
+    // Check if we got valid content from Drive
+    if (driveContent && typeof driveContent === 'object' && Object.keys(driveContent).length > 1) {
       // We got real Drive content
-      contentData = { 
-        ...defaultContent,
-        ...driveContent,
-        // Ensure nested objects are also merged correctly
-        colorMap: { ...defaultContent.colorMap, ...(driveContent.colorMap || {}) },
-        iconColorMap: { ...defaultContent.iconColorMap, ...(driveContent.iconColorMap || {}) }
-      };
+      contentData = driveContent;
       
       hasLogged = true;
       
@@ -73,47 +48,28 @@ export const initContentFromDrive = async () => {
         // Ignore cache errors
       }
     } else {
-      // We got the default content back, means Drive access failed
-      contentData = { ...defaultContent };
-      hasLogged = true;
-      
-      // Try to load from localStorage cache if available
-      try {
-        const cachedContent = localStorage.getItem('cachedContent');
-        const cacheTime = localStorage.getItem('contentCacheTime');
-        
-        if (cachedContent && cacheTime) {
-          const cacheAge = Date.now() - parseInt(cacheTime, 10);
-          const cacheValid = cacheAge < 24 * 60 * 60 * 1000; // 24 hours
-          
-          if (cacheValid) {
-            const parsedCache = JSON.parse(cachedContent);
-            contentData = parsedCache;
-            return contentData;
-          }
-        }
-      } catch (e) {
-        // Ignore cache errors
-      }
+      // Drive access failed - throw error
+      throw new Error('Failed to load content from Google Drive');
     }
     
     return contentData;
   } catch (error) {
-    contentData = { ...defaultContent };
     hasLogged = true;
     
-    // Try to load from localStorage cache if available
+    // Try to load from localStorage cache if available as last resort
     try {
       const cachedContent = localStorage.getItem('cachedContent');
       if (cachedContent) {
         contentData = JSON.parse(cachedContent);
+        console.warn('Using cached content due to Drive loading error:', error.message);
         return contentData;
       }
     } catch (e) {
       // Ignore cache errors
     }
     
-    return contentData;
+    // If no cache available, throw the error
+    throw new Error(`Failed to load content from Google Drive: ${error.message}`);
   }
 };
 
@@ -146,13 +102,13 @@ export const getIconColor = (color) => {
 export const content = contentData;
 
 // Individual exports for convenience
-export const hero = contentData.hero || defaultContent.hero;
-export const about = contentData.about || defaultContent.about;
-export const experiences = contentData.experiences || defaultContent.experiences;
-export const skillCategories = contentData.skillCategories || defaultContent.skillCategories;
-export const projects = contentData.projects || defaultContent.projects;
-export const certificates = contentData.certificates || defaultContent.certificates;
-export const contact = contentData.contact || defaultContent.contact;
+export const hero = contentData.hero || {};
+export const about = contentData.about || {};
+export const experiences = contentData.experiences || [];
+export const skillCategories = contentData.skillCategories || [];
+export const projects = contentData.projects || [];
+export const certificates = contentData.certificates || [];
+export const contact = contentData.contact || {};
 
 // Default values for components with safe fallbacks
 export const defaultHeroName = hero.name || 'Shrey Wahi';
@@ -164,19 +120,15 @@ export const defaultContactIntro = contact.intro || 'Get in touch';
 // Export certificates with the same name as in the original file
 export const certs = certificates;
 
-// Add a function to reset local content mode
+// Add a function to reset Drive mode
 export const resetDriveMode = async () => {
   console.log('Resetting Drive mode...');
-  
-  // Reset the drive content manager state first
-  toggleLocalContentMode(false);
-  
-  // Reset all local flags
+    // Reset all local flags
   hasLogged = false;
   hasTried = false;
   
   // Reset contentData to trigger fresh load
-  contentData = { ...defaultContent };
+  contentData = {};
   
   // Clear the cache to force a fresh load
   try {
@@ -203,7 +155,7 @@ export const resetDriveMode = async () => {
 export const forceContentReload = async () => {
   hasLogged = false;
   hasTried = false;
-  contentData = { ...defaultContent };
+  contentData = {};
   
   try {
     const freshContent = await initContentFromDrive();
@@ -212,6 +164,6 @@ export const forceContentReload = async () => {
     return freshContent;
   } catch (error) {
     console.error('Error reloading content:', error);
-    return defaultContent;
+    throw error;
   }
 };

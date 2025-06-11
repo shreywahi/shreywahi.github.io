@@ -245,14 +245,19 @@ export const isSignedInToGoogle = async () => {
 
 // Replace the fetchContentFromDrive function with this authenticated version
 export const fetchContentFromDrive = async () => {
-  // Check if we should skip Drive entirely - check localStorage first
-  if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
-    return defaultContent;
+  // Check for CSP errors that would prevent Google Drive access
+  if (checkForCspErrors()) {
+    throw new Error('Google Drive access blocked by Content Security Policy');
   }
-  
-  // Check if we should skip Drive entirely
-  if (forceLocalContent || checkForCspErrors()) {
-    return defaultContent;
+
+  // First, ensure the Google Drive client is initialized
+  try {
+    if (!gapi.client || !gapi.client.drive) {
+      await initDriveClient();
+    }
+  } catch (error) {
+    console.error('Failed to initialize Google Drive client:', error);
+    throw new Error('Google Drive client initialization failed');
   }
   
   // Check if we're on localhost - use different strategy
@@ -269,14 +274,14 @@ export const fetchContentFromDrive = async () => {
         if (authInstance && authInstance.isSignedIn.get()) {
           return await fetchFromDriveAuthenticated();
         } else {
-          return defaultContent;
+          throw new Error('Not signed in to Google Drive - Please sign in to access content');
         }
       } else {
-        return defaultContent;
+        throw new Error('Google Drive client not initialized');
       }
     } catch (error) {
-      console.warn('Authenticated fetch failed on localhost, using local content:', error);
-      return defaultContent;
+      console.error('Authenticated fetch failed on localhost:', error);
+      throw error;
     }
   } else {
     // For production, try various methods
@@ -302,8 +307,8 @@ const fetchFromDriveAuthenticated = async () => {
   try {
     const fileIdToFetch = getCurrentDriveFileId();
     if (!fileIdToFetch) {
-      console.warn('fetchFromDriveAuthenticated: No Drive File ID available.');
-      return defaultContent;
+      console.error('fetchFromDriveAuthenticated: No Drive File ID available.');
+      throw new Error('No Drive File ID configured');
     }
     
     const response = await gapi.client.drive.files.get({
@@ -327,12 +332,12 @@ const fetchFromDriveAuthenticated = async () => {
       return driveContent;
     } catch (parseError) {
       console.error('fetchFromDriveAuthenticated: Failed to parse JSON response. Content:', response.body, parseError);
-      return defaultContent;
+      throw new Error('Failed to parse Drive content as JSON');
     }
     
   } catch (error) {
     console.error('Error fetching content from Drive with authentication:', error);
-    return defaultContent;
+    throw error;
   }
 };
 
@@ -341,8 +346,8 @@ const fetchFromDriveDirect = async () => {
   try {
     const fileIdToFetch = getCurrentDriveFileId();
     if (!fileIdToFetch) {
-      console.warn('fetchFromDriveDirect: No Drive File ID available.');
-      return defaultContent;
+      console.error('fetchFromDriveDirect: No Drive File ID available.');
+      throw new Error('No Drive File ID configured');
     }
     const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileIdToFetch}?alt=media&key=${API_KEY}`;
     
@@ -362,8 +367,8 @@ const fetchFromDriveDirect = async () => {
     const driveContent = JSON.parse(contentText);
     return driveContent;
   } catch (error) {
-    console.error('Error fetching content directly from Drive:', error); // Added error logging
-    return defaultContent;
+    console.error('Error fetching content directly from Drive:', error);
+    throw error;
   }
 };
 
