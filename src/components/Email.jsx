@@ -112,7 +112,7 @@ const Email = () => {
         noValidate
         autoComplete="off"
         aria-label="Contact Form"
-        className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-8 max-w-xs sm:max-w-md mx-auto flex flex-col gap-4"
+        className="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 mb-8 max-w-xs sm:max-w-md mx-auto flex flex-col gap-4 overflow-hidden"
       >
         <div className="flex flex-row gap-4">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -153,14 +153,15 @@ const Email = () => {
             name="message"
             id="message"
           />
-        </div>
-        <input type="hidden" name="time" />
-        <div className="flex justify-center">
-          <ReCAPTCHA
-            sitekey={RECAPTCHA_SITE_KEY}
-            onChange={token => setCaptchaToken(token)}
-            theme="light"
-          />
+        </div>        <input type="hidden" name="time" />        <div className="flex justify-center overflow-hidden">
+          <div className="transform scale-[0.75] sm:scale-100 origin-center -mx-2 sm:mx-0">
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={token => setCaptchaToken(token)}
+              theme="light"
+              size="normal"
+            />
+          </div>
         </div>
         {formMessage && (
           <div className="text-red-600 font-medium text-sm mb-2 text-center">{formMessage}</div>
