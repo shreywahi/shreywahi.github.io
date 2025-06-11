@@ -96,9 +96,9 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [driveSaving, setDriveSaving] = useState(false);
   const [driveMessage, setDriveMessage] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
-  
   // Add a ref to track if user has manually scrolled
   const userScrolledRef = useRef(false);
+  const isNavigatingRef = useRef(false);
   
   // Update state when content loads from useContentManager
   useEffect(() => {
@@ -112,10 +112,6 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       setCertList(content.certificates || []);
       setContactHeading(content.contact?.heading || '');
       setContactIntro(content.contact?.intro || '');
-      // Ensure colorMap and iconColorMap are also set if they are part of `content`
-      // For example:
-      // setColorMapState(content.colorMap || {}); 
-      // setIconColorMapState(content.iconColorMap || {});
     }
   }, [content, loading]);
 
@@ -128,15 +124,12 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       }
     });
     return () => unsubscribe();
-  }, []);
-
-  // Save activeSection to localStorage whenever it changes
+  }, []);  // Save activeSection to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeSection', activeSection);
     }
   }, [activeSection]);
-
   // Handle resize with a stable reference to active section
   useEffect(() => {
     let resizeTimer;
@@ -163,8 +156,6 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
               setActiveSection(currentSection);
             }
             
-            userScrolledRef.current = false;
-            
             setTimeout(() => {
               const el = document.getElementById(currentSection);
               if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -180,94 +171,125 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [isDesktop]);
-
-  // Scroll to active section when desktop changes or section changes
-  useEffect(() => {
-    if (isDesktop && typeof window !== 'undefined' && !userScrolledRef.current) {
-      const el = document.getElementById(activeSection);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }, [isDesktop, activeSection]);
-
-  // Remove scroll snap for natural scrolling and restore section tracking only
+  }, [isDesktop]);  // Single unified scroll tracking effect
   useEffect(() => {
     if (!isDesktop) return;
 
     const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
-    
-    const handleWheel = () => {
-      userScrolledRef.current = true;
+    let scrollContainer = null;    // Get the scrolling container (main element)
+    const initializeScrollContainer = () => {
+      scrollContainer = document.getElementById('main-scroll-container');
+      return scrollContainer;
     };
     
-    const handleScroll = () => {
-      if (!userScrolledRef.current) return;
+    // Initialize scroll position after page refresh
+    const initializeScrollPosition = () => {
+      const savedSection = localStorage.getItem('activeSection');
+      if (savedSection && savedSection !== activeSection) {
+        setActiveSection(savedSection);
+      }
+      if (savedSection && savedSection !== 'hero') {
+        const el = document.getElementById(savedSection);
+        if (el) {
+          el.scrollIntoView({ behavior: 'auto' });
+        }
+      }
+    };
+      // Track which section is currently in view
+    const updateActiveSection = () => {
+      if (isNavigatingRef.current) return;
       
-      let found = false;
+      let currentSection = null;
+      
+      if (!scrollContainer) return;
+      
+      // Get the container's viewport
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const viewportHeight = containerRect.height;
+      
+      // Find the section that's most visible in the container viewport
       for (let id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= window.innerHeight * 0.4 && rect.bottom > window.innerHeight * 0.2) {
-            if (activeSection !== id) setActiveSection(id);
-            found = true;
+          // Calculate relative position to the container
+          const relativeTop = rect.top - containerRect.top;
+          const relativeBottom = rect.bottom - containerRect.top;
+          
+          // If section is in the top 60% of the container viewport, it's active
+          if (relativeTop <= viewportHeight * 0.6 && relativeBottom > viewportHeight * 0.2) {
+            currentSection = id;
             break;
           }
         }
       }
-    };
-    
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('touchmove', handleWheel, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchmove', handleWheel);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [isDesktop, activeSection]);
-
-  // Section tracking for sidebar (desktop only) using Intersection Observer
-  useEffect(() => {
-    if (!isDesktop) return;
-
-    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
-    const sectionElements = sectionIds
-      .map(id => document.getElementById(id))
-      .filter(Boolean);
-
-    if (sectionElements.length === 0) return;
-
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        if (!userScrolledRef.current) return;
-        
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-        if (visible.length > 0) {
-          const topSection = visible[0].target.id;
-          if (topSection && topSection !== activeSection) {
-            setActiveSection(topSection);
+      
+      // Fallback: if no section found, use the one that's most visible
+      if (!currentSection) {
+        for (let id of sectionIds) {
+          const el = document.getElementById(id);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const relativeTop = rect.top - containerRect.top;
+            const relativeBottom = rect.bottom - containerRect.top;
+            
+            if (relativeBottom > 100 && relativeTop < viewportHeight - 100) {
+              currentSection = id;
+              break;
+            }
           }
         }
-      },
-      {
-        root: null,
-        threshold: 0.3,
       }
-    );
-
-    sectionElements.forEach(el => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
+      
+      if (currentSection && currentSection !== activeSection) {
+        setActiveSection(currentSection);
+      }
     };
-  }, [isDesktop]);
+      const handleScroll = () => {
+      updateActiveSection();
+    };
+    
+    const handleWheel = () => {
+      userScrolledRef.current = true;
+    };
+      // Initialize after content loads
+    const timer = setTimeout(() => {
+      // Initialize the scroll container
+      if (initializeScrollContainer()) {
+        initializeScrollPosition();
+        updateActiveSection();
+        // Enable scroll tracking immediately
+        userScrolledRef.current = true;
+        
+        // Attach listeners to the correct scroll container
+        scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Wheel and touch events still go on window for broader capture
+        window.addEventListener('wheel', handleWheel, { passive: true });
+        window.addEventListener('touchmove', handleWheel, { passive: true });
+      } else {
+        // Retry if container not found yet
+        setTimeout(() => {
+          if (initializeScrollContainer()) {
+            scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+            window.addEventListener('wheel', handleWheel, { passive: true });
+            window.addEventListener('touchmove', handleWheel, { passive: true });
+            updateActiveSection();
+          }
+        }, 500);
+      }
+    }, 300);
+      return () => {
+      clearTimeout(timer);
+      
+      // Clean up from scroll container
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleWheel);
+    };
+  }, [isDesktop, loading]);
 
   // Add CSP logging on mount - ALWAYS call this hook
   useEffect(() => {
@@ -275,25 +297,30 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       logCspSuggestion();
     }, 2000);
   }, []);
-
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
-    // When user clicks navigation, we reset the scroll flag
-    // because this is intentional navigation, not scroll tracking
-    userScrolledRef.current = false;
+    // Set navigation flag to prevent scroll tracking during navigation
+    isNavigatingRef.current = true;
     
     setActiveSection(sectionId);
+    
     if (isDesktop) {
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
+          // Re-enable scroll tracking after navigation completes
+        setTimeout(() => {
+          isNavigatingRef.current = false;
+          userScrolledRef.current = true;
+        }, 500);
       }
     } else {
       setFade(false);
       setTimeout(() => {
         setActiveSection(sectionId);
         setFade(true);
-      }, 300); // match fade duration
+        isNavigatingRef.current = false;
+      }, 300);
     }
   };
   // Create wrapped update functions
@@ -589,8 +616,8 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         screenSize={screenSize}
       />
       
-      {isDesktop ? (
-        <main
+      {isDesktop ? (        <main
+          id="main-scroll-container"
           className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"
           style={{ minHeight: '100vh', height: '100vh' }}
         >
