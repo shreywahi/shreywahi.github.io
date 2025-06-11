@@ -74,11 +74,12 @@ const Sidebar = ({
 		// Triple click detection state
 	const [clickCount, setClickCount] = useState(0);
 	const clickTimeoutRef = useRef(null);
-	
-	// Portfolio triple click detection state
+		// Portfolio triple click detection state
 	const [portfolioClickCount, setPortfolioClickCount] = useState(0);
 	const portfolioClickTimeoutRef = useRef(null);
-	const [showAdminLogin, setShowAdminLogin] = useState(false);useEffect(() => {
+	const [showAdminLogin, setShowAdminLogin] = useState(false);
+	const [adminLoginClicked, setAdminLoginClicked] = useState(false);
+	const adminLoginRef = useRef(null);useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -178,13 +179,30 @@ const Sidebar = ({
 			
 			setClickCount(0);
 		}, 300); // 300ms window for detecting multiple clicks
-	};
-	// Hide admin login button when user exits admin mode
+	};	// Hide admin login button when user exits admin mode
 	useEffect(() => {
 		if (!isAdmin) {
 			setShowAdminLogin(false);
+			setAdminLoginClicked(false);
 		}
 	}, [isAdmin]);
+
+	// Hide admin login button when clicking outside of it (only if not clicked yet)
+	useEffect(() => {
+		if (!showAdminLogin || adminLoginClicked) return;
+		
+		function handleClickOutside(e) {
+			if (
+				adminLoginRef.current &&
+				!adminLoginRef.current.contains(e.target)
+			) {
+				setShowAdminLogin(false);
+			}
+		}
+		
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [showAdminLogin, adminLoginClicked]);
 
 	// Cleanup timeout on unmount
 	useEffect(() => {
@@ -235,10 +253,13 @@ const Sidebar = ({
 							))}
 						</nav>						{/* Admin Login/Exit Admin button (desktop) */}
 						{showAdminLogin && (
-							<div className="flex justify-center my-4">
+							<div className="flex justify-center my-4" ref={adminLoginRef}>
 								{!isAdmin ? (
 									<button
-										onClick={() => setShowLogin(true)}
+										onClick={() => {
+											setShowLogin(true);
+											setAdminLoginClicked(true);
+										}}
 										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
 										aria-label="Admin Login"
 										tabIndex={0}
