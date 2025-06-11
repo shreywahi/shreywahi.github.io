@@ -53,7 +53,11 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 	const [showAlternateButtons, setShowAlternateButtons] = useState(false);
 	const [userToggledNavigation, setUserToggledNavigation] = useState(false);
 	const moreButtonRef = useRef(null);
-	const moreMenuRef = useRef(null);useEffect(() => {
+	const moreMenuRef = useRef(null);
+	
+	// Triple click detection state
+	const [clickCount, setClickCount] = useState(0);
+	const clickTimeoutRef = useRef(null);useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -89,7 +93,6 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 			setUserToggledNavigation(false);
 		}
 	}, [screenSize]);
-
 	// Hide More menu when clicking outside
 	useEffect(() => {
 		if (!showMoreMenu) return;
@@ -106,6 +109,42 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [showMoreMenu]);
+
+	// Handle triple click detection
+	const handleToggleClick = () => {
+		setClickCount(prev => prev + 1);
+		
+		// Clear existing timeout
+		if (clickTimeoutRef.current) {
+			clearTimeout(clickTimeoutRef.current);
+		}
+		
+		// Set a new timeout to reset click count after 500ms
+		clickTimeoutRef.current = setTimeout(() => {
+			const currentCount = clickCount + 1; // +1 because state update is async
+			
+			if (currentCount === 3) {
+				// Triple click - open menu popup
+				setShowMoreMenu(true);
+			} else {
+				// Single or double click - toggle navigation buttons
+				setShowAlternateButtons(prev => !prev);
+				// Mark that user has manually toggled navigation
+				setUserToggledNavigation(true);
+			}
+			
+			setClickCount(0);
+		}, 300); // 300ms window for detecting multiple clicks
+	};
+
+	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (clickTimeoutRef.current) {
+				clearTimeout(clickTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<>
@@ -251,21 +290,15 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 					</button>					{/* More button and its popup */}
 					<div className="relative flex flex-col items-center justify-center flex-1 h-full">						<button
 							ref={moreButtonRef}
-							onClick={() => {
-								// Toggle between navigation modes
-								setShowAlternateButtons(prev => !prev);
-								setShowMoreMenu(prev => !prev);
-								// Mark that user has manually toggled navigation
-								setUserToggledNavigation(true);
-							}}
+							onClick={handleToggleClick}
 							className={`flex flex-col items-center justify-center w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 								${showMoreMenu
 									? 'text-blue-400'
 									: 'text-white hover:text-blue-400'}
 							`}
-							aria-label="Toggle navigation options and settings menu"
+							aria-label="Toggle navigation options and settings menu. Triple click to open menu."
 							tabIndex={0}
-						>							<ArrowLeftRight size={24} />
+						><ArrowLeftRight size={24} />
 							<span className="text-xs mt-1 text-center leading-tight">Toggle</span>
 						</button>
 						{showMoreMenu && (							<div
