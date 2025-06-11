@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, MoreHorizontal, Award, Layers, Smartphone, FileText, LogIn, LogOut } from 'lucide-react';
+import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -51,8 +51,9 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 	const sidebarRef = useRef(null);
 	const openButtonRef = useRef(null);	const [screenSize, setScreenSize] = useState('desktop');	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [showAlternateButtons, setShowAlternateButtons] = useState(false);
+	const [userToggledNavigation, setUserToggledNavigation] = useState(false);
 	const moreButtonRef = useRef(null);
-	const moreMenuRef = useRef(null);	useEffect(() => {
+	const moreMenuRef = useRef(null);useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -66,7 +67,28 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 		return () => {
 			window.removeEventListener('resize', checkScreen);
 		};
-	}, []);
+	}, []);	// Sync navigation mode with active section when screen size changes or active section changes
+	useEffect(() => {
+		// Only apply this logic for mobile/tablet screens
+		if (screenSize === 'desktop') return;
+		
+		// Don't auto-sync if user has manually toggled navigation
+		if (userToggledNavigation) return;
+
+		// Define which sections belong to alternate buttons
+		const alternateSections = ['projects', 'certs', 'contact'];
+		const shouldShowAlternate = alternateSections.includes(activeSection);
+		
+		// Update navigation mode if it doesn't match the current active section
+		setShowAlternateButtons(shouldShowAlternate);
+	}, [activeSection, screenSize, userToggledNavigation]);
+
+	// Reset user toggle flag only when screen size changes to desktop (to enable auto-sync when returning to mobile)
+	useEffect(() => {
+		if (screenSize === 'desktop') {
+			setUserToggledNavigation(false);
+		}
+	}, [screenSize]);
 
 	// Hide More menu when clicking outside
 	useEffect(() => {
@@ -151,32 +173,7 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 									<LogOut size={20} />
 									<span>Exit Admin</span>
 								</button>
-							)}
-						</div>
-						<div className="flex justify-center my-4">
-							<a
-								href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg"
-								className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-								aria-label="Download Resume"
-								target="_blank"
-								rel="noopener noreferrer"
-								tabIndex={0}
-							>
-								Download Resume
-							</a>
-						</div>
-						<div className="flex justify-center my-4">
-							<a
-								href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0"
-								className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-								aria-label="Download Apk"
-								target="_blank"
-								rel="noopener noreferrer"
-								tabIndex={0}
-							>
-								Download Apk
-							</a>
-						</div>
+							)}						</div>
 						<div className="flex justify-center my-4">
 							{mounted && (
 								<button
@@ -211,96 +208,70 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 			)}			{/* Mobile/tablet sticky footer nav */}
 			{(screenSize === 'mobile' || screenSize === 'tablet') && (
 				<nav
-					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
+					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex items-center h-16 border-t border-blue-300"
 					aria-label="Footer Navigation"
-				>
-					<button
+				>					<button
 						onClick={() => { 
 							if (showAlternateButtons) {
 								if (onNavigate) onNavigate('projects');
 							} else {
 								if (onNavigate) onNavigate('hero');
 							}
+							// Reset user toggle flag when user explicitly navigates
+							setUserToggledNavigation(false);
 						}}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+						className={`flex flex-col items-center justify-center flex-1 h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 							${(showAlternateButtons ? activeSection === 'projects' : activeSection === 'hero')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
 						aria-label={showAlternateButtons ? "Projects" : "Home"}
 						tabIndex={0}
-					>
-						{showAlternateButtons ? <FolderKanban size={24} /> : <Home size={24} />}
-						<span className="text-xs mt-1">{showAlternateButtons ? "Projects" : "Home"}</span>
-					</button>
-					<button
+					>						{showAlternateButtons ? <FolderKanban size={24} /> : <Home size={24} />}
+						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Projects" : "Home"}</span>
+					</button>					<button
 						onClick={() => { 
 							if (showAlternateButtons) {
 								if (onNavigate) onNavigate('certs');
 							} else {
 								if (onNavigate) onNavigate('about');
 							}
+							// Reset user toggle flag when user explicitly navigates
+							setUserToggledNavigation(false);
 						}}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+						className={`flex flex-col items-center justify-center flex-1 h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 							${(showAlternateButtons ? activeSection === 'certs' : activeSection === 'about')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
 						aria-label={showAlternateButtons ? "Certificates" : "About"}
 						tabIndex={0}
-					>
-						{showAlternateButtons ? <Award size={24} /> : <User size={24} />}
-						<span className="text-xs mt-1">{showAlternateButtons ? "Certificates" : "About"}</span>
+					>						{showAlternateButtons ? <Award size={24} /> : <User size={24} />}
+						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Certs" : "About"}</span>
 					</button>					{/* More button and its popup */}
-					<div className="relative flex flex-col items-center">
-						<button
+					<div className="relative flex flex-col items-center justify-center flex-1 h-full">						<button
 							ref={moreButtonRef}
 							onClick={() => {
+								// Toggle between navigation modes
 								setShowAlternateButtons(prev => !prev);
 								setShowMoreMenu(prev => !prev);
+								// Mark that user has manually toggled navigation
+								setUserToggledNavigation(true);
 							}}
-							className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							className={`flex flex-col items-center justify-center w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 								${showMoreMenu
 									? 'text-blue-400'
 									: 'text-white hover:text-blue-400'}
 							`}
 							aria-label="Toggle navigation options and settings menu"
 							tabIndex={0}
-						>
-							<MoreHorizontal size={24} />
-							<span className="text-xs mt-1">More</span>
+						>							<ArrowLeftRight size={24} />
+							<span className="text-xs mt-1 text-center leading-tight">Toggle</span>
 						</button>
-						{showMoreMenu && (
-							<div
+						{showMoreMenu && (							<div
 								ref={moreMenuRef}
 								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
 							>								<div className="flex flex-col gap-6 py-1 px-2">
-									<button
-										onClick={() => {
-											setTheme(resolvedTheme === "dark" ? "light" : "dark");
-											setShowMoreMenu(false);
-										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Toggle theme"
-										tabIndex={0}
-									>
-										{resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
-										<span className="text-xs mt-1">Theme</span>
-									</button>
-									{/* Download Apk */}
-									<button
-										onClick={() => {
-											window.open("https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0", "_blank", "noopener,noreferrer");
-											setShowMoreMenu(false);
-										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Download Apk"
-										tabIndex={0}
-									>
-										{/* Use a smartphone icon for APK */}
-										<Smartphone size={24} />
-										<span className="text-xs mt-1">Download APK</span>
-									</button>
 									{/* Admin Login/Exit Admin button (mobile/tablet) */}
 									{!isAdmin ? (
 										<button
@@ -332,44 +303,44 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 								</div>
 							</div>
 						)}
-					</div>
-					<button
+					</div>					<button
 						onClick={() => { 
 							if (showAlternateButtons) {
 								if (onNavigate) onNavigate('contact');
 							} else {
 								if (onNavigate) onNavigate('experience');
 							}
+							// Reset user toggle flag when user explicitly navigates
+							setUserToggledNavigation(false);
 						}}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+						className={`flex flex-col items-center justify-center flex-1 h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 							${(showAlternateButtons ? activeSection === 'contact' : activeSection === 'experience')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
 						aria-label={showAlternateButtons ? "Contact" : "Experience"}
 						tabIndex={0}
-					>
-						{showAlternateButtons ? <MailIcon size={24} /> : <Briefcase size={24} />}
-						<span className="text-xs mt-1">{showAlternateButtons ? "Contact" : "Experience"}</span>
-					</button>
-					<button
+					>						{showAlternateButtons ? <MailIcon size={24} /> : <Briefcase size={24} />}
+						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Contact" : "Experience"}</span>
+					</button>					<button
 						onClick={() => { 
 							if (showAlternateButtons) {
-								window.open("https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg", "_blank", "noopener,noreferrer");
+								setTheme(resolvedTheme === "dark" ? "light" : "dark");
 							} else {
 								if (onNavigate) onNavigate('skills');
+								// Reset user toggle flag when user explicitly navigates
+								setUserToggledNavigation(false);
 							}
 						}}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+						className={`flex flex-col items-center justify-center flex-1 h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 							${(!showAlternateButtons && activeSection === 'skills')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
-						aria-label={showAlternateButtons ? "Download Resume" : "Skills"}
+						aria-label={showAlternateButtons ? "Toggle Theme" : "Skills"}
 						tabIndex={0}
-					>
-						{showAlternateButtons ? <FileText size={24} /> : <Layers size={24} />}
-						<span className="text-xs mt-1">{showAlternateButtons ? "Download Resume" : "Skills"}</span>
+					>						{showAlternateButtons ? (resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />) : <Layers size={24} />}
+						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Theme" : "Skills"}</span>
 					</button>
 				</nav>
 			)}

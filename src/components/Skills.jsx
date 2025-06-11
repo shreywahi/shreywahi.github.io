@@ -12,12 +12,8 @@ const iconMap = {
 };
 
 const Skills = ({ isAdmin, categories, setCategories }) => {
-  const [showAll, setShowAll] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
   const [editData, setEditData] = useState(null);
-
-  // Toggle show all skills
-  const toggleShowAll = () => setShowAll(!showAll);
 
   // Start editing a category
   const startEdit = (idx) => {
@@ -43,15 +39,16 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
 
   return (
     <section id="skills" className="min-h-[100vh] py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
-      <div className="max-w-6xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
+      <div className="max-w-6xl mx-auto px-4 lg:px-8 text-center mb-16">
           <h2 className="text-4xl font-serif font-bold text-green-400 dark:text-purple-500 mb-6">
             Skills & Expertise
           </h2>
+          <br />
           <p className="text-white text-lg max-w-3xl mx-auto">
             With a passion for creating efficient, elegant solutions, I've developed expertise across various technologies and domains.
           </p>
-        </div>
+          <br />
+          <br />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
           {categories.map((category, idx) =>
@@ -122,13 +119,10 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
                   </button>
                 </div>
               </div>
-            ) : (
-              // Display card
+            ) : (              // Display card
               <div
                 key={idx}
-                className={`flex flex-col ${
-                  showAll ? "h-auto" : "h-80"
-                } overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gray-100 dark:bg-gray-800`}
+                className="flex flex-col h-auto overflow-visible rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gray-100 dark:bg-gray-800"
               >
                 <div
                   className={`flex items-center px-6 py-4 border-b ${getColorClasses(
@@ -149,13 +143,8 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
                       Edit
                     </button>
                   )}
-                </div>
-                <div className="flex-1 p-6 overflow-hidden">
-                  <div
-                    className={`flex flex-wrap gap-2 ${
-                      !showAll ? "max-h-44 overflow-hidden" : ""
-                    }`}
-                  >
+                </div>                <div className="flex-1 p-6">
+                  <div className="flex flex-wrap gap-2">
                     {category.skills.map((skill, i) => (
                       <span
                         key={i}
@@ -177,20 +166,8 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
                   </div>
                 </div>
               </div>
-            )
-          )}
+            )          )}
         </div>
-
-        {categories.length > 0 && (
-          <div className="text-center mt-10">
-            <button
-              onClick={toggleShowAll}
-              className="px-6 py-2 bg-transparent border-2 border-green-400 text-green-400 dark:border-purple-500 dark:text-purple-500 rounded-full hover:bg-green-400 hover:text-white dark:hover:bg-purple-500 dark:hover:text-white transition-colors duration-300"
-            >
-              {showAll ? "Show Less" : "Show All Skills"}
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );
