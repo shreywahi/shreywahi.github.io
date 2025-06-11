@@ -125,24 +125,22 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
       alert('Switched to Google Drive content. Please reload the page.');
     }
   };
-
   // Mobile/Tablet layout with 2x2 grid
   if (screenSize === 'mobile' || screenSize === 'tablet') {
     return (
-      <div className="fixed top-4 right-4 z-50">
-        <div className="grid grid-cols-2 gap-2 w-64">
-          {/* Use Local / Switch to Drive */}
+      <div className="fixed top-8 right-4 z-50 pt-4">
+        <div className="grid grid-cols-2 gap-2 w-64">          {/* Use Local / Switch to Drive */}
           {usingLocalContent ? (
             <button
               onClick={handleSwitchToDrive}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
+              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
             >
               Switch to Drive
             </button>
           ) : (
             <button
               onClick={handleSwitchToLocal}
-              className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-xs font-medium"
+              className="px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-xs font-medium"
             >
               Use Local
             </button>
@@ -152,7 +150,7 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
           <button
             onClick={saveContentToDrive}
             disabled={driveSaving || usingLocalContent}
-            className={`px-3 py-2 rounded-md text-xs font-medium ${
+            className={`px-2 py-1 rounded-md text-xs font-medium ${
               driveSaving || usingLocalContent 
                 ? 'bg-gray-500 cursor-not-allowed text-gray-300' 
                 : 'bg-purple-600 hover:bg-purple-700 text-white'
@@ -165,7 +163,7 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
           {/* Reset/Reload */}
           <button
             onClick={handleReset}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
+            className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
           >
             Reset/Reload
           </button>
@@ -174,7 +172,7 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
           <button
             onClick={handleLoadFromDrive}
             disabled={loadingFromDrive || usingLocalContent}
-            className={`px-3 py-2 rounded-md text-xs font-medium ${
+            className={`px-2 py-1 rounded-md text-xs font-medium ${
               loadingFromDrive || usingLocalContent
                 ? 'bg-gray-500 cursor-not-allowed text-gray-300' 
                 : 'bg-green-600 hover:bg-green-700 text-white'
