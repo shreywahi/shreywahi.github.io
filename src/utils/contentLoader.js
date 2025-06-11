@@ -1,8 +1,9 @@
 import { Code, Database, Globe, Smartphone, Shield } from 'lucide-react';
 import { fetchContentFromDrive } from './driveContentManager';
+import defaultContentData from '../data/content.json';
 
-// State to hold the content data - will be populated from Drive
-let contentData = {};
+// State to hold the content data - initially loaded from content.json
+let contentData = defaultContentData;
 
 // Remove the DISABLE_GOOGLE_DRIVE flag since we only use Google Drive now
 
@@ -12,33 +13,36 @@ let hasLogged = false;
 // Flag to track if we've tried to load from Drive
 let hasTried = false;
 
-// Function to initialize content from Drive only
+// Function to initialize content - starts with local content.json
 export const initContentFromDrive = async () => {
+  // Always start with local content.json for initial load
+  if (!hasLogged) {
+    console.log('Loading initial content from content.json');
+    contentData = defaultContentData;
+    hasLogged = true;
+    return contentData;
+  }
+  
+  // This can be called later to load from Drive if needed
+  return contentData;
+};
+
+// Function to load content from Drive (only called when needed for admin operations)
+export const loadContentFromDrive = async () => {
   try {
-    // Fetch from Drive with a timeout
+    console.log('Loading content from Google Drive for admin operations');
+    
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('TIMEOUT'));
-      }, 10000); // 10 seconds timeout
+      }, 10000);
     });
     
     const driveContentPromise = fetchContentFromDrive();
+    const driveContent = await Promise.race([driveContentPromise, timeoutPromise]);
     
-    // Race the fetch against the timeout
-    const driveContent = await Promise.race([
-      driveContentPromise,
-      timeoutPromise
-    ]);
-    
-    // Mark that we've tried to load from Drive
-    hasTried = true;
-    
-    // Check if we got valid content from Drive
     if (driveContent && typeof driveContent === 'object' && Object.keys(driveContent).length > 1) {
-      // We got real Drive content
       contentData = driveContent;
-      
-      hasLogged = true;
       
       // Store in localStorage as a cache
       try {
@@ -47,29 +51,14 @@ export const initContentFromDrive = async () => {
       } catch (e) {
         // Ignore cache errors
       }
+      
+      return contentData;
     } else {
-      // Drive access failed - throw error
-      throw new Error('Failed to load content from Google Drive');
+      throw new Error('Invalid content received from Drive');
     }
-    
-    return contentData;
   } catch (error) {
-    hasLogged = true;
-    
-    // Try to load from localStorage cache if available as last resort
-    try {
-      const cachedContent = localStorage.getItem('cachedContent');
-      if (cachedContent) {
-        contentData = JSON.parse(cachedContent);
-        console.warn('Using cached content due to Drive loading error:', error.message);
-        return contentData;
-      }
-    } catch (e) {
-      // Ignore cache errors
-    }
-    
-    // If no cache available, throw the error
-    throw new Error(`Failed to load content from Google Drive: ${error.message}`);
+    console.error('Failed to load content from Drive:', error.message);
+    throw error;
   }
 };
 

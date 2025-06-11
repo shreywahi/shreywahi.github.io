@@ -26,7 +26,6 @@ import {
   defaultContactIntro,
 } from '../utils/contentLoader';
 import { useContentManager } from '../hooks/useContentManager';
-import { saveAndReplaceDriveFile, signInToGoogle } from '../utils/driveContentManager';
 import { logCspSuggestion } from '../utils/cspHelper';
 
 // --- Firebase config (replace with your own config) ---
@@ -70,9 +69,8 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   // --- Centralized content state ---
-  const { content, updateContent, loading } = useContentManager(isAdmin); // `content` is the state from the hook
+  const { content, updateContent, saveContentToDrive, loading } = useContentManager(isAdmin); // `content` is the state from the hook
   
   const [heroName, setHeroName] = useState('');
   const [heroDesc, setHeroDesc] = useState('');
@@ -498,51 +496,26 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       </form>
     </div>
   );
-
   // Function to save content to Google Drive
   const saveContentToDriveHandler = async () => {
-    if (!isAdmin || !driveInitialized) return;
+    if (!isAdmin) return;
     
     try {
       setDriveSaving(true);
       setDriveMessage({ type: 'info', text: 'Saving content to Google Drive...' });
       
-      await signInToGoogle(); // Ensure user is signed in
+      const success = await saveContentToDrive();
       
-      // Prepare the data to save directly from the `content` object from useContentManager.
-      // This `content` object should hold the most up-to-date, complete portfolio data.
-      const dataToSave = {
-        hero: content.hero,
-        about: content.about,
-        skillCategories: content.skillCategories,
-        experiences: content.experiences,
-        projects: content.projects,
-        certificates: content.certificates,
-        contact: content.contact,
-        // Assuming colorMap and iconColorMap are part of the `content` object
-        // loaded from content.json / Drive. If they are not, and you intend them
-        // to be static, you might need to merge them differently or ensure they
-        // are part of the `content` structure managed by `useContentManager`.
-        colorMap: content.colorMap || { /* default static colorMap if not in content */ },
-        iconColorMap: content.iconColorMap || { /* default static iconColorMap if not in content */ }
-      };
-
-      // It's crucial that `content.hero`, `content.about`, etc., contain the actual data.
-      // The `content` object from `useContentManager` might also include `loading` and `error` keys.
-      // The structure above cherry-picks the known data sections.
-      // If `content` itself is purely the data object (without loading/error at the root),
-      // you could potentially do: const dataToSave = { ...content }; (after ensuring no metadata)
-
-      console.log("Data being sent by saveContentToDriveHandler:", JSON.stringify(dataToSave, null, 2));
-      
-      if (Object.keys(dataToSave.hero || {}).length === 0 && Object.keys(dataToSave.about || {}).length === 0) {
-        console.warn("Warning: Data being saved appears to be largely empty. Check content state from useContentManager.");
+      if (success) {
+        setDriveMessage({ type: 'success', text: 'Content saved to Google Drive successfully!' });
+        setTimeout(() => setDriveMessage(null), 3000);
+      } else {
+        setDriveMessage({ 
+          type: 'error', 
+          text: 'Failed to save to Google Drive. Please try again.' 
+        });
+        setTimeout(() => setDriveMessage(null), 5000);
       }
-
-      await saveAndReplaceDriveFile(dataToSave); 
-      
-      setDriveMessage({ type: 'success', text: 'Content saved to Google Drive successfully!' });
-      setTimeout(() => setDriveMessage(null), 3000);
     } catch (error) {
       console.error('Error saving to Drive:', error);
       setDriveMessage({ 
@@ -554,11 +527,10 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       setDriveSaving(false);
     }
   };
-  
-  // Add a Google Drive save button to the admin interface
+    // Add a Google Drive save button to the admin interface
   const renderAdminControls = () => (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-      {isAdmin && driveInitialized && (
+      {isAdmin && (
         <button
           onClick={saveContentToDriveHandler}
           disabled={driveSaving}

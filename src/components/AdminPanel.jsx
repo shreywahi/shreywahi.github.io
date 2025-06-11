@@ -71,10 +71,9 @@ const AdminPanel = ({ isAdmin }) => {
             Copy to Clipboard
           </button>        </div>
       )}
-      
-      <div className="mb-4 p-3 bg-slate-700 rounded-md">
+        <div className="mb-4 p-3 bg-slate-700 rounded-md">
         <p className="text-sm font-semibold mb-1">📂 Content Source</p>
-        <p className="text-xs">Content is now loaded exclusively from Google Drive</p>
+        <p className="text-xs">Content loads from local files initially. Changes are saved to Google Drive when you click "Save to Google Drive".</p>
       </div>
       
       <button

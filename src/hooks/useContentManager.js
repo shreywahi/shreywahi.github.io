@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { initContentFromDrive, getContent } from '../utils/contentLoader';
-import { saveAndReplaceDriveFile, isSignedInToGoogle, signInToGoogle, updateAndReplaceDriveFile } from '../utils/driveContentManager';
+import { initContentFromDrive, getContent, loadContentFromDrive } from '../utils/contentLoader';
+import { saveAndReplaceDriveFile, isSignedInToGoogle, signInToGoogle } from '../utils/driveContentManager';
 
 export function useContentManager(isAdmin) {
   // Start with content from the module state to prevent blank screen
@@ -55,8 +55,7 @@ export function useContentManager(isAdmin) {
     return () => {
       isMounted = false;
     };
-  }, []);
-  // Function to update content (for admin mode)
+  }, []);  // Function to update content (for admin mode)
   const updateContent = async (section, newData) => {
     if (!isAdmin) return false;
     
@@ -66,37 +65,47 @@ export function useContentManager(isAdmin) {
       [section]: { ...(prev[section] || {}), ...newData },
     }));
 
-    // Save to Drive using the dedicated update function
+    // For individual edits, we don't save to Drive immediately
+    // Saving happens only when the save button is clicked
+    return true;
+  };
+  
+  // Function to save all content to Drive (called when save button is clicked)
+  const saveContentToDrive = async () => {
+    if (!isAdmin) return false;
+    
     try {
-      // Check if signed in to Google
+      // Check if signed in to Google - authenticate only when saving
       const signedIn = await isSignedInToGoogle();
       if (!signedIn) {
         await signInToGoogle();
       }
       
-      // Use the dedicated update function that fetches current content first
-      await updateAndReplaceDriveFile(section, newData);
+      // Prepare the complete content data
+      const dataToSave = {
+        hero: contentState.hero || {},
+        about: contentState.about || {},
+        skillCategories: contentState.skillCategories || [],
+        experiences: contentState.experiences || [],
+        projects: contentState.projects || [],
+        certificates: contentState.certificates || [],
+        contact: contentState.contact || {},
+        // Include static data that should be preserved
+        colorMap: getContent().colorMap || {},
+        iconColorMap: getContent().iconColorMap || {}
+      };
+
+      await saveAndReplaceDriveFile(dataToSave);
       return true;
     } catch (error) {
-      console.error('Failed to update content:', error);
-      // Revert the state change on error
-      setContentState(prev => {
-        const reverted = { ...prev };
-        // Remove the failed update
-        if (reverted[section]) {
-          Object.keys(newData).forEach(key => {
-            delete reverted[section][key];
-          });
-        }
-        return reverted;
-      });
+      console.error('Failed to save content to Drive:', error);
       return false;
     }
   };
-  
-  return {
+    return {
     content: contentState,
     updateContent,
+    saveContentToDrive,
     loading: contentState.loading,
     error: contentState.error
   };
