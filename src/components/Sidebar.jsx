@@ -49,13 +49,10 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
-	const openButtonRef = useRef(null);
-	const [screenSize, setScreenSize] = useState('desktop');
-	const [showMoreMenu, setShowMoreMenu] = useState(false);
+	const openButtonRef = useRef(null);	const [screenSize, setScreenSize] = useState('desktop');	const [showMoreMenu, setShowMoreMenu] = useState(false);
+	const [showAlternateButtons, setShowAlternateButtons] = useState(false);
 	const moreButtonRef = useRef(null);
-	const moreMenuRef = useRef(null);
-
-	useEffect(() => {
+	const moreMenuRef = useRef(null);	useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -66,7 +63,9 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 		};
 		checkScreen();
 		window.addEventListener('resize', checkScreen);
-		return () => window.removeEventListener('resize', checkScreen);
+		return () => {
+			window.removeEventListener('resize', checkScreen);
+		};
 	}, []);
 
 	// Hide More menu when clicking outside
@@ -209,77 +208,63 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 						))}
 					</div>
 				</aside>
-			)}
-
-			{/* Mobile/tablet sticky footer nav */}
+			)}			{/* Mobile/tablet sticky footer nav */}
 			{(screenSize === 'mobile' || screenSize === 'tablet') && (
 				<nav
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex justify-around items-center h-16 border-t border-blue-300"
 					aria-label="Footer Navigation"
 				>
 					<button
-						onClick={() => { if (onNavigate) onNavigate('hero'); }}
+						onClick={() => { 
+							if (showAlternateButtons) {
+								if (onNavigate) onNavigate('projects');
+							} else {
+								if (onNavigate) onNavigate('hero');
+							}
+						}}
 						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
-							${activeSection === 'hero'
+							${(showAlternateButtons ? activeSection === 'projects' : activeSection === 'hero')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
-						aria-label="Home"
+						aria-label={showAlternateButtons ? "Projects" : "Home"}
 						tabIndex={0}
 					>
-						<Home size={24} />
-						<span className="text-xs mt-1">Home</span>
+						{showAlternateButtons ? <FolderKanban size={24} /> : <Home size={24} />}
+						<span className="text-xs mt-1">{showAlternateButtons ? "Projects" : "Home"}</span>
 					</button>
 					<button
-						onClick={() => { if (onNavigate) onNavigate('about'); }}
+						onClick={() => { 
+							if (showAlternateButtons) {
+								if (onNavigate) onNavigate('certs');
+							} else {
+								if (onNavigate) onNavigate('about');
+							}
+						}}
 						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
-							${activeSection === 'about'
+							${(showAlternateButtons ? activeSection === 'certs' : activeSection === 'about')
 								? 'text-blue-400'
 								: 'text-white hover:text-blue-400'}
 						`}
-						aria-label="About"
+						aria-label={showAlternateButtons ? "Certificates" : "About"}
 						tabIndex={0}
 					>
-						<User size={24} />
-						<span className="text-xs mt-1">About</span>
-					</button>
-					<button
-						onClick={() => { if (onNavigate) onNavigate('experience'); }}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
-							${activeSection === 'experience'
-								? 'text-blue-400'
-								: 'text-white hover:text-blue-400'}
-						`}
-						aria-label="Experience"
-						tabIndex={0}
-					>
-						<Briefcase size={24} />
-						<span className="text-xs mt-1">Experience</span>
-					</button>
-					<button
-						onClick={() => { if (onNavigate) onNavigate('skills'); }}
-						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
-							${activeSection === 'skills'
-								? 'text-blue-400'
-								: 'text-white hover:text-blue-400'}
-						`}
-						aria-label="Skills"
-						tabIndex={0}
-					>
-						<Layers size={24} />
-						<span className="text-xs mt-1">Skills</span>
-					</button>
-					{/* More button and its popup */}
+						{showAlternateButtons ? <Award size={24} /> : <User size={24} />}
+						<span className="text-xs mt-1">{showAlternateButtons ? "Certificates" : "About"}</span>
+					</button>					{/* More button and its popup */}
 					<div className="relative flex flex-col items-center">
 						<button
 							ref={moreButtonRef}
-							onClick={() => setShowMoreMenu((v) => !v)}
+							onClick={() => {
+								setShowAlternateButtons(prev => !prev);
+								setShowMoreMenu(prev => !prev);
+							}}
 							className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
 								${showMoreMenu
 									? 'text-blue-400'
 									: 'text-white hover:text-blue-400'}
 							`}
-							aria-label="More options"
+							aria-label="Toggle navigation options and settings menu"
 							tabIndex={0}
 						>
 							<MoreHorizontal size={24} />
@@ -289,8 +274,7 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 							<div
 								ref={moreMenuRef}
 								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
-							>
-								<div className="flex flex-col gap-6 py-1 px-2">
+							>								<div className="flex flex-col gap-6 py-1 px-2">
 									<button
 										onClick={() => {
 											setTheme(resolvedTheme === "dark" ? "light" : "dark");
@@ -302,68 +286,6 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 									>
 										{resolvedTheme === "dark" ? <Sun size={24} /> : <Moon size={24} />}
 										<span className="text-xs mt-1">Theme</span>
-									</button>
-									<button
-										onClick={() => {
-											if (onNavigate) onNavigate('projects');
-											setShowMoreMenu(false);
-										}}
-										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
-											${activeSection === 'projects'
-												? 'text-blue-400'
-												: 'text-white hover:text-blue-400'}
-										`}
-										aria-label="Projects"
-										tabIndex={0}
-									>
-										<FolderKanban size={24} />
-										<span className="text-xs mt-1">Projects</span>
-									</button>
-									<button
-										onClick={() => {
-											if (onNavigate) onNavigate('certs');
-											setShowMoreMenu(false);
-										}}
-										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
-											${activeSection === 'certs'
-												? 'text-blue-400'
-												: 'text-white hover:text-blue-400'}
-										`}
-										aria-label="Certificates"
-										tabIndex={0}
-									>
-										<Award size={24} />
-										<span className="text-xs mt-1">Certificates</span>
-									</button>
-									<button
-										onClick={() => {
-											if (onNavigate) onNavigate('contact');
-											setShowMoreMenu(false);
-										}}
-										className={`flex flex-col items-center focus:outline-none focus:ring-2 focus:ring-blue-400
-											${activeSection === 'contact'
-												? 'text-blue-400'
-												: 'text-white hover:text-blue-400'}
-										`}
-										aria-label="Contact"
-										tabIndex={0}
-									>
-										<MailIcon size={24} />
-										<span className="text-xs mt-1">Contact</span>
-									</button>
-									{/* Download Resume */}
-									<button
-										onClick={() => {
-											window.open("https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg", "_blank", "noopener,noreferrer");
-											setShowMoreMenu(false);
-										}}
-										className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Download Resume"
-										tabIndex={0}
-									>
-										{/* Use a document icon for resume */}
-										<FileText size={24} />
-										<span className="text-xs mt-1">Download Resume</span>
 									</button>
 									{/* Download Apk */}
 									<button
@@ -377,7 +299,7 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 									>
 										{/* Use a smartphone icon for APK */}
 										<Smartphone size={24} />
-										<span className="text-xs mt-1">Download Apk</span>
+										<span className="text-xs mt-1">Download APK</span>
 									</button>
 									{/* Admin Login/Exit Admin button (mobile/tablet) */}
 									{!isAdmin ? (
@@ -411,6 +333,44 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 							</div>
 						)}
 					</div>
+					<button
+						onClick={() => { 
+							if (showAlternateButtons) {
+								if (onNavigate) onNavigate('contact');
+							} else {
+								if (onNavigate) onNavigate('experience');
+							}
+						}}
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${(showAlternateButtons ? activeSection === 'contact' : activeSection === 'experience')
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
+						aria-label={showAlternateButtons ? "Contact" : "Experience"}
+						tabIndex={0}
+					>
+						{showAlternateButtons ? <MailIcon size={24} /> : <Briefcase size={24} />}
+						<span className="text-xs mt-1">{showAlternateButtons ? "Contact" : "Experience"}</span>
+					</button>
+					<button
+						onClick={() => { 
+							if (showAlternateButtons) {
+								window.open("https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg", "_blank", "noopener,noreferrer");
+							} else {
+								if (onNavigate) onNavigate('skills');
+							}
+						}}
+						className={`flex flex-col items-center px-2 focus:outline-none focus:ring-2 focus:ring-blue-400
+							${(!showAlternateButtons && activeSection === 'skills')
+								? 'text-blue-400'
+								: 'text-white hover:text-blue-400'}
+						`}
+						aria-label={showAlternateButtons ? "Download Resume" : "Skills"}
+						tabIndex={0}
+					>
+						{showAlternateButtons ? <FileText size={24} /> : <Layers size={24} />}
+						<span className="text-xs mt-1">{showAlternateButtons ? "Download Resume" : "Skills"}</span>
+					</button>
 				</nav>
 			)}
 		</>
