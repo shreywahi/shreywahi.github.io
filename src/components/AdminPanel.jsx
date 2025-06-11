@@ -64,7 +64,7 @@ const AdminPanel = ({ isAdmin }) => {
   const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
   
   return (
-    <div className="fixed bottom-20 right-4 z-50 bg-slate-800 text-white p-4 rounded-lg shadow-lg max-w-md">
+    <div className="fixed top-8 right-8 z-50 bg-slate-800 text-white p-4 rounded-lg shadow-lg max-w-md">
       <h3 className="text-lg font-bold mb-2">Admin Content Settings</h3>
       
       {hasCspIssues && (
