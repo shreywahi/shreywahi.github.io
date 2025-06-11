@@ -1,121 +1,188 @@
-import { useState } from "react";
-import { skillCategories, getColorClasses, getIconColor } from './content';
-import DragDrop from "./ui/DragDrop";
+import React, { useState } from 'react';
+import { Globe, Database, Code, Smartphone, Shield } from 'lucide-react';
+import { getColorClasses, getIconColor } from '../utils/contentLoader';
 
-const Skills = ({ isAdmin, categories = skillCategories, setCategories }) => {
-  const [editIdx, setEditIdx] = useState(null);
+// Map string icon names to actual icon components
+const iconMap = {
+  Globe: Globe,
+  Database: Database,
+  Code: Code, 
+  Smartphone: Smartphone,
+  Shield: Shield
+};
+
+const Skills = ({ isAdmin, categories, setCategories }) => {
+  const [showAll, setShowAll] = useState(false);
+  const [editCategory, setEditCategory] = useState(null);
   const [editData, setEditData] = useState(null);
 
-  const startEdit = idx => {
-    setEditIdx(idx);
-    setEditData(JSON.parse(JSON.stringify(categories[idx])));
+  // Toggle show all skills
+  const toggleShowAll = () => setShowAll(!showAll);
+
+  // Start editing a category
+  const startEdit = (idx) => {
+    setEditCategory(idx);
+    setEditData({ ...categories[idx] });
   };
+
+  // Cancel editing
   const cancelEdit = () => {
-    setEditIdx(null);
-    setEditData(null);
-  };
-  const saveEdit = idx => {
-    if (!setCategories) return;
-    const newList = categories.slice();
-    const orig = skillCategories.find(cat => cat.title === editData.title) || skillCategories[idx];
-    newList[idx] = { ...editData, icon: orig.icon };
-    setCategories(newList);
-    setEditIdx(null);
+    setEditCategory(null);
     setEditData(null);
   };
 
-  const getIconByTitle = (title, fallbackIdx) => {
-    const found = skillCategories.find(cat => cat.title === title);
-    return found ? found.icon : skillCategories[fallbackIdx]?.icon;
+  // Save edited category
+  const saveEdit = (idx) => {
+    if (!setCategories) return;
+    const newCategories = [...categories];
+    newCategories[idx] = editData;
+    setCategories(newCategories);
+    setEditCategory(null);
+    setEditData(null);
   };
 
   return (
-    <section id="skills" className="min-h-[100vh] py-10 sm:py-20 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">
-      <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-4xl font-serif font-bold text-orange-400 dark:text-purple-500 mb-4 sm:mb-6">
+    <section id="skills" className="min-h-[100vh] py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
+      <div className="max-w-6xl mx-auto px-4 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-serif font-bold text-green-400 dark:text-purple-500 mb-6">
             Skills & Expertise
           </h2>
+          <p className="text-white text-lg max-w-3xl mx-auto">
+            With a passion for creating efficient, elegant solutions, I've developed expertise across various technologies and domains.
+          </p>
         </div>
-        <br /><br />
-        <div className="font-mono grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
           {categories.map((category, idx) =>
-            isAdmin && editIdx === idx ? (
-              <div key={category.title + idx} className="p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-yellow-400">
+            isAdmin && editCategory === idx ? (
+              // Edit form for admin
+              <div key={idx} className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-2 border-pink-400">
                 <input
                   value={editData.title}
-                  onChange={e => setEditData({ ...editData, title: e.target.value })}
-                  className="w-full mb-2 p-2 rounded border"
+                  onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                  className="w-full mb-4 p-2 border rounded"
                   placeholder="Category Title"
-                  style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                 />
-                <input
-                  value={editData.color}
-                  onChange={e => setEditData({ ...editData, color: e.target.value })}
-                  className="w-full mb-2 p-2 rounded border"
-                  placeholder="Color"
-                  style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
-                />
-                <div>
-                  <label>Skills (comma separated):</label>
-                  <input
-                    value={editData.skills.join(', ')}
-                    onChange={e => setEditData({ ...editData, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                    className="w-full mb-2 p-2 rounded border"
-                    style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
+                <div className="mb-4">
+                  <label className="block mb-2">Icon:</label>
+                  <select
+                    value={editData.icon}
+                    onChange={(e) => setEditData({ ...editData, icon: e.target.value })}
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="Globe">Globe</option>
+                    <option value="Database">Database</option>
+                    <option value="Code">Code</option>
+                    <option value="Smartphone">Smartphone</option>
+                    <option value="Shield">Shield</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Color:</label>
+                  <select
+                    value={editData.color}
+                    onChange={(e) => setEditData({ ...editData, color: e.target.value })}
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="blue">Blue</option>
+                    <option value="green">Green</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="red">Red</option>
+                    <option value="yellow">Yellow</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Skills (comma separated):</label>
+                  <textarea
+                    value={editData.skills.join(", ")}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        skills: e.target.value.split(",").map((s) => s.trim()),
+                      })
+                    }
+                    className="w-full p-2 border rounded"
+                    rows="4"
                   />
                 </div>
-                <button
-                  onClick={() => saveEdit(idx)}
-                  className="mr-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  className="px-4 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => saveEdit(idx)}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             ) : (
+              // Display card
               <div
-                key={category.title + idx}
-                className={`bg-gray-50 dark:bg-gray-800 rounded-xl p-4 sm:p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${getColorClasses(category.color)}`}
-                style={{ borderRadius: "1rem" }}
+                key={idx}
+                className={`flex flex-col ${
+                  showAll ? "h-auto" : "h-80"
+                } overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gray-100 dark:bg-gray-800`}
               >
-                <div className="flex items-center mb-4 sm:mb-6">
-                  <div className={`p-0 sm:p-3 rounded-lg ${category.color === 'blue' ? 'bg-blue-200 dark:bg-blue-900' : category.color === 'green' ? 'bg-green-200 dark:bg-green-900' : category.color === 'purple' ? 'bg-purple-200 dark:bg-purple-900' : category.color === 'pink' ? 'bg-pink-200 dark:bg-pink-900' : category.color === 'red' ? 'bg-red-200 dark:bg-red-900' : 'bg-yellow-200 dark:bg-yellow-900'}`}>
-                    {(() => {
-                      const Icon = getIconByTitle(category.title, idx);
-                      return Icon ? <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${getIconColor(category.color)}`} /> : null;
-                    })()}
-                  </div>
-                  <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white ml-3 sm:ml-4">{category.title}</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {category.skills.map((skill, i) => (
-                    <span
-                      key={i}
-                      className={`px-1 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border ${getColorClasses(category.color)}`}
-                      style={{ color: "#fff" }}
+                <div
+                  className={`flex items-center px-6 py-4 border-b ${getColorClasses(
+                    category.color
+                  )}`}
+                >
+                  {/* Use the mapped icon component */}
+                  {React.createElement(iconMap[category.icon] || Globe, {
+                    className: "w-6 h-6 mr-3",
+                    style: { flexShrink: 0 }
+                  })}
+                  <h3 className="text-xl font-bold">{category.title}</h3>
+                  {isAdmin && (
+                    <button
+                      onClick={() => startEdit(idx)}
+                      className="ml-auto px-2 py-1 text-xs bg-yellow-500 text-white rounded"
                     >
-                      {skill}
-                    </span>
-                  ))}
+                      Edit
+                    </button>
+                  )}
                 </div>
-                {isAdmin && setCategories && (
-                  <button
-                    className="mt-2 px-4 py-2 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
-                    onClick={() => startEdit(idx)}
+                <div className="flex-1 p-6 overflow-hidden">
+                  <div
+                    className={`flex flex-wrap gap-2 ${
+                      !showAll ? "max-h-44 overflow-hidden" : ""
+                    }`}
                   >
-                    Edit
-                  </button>
-                )}
+                    {category.skills.map((skill, i) => (
+                      <span
+                        key={i}
+                        className={`inline-block text-sm px-3 py-1 rounded-full ${getColorClasses(
+                          category.color
+                        )}`}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             )
           )}
         </div>
+
+        {categories.length > 0 && (
+          <div className="text-center mt-10">
+            <button
+              onClick={toggleShowAll}
+              className="px-6 py-2 bg-transparent border-2 border-green-400 text-green-400 dark:border-purple-500 dark:text-purple-500 rounded-full hover:bg-green-400 hover:text-white dark:hover:bg-purple-500 dark:hover:text-white transition-colors duration-300"
+            >
+              {showAll ? "Show Less" : "Show All Skills"}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

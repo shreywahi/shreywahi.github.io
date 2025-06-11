@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -7,12 +7,14 @@ import Skills from '../components/Skills';
 import Projects from '../components/Projects';
 import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
+import AdminPanel from '../components/AdminPanel';
 import '../App.css';
 // --- Firebase imports ---
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 // --- Centralized content ---
 import {
+  initContentFromDrive,
   experiences as defaultExperiences,
   skillCategories as defaultSkillCategories,
   projects as defaultProjects,
@@ -22,7 +24,10 @@ import {
   defaultAboutText,
   defaultContactHeading,
   defaultContactIntro,
-} from '../components/content';
+} from '../utils/contentLoader';
+import { useContentManager } from '../hooks/useContentManager';
+import { fetchContentFromDrive, saveContentToDrive, signInToGoogle } from '../utils/driveContentManager';
+import { logCspSuggestion } from '../utils/cspHelper';
 
 // --- Firebase config (replace with your own config) ---
 const firebaseConfig = {
@@ -38,7 +43,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const Index = () => {
+const Index = ({ driveInitialized = false, driveError = null }) => {
   // Initialize with a function to ensure localStorage is read only once on mount
   const getInitialSection = () => {
     if (typeof window !== 'undefined') {
@@ -67,15 +72,40 @@ const Index = () => {
   const [password, setPassword] = useState("");
 
   // --- Centralized content state ---
-  const [heroName, setHeroName] = useState(defaultHeroName);
-  const [heroDesc, setHeroDesc] = useState(defaultHeroDesc);
-  const [aboutText, setAboutText] = useState(defaultAboutText);
-  const [categories, setCategories] = useState(defaultSkillCategories);
-  const [experiences, setExperiences] = useState(defaultExperiences);
-  const [projectList, setProjectList] = useState(defaultProjects);
-  const [certList, setCertList] = useState(defaultCerts);
-  const [contactHeading, setContactHeading] = useState(defaultContactHeading);
-  const [contactIntro, setContactIntro] = useState(defaultContactIntro);
+  const { content, updateContent, loading } = useContentManager(isAdmin);
+  
+  const [heroName, setHeroName] = useState('');
+  const [heroDesc, setHeroDesc] = useState('');
+  const [aboutText, setAboutText] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [experiences, setExperiences] = useState([]);
+  const [projectList, setProjectList] = useState([]);
+  const [certList, setCertList] = useState([]);
+  const [contactHeading, setContactHeading] = useState('');
+  const [contactIntro, setContactIntro] = useState('');
+  
+  // Add new state for drive operations - ALWAYS declare these
+  const [driveSaving, setDriveSaving] = useState(false);
+  const [driveMessage, setDriveMessage] = useState(null);
+  const [contentLoading, setContentLoading] = useState(true);
+  
+  // Add a ref to track if user has manually scrolled
+  const userScrolledRef = useRef(false);
+  
+  // Update state when content loads
+  useEffect(() => {
+    if (!loading) {
+      setHeroName(content.hero?.name || '');
+      setHeroDesc(content.hero?.description || '');
+      setAboutText(content.about?.text || '');
+      setCategories(content.skillCategories || []);
+      setExperiences(content.experiences || []);
+      setProjectList(content.projects || []);
+      setCertList(content.certificates || []);
+      setContactHeading(content.contact?.heading || '');
+      setContactIntro(content.contact?.intro || '');
+    }
+  }, [content, loading]);
 
   // Listen to Firebase auth state
   useEffect(() => {
@@ -95,40 +125,29 @@ const Index = () => {
     }
   }, [activeSection]);
 
-  // Add a ref to track if user has manually scrolled
-  const userScrolledRef = useRef(false);
-  
   // Handle resize with a stable reference to active section
   useEffect(() => {
     let resizeTimer;
     
     const handleResize = () => {
-      // Clear any pending timers to avoid multiple rapid calls
       clearTimeout(resizeTimer);
       
-      // Set a small delay to ensure we're not responding to every pixel change
       resizeTimer = setTimeout(() => {
         const wasDesktop = isDesktop;
         const nowDesktop = window.innerWidth > 1024;
         
         if (wasDesktop !== nowDesktop) {
-          // Update isDesktop state first
           setIsDesktop(nowDesktop);
           
-          // When switching to desktop, make sure we're showing the correct section
           if (!wasDesktop && nowDesktop) {
-            // Force read from localStorage to ensure we have the latest value
             const currentSection = localStorage.getItem('activeSection') || 'hero';
             
-            // Only update if needed
             if (currentSection !== activeSectionRef.current) {
               setActiveSection(currentSection);
             }
             
-            // Reset user scroll flag when transitioning
             userScrolledRef.current = false;
             
-            // Then scroll to it after a small delay to ensure DOM is updated
             setTimeout(() => {
               const el = document.getElementById(currentSection);
               if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -138,18 +157,15 @@ const Index = () => {
       }, 50);
     };
     
-    // Add resize listener
     window.addEventListener('resize', handleResize);
     
-    // Clean up
     return () => {
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [isDesktop]); // Only depend on isDesktop to avoid loops
+  }, [isDesktop]);
 
   // Scroll to active section when desktop changes or section changes
-  // But only for programmatic navigation, not for scroll tracking
   useEffect(() => {
     if (isDesktop && typeof window !== 'undefined' && !userScrolledRef.current) {
       const el = document.getElementById(activeSection);
@@ -158,6 +174,90 @@ const Index = () => {
       }
     }
   }, [isDesktop, activeSection]);
+
+  // Remove scroll snap for natural scrolling and restore section tracking only
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
+    
+    const handleWheel = () => {
+      userScrolledRef.current = true;
+    };
+    
+    const handleScroll = () => {
+      if (!userScrolledRef.current) return;
+      
+      let found = false;
+      for (let id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= window.innerHeight * 0.4 && rect.bottom > window.innerHeight * 0.2) {
+            if (activeSection !== id) setActiveSection(id);
+            found = true;
+            break;
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchmove', handleWheel, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleWheel);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isDesktop, activeSection]);
+
+  // Section tracking for sidebar (desktop only) using Intersection Observer
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
+    const sectionElements = sectionIds
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+
+    if (sectionElements.length === 0) return;
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (!userScrolledRef.current) return;
+        
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          const topSection = visible[0].target.id;
+          if (topSection && topSection !== activeSection) {
+            setActiveSection(topSection);
+          }
+        }
+      },
+      {
+        root: null,
+        threshold: 0.3,
+      }
+    );
+
+    sectionElements.forEach(el => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isDesktop]);
+
+  // Add CSP logging on mount - ALWAYS call this hook
+  useEffect(() => {
+    setTimeout(() => {
+      logCspSuggestion();
+    }, 2000);
+  }, []);
 
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
@@ -180,6 +280,20 @@ const Index = () => {
     }
   };
 
+  // Create wrapped update functions
+  const updateHero = async (name, desc) => {
+    const updated = await updateContent('hero', { ...content.hero, name, description: desc });
+    if (updated) {
+      setHeroName(name);
+      setHeroDesc(desc);
+    }
+  };
+  
+  const updateAbout = async (text) => {
+    const updated = await updateContent('about', { ...content.about, text });
+    if (updated) setAboutText(text);
+  };
+
   // Section mapping (must be inside component to access handleNavigate)
   const sections = [
     {
@@ -189,9 +303,9 @@ const Index = () => {
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
           heroName={heroName}
-          setHeroName={setHeroName}
+          setHeroName={(name) => updateHero(name, heroDesc)}
           heroDesc={heroDesc}
-          setHeroDesc={setHeroDesc}
+          setHeroDesc={(desc) => updateHero(heroName, desc)}
         />
       ),
     },
@@ -381,89 +495,133 @@ const Index = () => {
     </div>
   );
 
-  // Remove scroll snap for natural scrolling and restore section tracking only
-  useEffect(() => {
-    if (!isDesktop) return;
-
-    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
+  // Function to save content to Google Drive
+  const saveContentToDriveHandler = async () => {
+    if (!isAdmin || !driveInitialized) return;
     
-    // Add a wheel event listener to detect user scrolling
-    const handleWheel = () => {
-      userScrolledRef.current = true;
-    };
-    
-    const handleScroll = () => {
-      // Only track sections if user has scrolled
-      if (!userScrolledRef.current) return;
+    try {
+      setDriveSaving(true);
+      setDriveMessage({ type: 'info', text: 'Saving content to Google Drive...' });
       
-      let found = false;
-      for (let id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= window.innerHeight * 0.4 && rect.bottom > window.innerHeight * 0.2) {
-            if (activeSection !== id) setActiveSection(id);
-            found = true;
-            break;
-          }
+      // Sign in if needed (this will trigger the OAuth consent screen)
+      await signInToGoogle();
+      
+      // Construct the complete content object
+      const completeContent = {
+        hero: {
+          name: heroName,
+          description: heroDesc
+        },
+        about: {
+          text: aboutText
+        },
+        skillCategories: categories,
+        experiences: experiences,
+        projects: projectList,
+        certificates: certList,
+        contact: {
+          heading: contactHeading,
+          intro: contactIntro
+        },
+        // Include the color maps and any other static content
+        colorMap: {
+          blue: "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
+          green: "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
+          purple: "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
+          pink: "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
+          red: "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
+          yellow: "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
+        },
+        iconColorMap: {
+          blue: "text-blue-600 dark:text-blue-300",
+          green: "text-green-600 dark:text-green-300",
+          purple: "text-purple-600 dark:text-purple-300",
+          pink: "text-pink-600 dark:text-pink-300",
+          red: "text-red-600 dark:text-red-300",
+          yellow: "text-yellow-600 dark:text-yellow-300"
         }
-      }
-    };
+      };
+      
+      // Save to Google Drive
+      await saveContentToDrive(completeContent);
+      
+      setDriveMessage({ type: 'success', text: 'Content saved to Google Drive successfully!' });
+      setTimeout(() => setDriveMessage(null), 3000);
+    } catch (error) {
+      console.error('Error saving to Drive:', error);
+      setDriveMessage({ 
+        type: 'error', 
+        text: 'Failed to save to Google Drive: ' + (error.message || 'Unknown error') 
+      });
+      setTimeout(() => setDriveMessage(null), 5000);
+    } finally {
+      setDriveSaving(false);
+    }
+  };
+  
+  // Add a Google Drive save button to the admin interface
+  const renderAdminControls = () => (
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      {isAdmin && driveInitialized && (
+        <button
+          onClick={saveContentToDriveHandler}
+          disabled={driveSaving}
+          className={`px-4 py-2 rounded-full shadow-lg text-white flex items-center gap-2 ${
+            driveSaving ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {driveSaving ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              Save to Google Drive
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+  
+  // Message notification for drive operations
+  const renderDriveMessage = () => {
+    if (!driveMessage) return null;
     
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('touchmove', handleWheel, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    const bgColor = driveMessage.type === 'error' ? 'bg-red-500' : 
+                   driveMessage.type === 'success' ? 'bg-green-500' : 
+                   'bg-blue-500';
     
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchmove', handleWheel);
-      window.removeEventListener('scroll', handleScroll);
-    };
-    // eslint-disable-next-line
-  }, [isDesktop, activeSection]);
-
-  // Section tracking for sidebar (desktop only) using Intersection Observer
-  useEffect(() => {
-    if (!isDesktop) return;
-
-    const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
-    const sectionElements = sectionIds
-      .map(id => document.getElementById(id))
-      .filter(Boolean);
-
-    if (sectionElements.length === 0) return;
-
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        // Only update based on intersection if user has scrolled
-        if (!userScrolledRef.current) return;
-        
-        // Find all intersecting entries
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-        if (visible.length > 0) {
-          const topSection = visible[0].target.id;
-          if (topSection && topSection !== activeSection) {
-            setActiveSection(topSection);
-          }
-        }
-      },
-      {
-        root: null,
-        threshold: 0.3, // 30% of section visible
-      }
+    return (
+      <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-white ${bgColor}`}>
+        {driveMessage.text}
+      </div>
     );
+  };
+  
+  // Update the loading indicator with a better fallback
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-blue-950 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white text-lg">Loading content...</p>
+        </div>
+      </div>
+    );
+  }
 
-    sectionElements.forEach(el => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
-    };
-    // eslint-disable-next-line
-  }, [isDesktop, /* do not depend on activeSection here */]);
-
+  // Rest of your component...
+  // Modify the return statement to include the new components
   return (
     <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
       <Sidebar
@@ -475,6 +633,10 @@ const Index = () => {
         auth={auth}
       />
       {showLogin && renderAdminLogin()}
+      <AdminPanel isAdmin={isAdmin} />
+      {renderDriveMessage()}
+      {renderAdminControls()}
+      
       {isDesktop ? (
         <main
           className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"

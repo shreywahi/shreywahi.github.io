@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import Modal from "./ui/Modal";
-import { certs as certsData } from './content';
-import DragDrop from "./ui/DragDrop";
+import { certs as certsData } from '../utils/contentLoader';
 
 const scrollToTop = () => {
     const element = document.getElementById('hero');
