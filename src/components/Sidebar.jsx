@@ -71,10 +71,14 @@ const Sidebar = ({
 	const [userToggledNavigation, setUserToggledNavigation] = useState(false);
 	const moreButtonRef = useRef(null);
 	const moreMenuRef = useRef(null);
-	
-	// Triple click detection state
+		// Triple click detection state
 	const [clickCount, setClickCount] = useState(0);
-	const clickTimeoutRef = useRef(null);useEffect(() => {
+	const clickTimeoutRef = useRef(null);
+	
+	// Portfolio triple click detection state
+	const [portfolioClickCount, setPortfolioClickCount] = useState(0);
+	const portfolioClickTimeoutRef = useRef(null);
+	const [showAdminLogin, setShowAdminLogin] = useState(false);useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -127,6 +131,28 @@ const Sidebar = ({
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [showMoreMenu]);
 
+	// Handle Portfolio triple click detection
+	const handlePortfolioClick = () => {
+		setPortfolioClickCount(prev => prev + 1);
+		
+		// Clear existing timeout
+		if (portfolioClickTimeoutRef.current) {
+			clearTimeout(portfolioClickTimeoutRef.current);
+		}
+		
+		// Set a new timeout to reset click count after 500ms
+		portfolioClickTimeoutRef.current = setTimeout(() => {
+			const currentCount = portfolioClickCount + 1; // +1 because state update is async
+			
+			if (currentCount === 3) {
+				// Triple click - show admin login button
+				setShowAdminLogin(true);
+			}
+			
+			setPortfolioClickCount(0);
+		}, 300); // 300ms window for detecting multiple clicks
+	};
+
 	// Handle triple click detection
 	const handleToggleClick = () => {
 		setClickCount(prev => prev + 1);
@@ -153,12 +179,21 @@ const Sidebar = ({
 			setClickCount(0);
 		}, 300); // 300ms window for detecting multiple clicks
 	};
+	// Hide admin login button when user exits admin mode
+	useEffect(() => {
+		if (!isAdmin) {
+			setShowAdminLogin(false);
+		}
+	}, [isAdmin]);
 
 	// Cleanup timeout on unmount
 	useEffect(() => {
 		return () => {
 			if (clickTimeoutRef.current) {
 				clearTimeout(clickTimeoutRef.current);
+			}
+			if (portfolioClickTimeoutRef.current) {
+				clearTimeout(portfolioClickTimeoutRef.current);
 			}
 		};
 	}, []);
@@ -176,20 +211,12 @@ const Sidebar = ({
 					style={{ width: '16rem', maxWidth: '16rem' }}
 				>
 					<div>
-						<br /><br />
-						<div
+						<br /><br />						<div
 							className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
-							onClick={() => {
-								if (onNavigate) onNavigate('hero');
-							}}
+							onClick={handlePortfolioClick}
 							tabIndex={0}
-							aria-label="Go to Home"
+							aria-label="Portfolio - Triple click for admin access"
 							role="button"
-							onKeyDown={e => {
-								if (e.key === "Enter" || e.key === " ") {
-									if (onNavigate) onNavigate('hero');
-								}
-							}}
 						>
 							Portfolio
 						</div>
@@ -206,30 +233,32 @@ const Sidebar = ({
 									active={activeSection === link.section}
 								/>
 							))}
-						</nav>
-						{/* Admin Login/Exit Admin button (desktop) */}
-						<div className="flex justify-center my-4">
-							{!isAdmin ? (
-								<button
-									onClick={() => setShowLogin(true)}
-									className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-									aria-label="Admin Login"
-									tabIndex={0}
-								>
-									<LogIn size={20} />
-									<span>Admin Login</span>
-								</button>
-							) : (
-								<button
-									onClick={() => signOut(auth)}
-									className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
-									aria-label="Exit Admin"
-									tabIndex={0}
-								>
-									<LogOut size={20} />
-									<span>Exit Admin</span>
-								</button>
-							)}						</div>
+						</nav>						{/* Admin Login/Exit Admin button (desktop) */}
+						{showAdminLogin && (
+							<div className="flex justify-center my-4">
+								{!isAdmin ? (
+									<button
+										onClick={() => setShowLogin(true)}
+										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label="Admin Login"
+										tabIndex={0}
+									>
+										<LogIn size={20} />
+										<span>Admin Login</span>
+									</button>
+								) : (
+									<button
+										onClick={() => signOut(auth)}
+										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+										aria-label="Exit Admin"
+										tabIndex={0}
+									>
+										<LogOut size={20} />
+										<span>Exit Admin</span>
+									</button>
+								)}
+							</div>
+						)}
 						<div className="flex justify-center my-4">
 							{mounted && (
 								<button
