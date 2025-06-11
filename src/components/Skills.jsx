@@ -162,6 +162,14 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
                         className={`inline-block text-sm px-3 py-1 rounded-full ${getColorClasses(
                           category.color
                         )}`}
+                        style={{ 
+                          color: '#ffffff',
+                          backgroundColor: category.color === 'blue' ? '#1e40af' : 
+                                         category.color === 'green' ? '#059669' :
+                                         category.color === 'purple' ? '#7c3aed' :
+                                         category.color === 'pink' ? '#db2777' :
+                                         category.color === 'red' ? '#dc2626' : '#ca8a04'
+                        }}
                       >
                         {skill}
                       </span>
