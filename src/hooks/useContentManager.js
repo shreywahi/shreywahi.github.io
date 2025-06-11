@@ -113,6 +113,7 @@ export function useContentManager(isAdmin) {
       }
       
       // Prepare the complete content data
+      const { getContent } = await import('../utils/contentLoader');
       const dataToSave = {
         hero: contentState.hero || {},
         about: contentState.about || {},
@@ -136,12 +137,11 @@ export function useContentManager(isAdmin) {
   // Function to reload content from Drive (for admin use)
   const reloadFromDrive = async () => {
     if (!isAdmin) return false;
-    
     try {
       setContentState(prev => ({ ...prev, loading: true }));
-      
+      // Import content loader functions dynamically
+      const { loadContentFromDrive } = await import('../utils/contentLoader');
       const content = await loadContentFromDrive();
-      
       setContentState({
         loading: false,
         error: null,
@@ -153,7 +153,6 @@ export function useContentManager(isAdmin) {
         certificates: content.certificates || [],
         contact: content.contact || {},
       });
-      
       return true;
     } catch (error) {
       console.error('Failed to reload content from Drive:', error);

@@ -88,6 +88,7 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   // Add a ref to track if user has manually scrolled
   const userScrolledRef = useRef(false);
   const isNavigatingRef = useRef(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   
   // Update state when content loads from useContentManager
   useEffect(() => {
@@ -153,18 +154,14 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
 
   const handleSwitchToLocal = async () => {
     console.log('Index: Switching to local content');
-    
     try {
-      // Enable local content mode
       const { toggleLocalContentMode } = await import('../utils/driveContentManager');
       toggleLocalContentMode(true);
       setUsingLocalContent(true);
-      
-      // Force reload to use local content
       window.location.reload();
     } catch (error) {
       console.error('Error switching to local content:', error);
-      alert('Failed to switch to local content: ' + error.message);
+      alert('Failed to switch to local content: ' + (error && error.message ? error.message : JSON.stringify(error)));
     }
   };
 
@@ -688,14 +685,24 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   // Rest of your component...
   // Modify the return statement to include the new components
   return (
-    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>      <Sidebar
+    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
+      {/* Floating Admin Panel open button (desktop only) */}
+      {isDesktop && isAdmin && !showAdminPanel && (
+        <button
+          onClick={() => setShowAdminPanel(true)}
+          className="fixed top-8 right-8 z-50 bg-blue-700 hover:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          aria-label="Open Admin Panel"
+        >
+          ⚙️
+        </button>
+      )}
+      <Sidebar
         onNavigate={handleNavigate}
         activeSection={activeSection}
         setShowLogin={setShowLogin}
         isAdmin={isAdmin}
         signOut={signOut}
         auth={auth}
-        // Admin panel props
         reloadFromDrive={reloadFromDrive}
         saveContentToDrive={saveContentToDriveHandler}
         driveSaving={driveSaving}
@@ -705,22 +712,47 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         handleSwitchToDrive={handleSwitchToDrive}
         handleReset={handleReset}
         handleLoadFromDrive={handleLoadFromDrive}
-      />{showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>
-        <AdminPanel 
-          isAdmin={isAdmin} 
-          reloadFromDrive={reloadFromDrive} 
-          saveContentToDrive={saveContentToDriveHandler}
-          driveSaving={driveSaving}
-          driveMessage={driveMessage}
-          screenSize={screenSize}
-          // Admin functions
-          loadingFromDrive={loadingFromDrive}
-          usingLocalContent={usingLocalContent}
-          handleSwitchToLocal={handleSwitchToLocal}
-          handleSwitchToDrive={handleSwitchToDrive}
-          handleReset={handleReset}
-          handleLoadFromDrive={handleLoadFromDrive}
-        />
+      />
+      {showLogin && renderAdminLogin()}
+      <Suspense fallback={<div></div>}>
+        {isDesktop && isAdmin && showAdminPanel && (
+          <AdminPanel
+            isAdmin={isAdmin}
+            reloadFromDrive={reloadFromDrive}
+            saveContentToDrive={saveContentToDriveHandler}
+            driveSaving={driveSaving}
+            driveMessage={driveMessage}
+            screenSize={screenSize}
+            loadingFromDrive={loadingFromDrive}
+            setLoadingFromDrive={setLoadingFromDrive}
+            usingLocalContent={usingLocalContent}
+            setUsingLocalContent={setUsingLocalContent} // <-- pass setter
+            handleSwitchToLocal={handleSwitchToLocal}
+            handleSwitchToDrive={handleSwitchToDrive}
+            handleReset={handleReset}
+            handleLoadFromDrive={handleLoadFromDrive}
+            onClose={() => setShowAdminPanel(false)}
+          />
+        )}
+        {/* Mobile/tablet: keep as before */}
+        {(!isDesktop || !isAdmin) && (
+          <AdminPanel
+            isAdmin={isAdmin}
+            reloadFromDrive={reloadFromDrive}
+            saveContentToDrive={saveContentToDriveHandler}
+            driveSaving={driveSaving}
+            driveMessage={driveMessage}
+            screenSize={screenSize}
+            loadingFromDrive={loadingFromDrive}
+            setLoadingFromDrive={setLoadingFromDrive}
+            usingLocalContent={usingLocalContent}
+            setUsingLocalContent={setUsingLocalContent} // <-- pass setter
+            handleSwitchToLocal={handleSwitchToLocal}
+            handleSwitchToDrive={handleSwitchToDrive}
+            handleReset={handleReset}
+            handleLoadFromDrive={handleLoadFromDrive}
+          />
+        )}
       </Suspense>
       
       {isDesktop ? (        <main

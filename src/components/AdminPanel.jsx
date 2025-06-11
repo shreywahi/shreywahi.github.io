@@ -10,8 +10,10 @@ const AdminPanel = ({
   screenSize = 'desktop',
   // Admin functions from parent
   loadingFromDrive,
-  usingLocalContent
-  // Removed handleSwitchToLocal, handleSwitchToDrive, handleReset, handleLoadFromDrive from props
+  setLoadingFromDrive, // <-- add this line
+  usingLocalContent,
+  setUsingLocalContent, // <-- add this line
+  onClose // <-- add onClose prop
 }) => {  
   const [showCspFix, setShowCspFix] = useState(false);
   const [cspIssues, setCspIssues] = useState([]);
@@ -50,18 +52,14 @@ const AdminPanel = ({
   };
   const handleSwitchToLocal = async () => {
     console.log('AdminPanel: Switching to local content');
-    
     try {
-      // Enable local content mode
       const { toggleLocalContentMode } = await import('../utils/driveContentManager');
       toggleLocalContentMode(true);
       setUsingLocalContent(true);
-      
-      // Force reload to use local content
       window.location.reload();
     } catch (error) {
       console.error('Error switching to local content:', error);
-      alert('Failed to switch to local content: ' + error.message);
+      alert('Failed to switch to local content: ' + (error && error.message ? error.message : JSON.stringify(error)));
     }
   };
   const handleSwitchToDrive = async () => {
@@ -132,6 +130,16 @@ const AdminPanel = ({
   // Desktop layout (original full panel)
   return (
     <div className="fixed top-8 right-8 z-50 bg-slate-800 text-white p-4 rounded-lg shadow-lg max-w-md">
+      {/* Close button for desktop floating panel */}
+      {typeof onClose === 'function' && (
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-300 hover:text-red-500 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-red-400"
+          aria-label="Close Admin Panel"
+        >
+          ×
+        </button>
+      )}
       <h3 className="text-lg font-bold mb-2">Admin Content Settings</h3>
       
       {/* Drive Message */}
