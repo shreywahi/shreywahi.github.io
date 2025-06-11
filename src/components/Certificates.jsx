@@ -8,7 +8,7 @@ const scrollToTop = () => {
     element?.scrollIntoView({ behavior: 'smooth' });
 };
 
-const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
+const Certificates = ({ onSectionChange, isAdmin, certList, setCertList, updateContent, saveContentToDrive }) => {
     const [selectedCert, setselectedCert] = useState(null);
     const [certs, setCerts] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
@@ -62,14 +62,25 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
     const cancelEdit = () => {
         setEditIdx(null);
         setEditData(null);
-    };
-    const saveEdit = idx => {
+    };    const saveEdit = async (idx) => {
         if (!setCertList) return;
         const newList = certList.slice();
         newList[idx] = editData;
         setCertList(newList);
         setEditIdx(null);
         setEditData(null);
+        
+        // Save to JSON/Drive
+        if (updateContent && saveContentToDrive) {
+            try {
+                console.log('Saving certificate edit to Drive...');
+                await updateContent('certificates', newList);
+                await saveContentToDrive();
+                console.log('Certificate edit saved successfully');
+            } catch (error) {
+                console.error('Error saving certificate edit:', error);
+            }
+        }
     };
 
     return (
@@ -80,10 +91,23 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
                         Certificates & Proficiency
                     </h2>
                 </div>
-                {isAdmin ? (
-                  <DragDrop
+                {isAdmin ? (                  <DragDrop
                     items={certList}
-                    onChange={setCertList}
+                    onChange={async (newOrder) => {
+                      setCertList(newOrder);
+                      
+                      // Save to JSON/Drive
+                      if (updateContent && saveContentToDrive) {
+                        try {
+                          console.log('Saving certificate order to Drive...');
+                          await updateContent('certificates', newOrder);
+                          await saveContentToDrive();
+                          console.log('Certificate order saved successfully');
+                        } catch (error) {
+                          console.error('Error saving certificate order:', error);
+                        }
+                      }
+                    }}
                     className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
                     renderItem={(cert, dragProps, idx, isDragged, isDropTarget) =>
                       editIdx === idx ? (

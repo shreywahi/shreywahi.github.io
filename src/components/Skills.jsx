@@ -26,7 +26,7 @@ const getColorClasses = (color) => {
   return defaultColorMap[color] || defaultColorMap.blue || '';
 };
 
-const Skills = ({ isAdmin, categories, setCategories }) => {
+const Skills = ({ isAdmin, categories, setCategories, updateContent, saveContentToDrive }) => {
   const [editCategory, setEditCategory] = useState(null);
   const [editData, setEditData] = useState(null);
 
@@ -43,13 +43,22 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
   };
 
   // Save edited category
-  const saveEdit = (idx) => {
+  const saveEdit = async (idx) => {
     if (!setCategories) return;
     const newCategories = [...categories];
     newCategories[idx] = editData;
     setCategories(newCategories);
     setEditCategory(null);
     setEditData(null);
+      // Also update content when editing individual items
+    if (updateContent) {
+      console.log('saveEdit: Calling updateContent with:', newCategories);
+      await updateContent('skillCategories', newCategories);
+      if (saveContentToDrive) {
+        console.log('saveEdit: Calling saveContentToDrive...');
+        await saveContentToDrive();
+      }
+    }
   };
 
   return (
@@ -66,8 +75,26 @@ const Skills = ({ isAdmin, categories, setCategories }) => {
         <br />
         {isAdmin ? (
           <DragDrop
-            items={categories}
-            onChange={setCategories}
+            items={categories}            onChange={async newOrder => {
+              console.log('DragDrop onChange called with:', newOrder);
+              setCategories(newOrder);
+              
+              if (updateContent) {
+                console.log('Calling updateContent...');
+                const result = await updateContent('skillCategories', newOrder);
+                console.log('updateContent result:', result);
+              } else {
+                console.log('updateContent not available as prop');
+              }
+              
+              if (saveContentToDrive) {
+                console.log('Calling saveContentToDrive...');
+                const saveResult = await saveContentToDrive();
+                console.log('saveContentToDrive result:', saveResult);
+              } else {
+                console.log('saveContentToDrive not available as prop');
+              }
+            }}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8"
             renderItem={(category, dragProps, idx, isDragged, isDropTarget) =>
               editCategory === idx ? (

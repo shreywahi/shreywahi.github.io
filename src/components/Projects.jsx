@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
 import DragDrop from "./ui/DragDrop";
 
-const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => {
+const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updateContent, saveContentToDrive }) => {
     // Editable project list
     const [selectedProject, setSelectedProject] = useState(() => {
         if (typeof window !== "undefined") {
@@ -83,14 +83,21 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
     const cancelEdit = () => {
         setEditIdx(null);
         setEditData(null);
-    };
-    const saveEdit = idx => {
+    };    const saveEdit = async idx => {
         if (!setProjectList) return;
         const newList = projectList.slice();
         newList[idx] = editData;
         setProjectList(newList);
         setEditIdx(null);
         setEditData(null);
+        
+        // Update content when editing individual items
+        if (updateContent) {
+            await updateContent('projects', newList);
+            if (saveContentToDrive) {
+                await saveContentToDrive();
+            }
+        }
     };
 
     return (
@@ -111,10 +118,17 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList }) => 
                     />
                 </div>
 
-                {isAdmin ? (
-                  <DragDrop
-                    items={filteredProjects}
-                    onChange={handleDragDrop}
+                {isAdmin ? (                  <DragDrop
+                    items={projectList}
+                    onChange={async newOrder => {
+                      setProjectList(newOrder);
+                      if (updateContent) {
+                        await updateContent('projects', newOrder);
+                      }
+                      if (saveContentToDrive) {
+                        await saveContentToDrive();
+                      }
+                    }}
                     className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
                     renderItem={(project, dragProps, idx, isDragged, isDropTarget) => {
                       const realIdx = projectList.findIndex(p => p.title === project.title);

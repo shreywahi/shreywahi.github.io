@@ -459,18 +459,18 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
           setExperiences={setExperiences}
         />
       ),
-    },
-    {
+    },    {
       id: "skills",
       component: (
         <Skills
           isAdmin={isAdmin}
           categories={categories}
           setCategories={setCategories}
+          updateContent={updateContent}
+          saveContentToDrive={saveContentToDrive}
         />
       ),
-    },
-    {
+    },    {
       id: "projects",
       component: (
         <Projects
@@ -478,10 +478,11 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
           isAdmin={isAdmin}
           projectList={projectList}
           setProjectList={setProjectList}
+          updateContent={updateContent}
+          saveContentToDrive={saveContentToDrive}
         />
       ),
-    },
-    {
+    },    {
       id: "certs",
       component: (
         <Certificates
@@ -489,6 +490,8 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
           isAdmin={isAdmin}
           certList={certList}
           setCertList={setCertList}
+          updateContent={updateContent}
+          saveContentToDrive={saveContentToDrive}
         />
       ),
     },

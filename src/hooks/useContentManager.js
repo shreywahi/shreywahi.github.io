@@ -89,15 +89,14 @@ export function useContentManager(isAdmin) {
   }, []);  // Function to update content (for admin mode)
   const updateContent = async (section, newData) => {
     if (!isAdmin) return false;
-    
-    // Update the state first for immediate UI feedback
-    setContentState(prev => ({
-      ...prev,
-      [section]: { ...(prev[section] || {}), ...newData },
-    }));
-
-    // For individual edits, we don't save to Drive immediately
-    // Saving happens only when the save button is clicked
+    // For array sections, replace the array directly
+    const arraySections = ['skillCategories', 'projects', 'certificates', 'experiences'];
+    setContentState(prev => {
+      if (arraySections.includes(section)) {
+        return { ...prev, [section]: Array.isArray(newData) ? [...newData] : newData };
+      }
+      return { ...prev, [section]: { ...(prev[section] || {}), ...newData } };
+    });
     return true;
   };
   
