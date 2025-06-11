@@ -14,18 +14,6 @@ import '../App.css';
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 // --- Centralized content ---
-import {
-  initContentFromDrive,
-  experiences as defaultExperiences,
-  skillCategories as defaultSkillCategories,
-  projects as defaultProjects,
-  certs as defaultCerts,
-  defaultHeroName,
-  defaultHeroDesc,
-  defaultAboutText,
-  defaultContactHeading,
-  defaultContactIntro,
-} from '../utils/contentLoader';
 import { useContentManager } from '../hooks/useContentManager';
 import { logCspSuggestion } from '../utils/cspHelper';
 

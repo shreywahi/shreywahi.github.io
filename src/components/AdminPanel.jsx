@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { resetDriveMode, loadContentFromDrive } from '../utils/contentLoader';
 import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
 
 const AdminPanel = ({ 
@@ -23,8 +22,7 @@ const AdminPanel = ({
     setCspIssues(issues);
   }, []);
   
-  if (!isAdmin) return null;
-  const handleLoadFromDrive = async () => {
+  if (!isAdmin) return null;  const handleLoadFromDrive = async () => {
     console.log('AdminPanel: Loading latest content from Drive');
     setLoadingFromDrive(true);
     
@@ -39,6 +37,7 @@ const AdminPanel = ({
         }
       } else {
         // Fallback to direct load and reload
+        const { loadContentFromDrive } = await import('../utils/contentLoader');
         await loadContentFromDrive();
         window.location.reload();
       }
@@ -81,7 +80,6 @@ const AdminPanel = ({
       alert('Failed to switch to Drive content: ' + error.message);
     }
   };
-
   const handleReset = async () => {
     console.log('AdminPanel: Resetting Drive content cache');
     
@@ -95,6 +93,7 @@ const AdminPanel = ({
       const { resetContentState } = await import('../utils/driveContentManager');
       resetContentState();
       
+      const { resetDriveMode } = await import('../utils/contentLoader');
       await resetDriveMode();
       
       // Set a flag to indicate we want to load from Drive on next load
@@ -108,7 +107,7 @@ const AdminPanel = ({
       localStorage.setItem('loadFromDriveOnStart', 'true');
       window.location.reload();
     }
-  };  
+  };
   const cspFix = getSuggestedCspFix();
   const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
     const handleToggleLocalContent = async () => {

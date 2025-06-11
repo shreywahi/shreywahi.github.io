@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import Modal from "./ui/Modal";
-import { certs as certsData } from '../utils/contentLoader';
 
 const scrollToTop = () => {
     const element = document.getElementById('hero');
@@ -9,19 +8,34 @@ const scrollToTop = () => {
 };
 
 const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
-    const [selectedCert, setselectedCert] = useState(() => {
-        if (typeof window !== "undefined") {
-            const saved = localStorage.getItem('openCertModalTitle');
-            if (saved) {
-                // Find the cert by title
-                return certsData.find(cert => cert.title === saved) || null;
-            }
-        }
-        return null;
-    });
-    const [certs, setCerts] = useState(certsData);
+    const [selectedCert, setselectedCert] = useState(null);
+    const [certs, setCerts] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
     const [editData, setEditData] = useState(null);
+    const [certsLoaded, setCertsLoaded] = useState(false);
+
+    // Load certs data on component mount
+    useEffect(() => {
+        const loadCerts = async () => {
+            try {
+                const { certs: certsData } = await import('../utils/contentLoader');
+                setCerts(certsData);
+                setCertsLoaded(true);
+                
+                // Check for saved modal state after data is loaded
+                if (typeof window !== "undefined") {
+                    const saved = localStorage.getItem('openCertModalTitle');
+                    if (saved) {
+                        const cert = certsData.find(cert => cert.title === saved);
+                        if (cert) setselectedCert(cert);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading certs data:', error);
+            }
+        };
+        loadCerts();
+    }, []);
 
     // Persist modal state to localStorage
     useEffect(() => {
@@ -32,16 +46,6 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList }) => {
             localStorage.removeItem('openCertModalTitle');
         }
     }, [selectedCert]);
-
-    // Restore modal state on mount
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-        const saved = localStorage.getItem('openCertModalTitle');
-        if (saved && !selectedCert) {
-            const cert = certsData.find(cert => cert.title === saved);
-            if (cert) setselectedCert(cert);
-        }
-    }, []);
 
     // When modal opens, notify parent to set section to "certs"
     useEffect(() => {

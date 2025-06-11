@@ -1,25 +1,40 @@
 import { useState, useEffect } from 'react';
-import { initContentFromDrive, getContent, loadContentFromDrive } from '../utils/contentLoader';
 
 export function useContentManager(isAdmin) {
-  // Start with content from the module state to prevent blank screen
-  const initialContent = getContent();
-  
+  // Start with empty content initially
   const [contentState, setContentState] = useState({
     loading: true,
     error: null,
-    hero: initialContent.hero || {},
-    about: initialContent.about || {},
-    experiences: initialContent.experiences || [],
-    skillCategories: initialContent.skillCategories || [],
-    projects: initialContent.projects || [],
-    certificates: initialContent.certificates || [],
-    contact: initialContent.contact || {},
+    hero: {},
+    about: {},
+    experiences: [],
+    skillCategories: [],
+    projects: [],
+    certificates: [],
+    contact: {},
   });
     // Initialize content
   useEffect(() => {
     let isMounted = true;      async function loadContent() {
       try {
+        // Import content loader functions dynamically
+        const { initContentFromDrive, getContent, loadContentFromDrive } = await import('../utils/contentLoader');
+        
+        // Get initial content to prevent blank screen
+        const initialContent = getContent();
+        
+        // Update state with initial content first
+        setContentState(prev => ({
+          ...prev,
+          hero: initialContent.hero || {},
+          about: initialContent.about || {},
+          experiences: initialContent.experiences || [],
+          skillCategories: initialContent.skillCategories || [],
+          projects: initialContent.projects || [],
+          certificates: initialContent.certificates || [],
+          contact: initialContent.contact || {},
+        }));
+        
         // Check if we should load from Drive (only after explicit admin reset)
         const shouldLoadFromDrive = localStorage.getItem('loadFromDriveOnStart') === 'true';
         

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Globe, Database, Code, Smartphone, Shield } from 'lucide-react';
-import { getColorClasses, getIconColor } from '../utils/contentLoader';
 
 // Map string icon names to actual icon components
 const iconMap = {
@@ -9,6 +8,21 @@ const iconMap = {
   Code: Code, 
   Smartphone: Smartphone,
   Shield: Shield
+};
+
+// Local color map for Skills component
+const defaultColorMap = {
+  "blue": "bg-blue-700 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-white dark:text-blue-200",
+  "green": "bg-green-700 dark:bg-green-900 border-green-200 dark:border-green-800 text-white dark:text-green-200",
+  "purple": "bg-purple-700 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-white dark:text-purple-200",
+  "pink": "bg-pink-700 dark:bg-pink-900 border-pink-200 dark:border-pink-800 text-white dark:text-pink-200",
+  "red": "bg-red-700 dark:bg-red-900 border-red-200 dark:border-red-800 text-white dark:text-red-200",
+  "yellow": "bg-yellow-700 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800 text-white dark:text-yellow-200"
+};
+
+// Local function to get color classes
+const getColorClasses = (color) => {
+  return defaultColorMap[color] || defaultColorMap.blue || '';
 };
 
 const Skills = ({ isAdmin, categories, setCategories }) => {
