@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { resetDriveMode } from '../utils/contentLoader';
+import { resetDriveMode, loadContentFromDrive } from '../utils/contentLoader';
 import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
 
-const AdminPanel = ({ isAdmin }) => {
+const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving, driveMessage }) => {
   const [showCspFix, setShowCspFix] = useState(false);
   const [cspIssues, setCspIssues] = useState([]);
+  const [loadingFromDrive, setLoadingFromDrive] = useState(false);
   
   useEffect(() => {
     // Check for CSP issues
@@ -12,8 +13,33 @@ const AdminPanel = ({ isAdmin }) => {
     setCspIssues(issues);
   }, []);
   
-  if (!isAdmin) return null;
-    const handleReset = async () => {
+  if (!isAdmin) return null;const handleLoadFromDrive = async () => {
+    console.log('AdminPanel: Loading latest content from Drive');
+    setLoadingFromDrive(true);
+    
+    try {
+      if (reloadFromDrive) {
+        // Use the hook's reload function if available
+        const success = await reloadFromDrive();
+        if (success) {
+          console.log('Successfully reloaded content from Drive');
+        } else {
+          throw new Error('Failed to reload content');
+        }
+      } else {
+        // Fallback to direct load and reload
+        await loadContentFromDrive();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error loading from Drive:', error);
+      alert('Failed to load content from Drive: ' + error.message);
+    } finally {
+      setLoadingFromDrive(false);
+    }
+  };
+
+  const handleReset = async () => {
     console.log('AdminPanel: Resetting Drive content cache');
     
     try {
@@ -28,20 +54,35 @@ const AdminPanel = ({ isAdmin }) => {
       
       await resetDriveMode();
       
+      // Set a flag to indicate we want to load from Drive on next load
+      localStorage.setItem('loadFromDriveOnStart', 'true');
+      
       // Force reload
       window.location.reload();
     } catch (e) {
       console.error('Error resetting Drive mode:', e);
+      // Set the flag even if reset fails, then reload
+      localStorage.setItem('loadFromDriveOnStart', 'true');
       window.location.reload();
     }
   };
-  
-  const cspFix = getSuggestedCspFix();
+    const cspFix = getSuggestedCspFix();
   const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
   
   return (
     <div className="fixed top-8 right-8 z-50 bg-slate-800 text-white p-4 rounded-lg shadow-lg max-w-md">
       <h3 className="text-lg font-bold mb-2">Admin Content Settings</h3>
+      
+      {/* Drive Message */}
+      {driveMessage && (
+        <div className={`mb-4 p-3 rounded-md ${
+          driveMessage.type === 'error' ? 'bg-red-900' : 
+          driveMessage.type === 'success' ? 'bg-green-900' : 
+          'bg-blue-900'
+        }`}>
+          <p className="text-sm">{driveMessage.text}</p>
+        </div>
+      )}
       
       {hasCspIssues && (
         <div className="mb-4 p-3 bg-red-900 rounded-md">
@@ -70,11 +111,32 @@ const AdminPanel = ({ isAdmin }) => {
           >
             Copy to Clipboard
           </button>        </div>
-      )}
-        <div className="mb-4 p-3 bg-slate-700 rounded-md">
+      )}      <div className="mb-4 p-3 bg-slate-700 rounded-md">
         <p className="text-sm font-semibold mb-1">📂 Content Source</p>
-        <p className="text-xs">Content loads from local files initially. Changes are saved to Google Drive when you click "Save to Google Drive".</p>
+        <p className="text-xs">Content loads from local files initially. Use "Load Latest from Drive" to get current Drive content, or "Save to Google Drive" to save changes.</p>
       </div>
+      
+      <button
+        onClick={saveContentToDrive}
+        disabled={driveSaving}
+        className={`w-full py-2 rounded-md mb-2 text-white ${
+          driveSaving ? 'bg-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+        }`}
+      >
+        {driveSaving ? 'Saving...' : 'Save to Google Drive'}
+      </button>
+      
+      <button
+        onClick={handleLoadFromDrive}
+        disabled={loadingFromDrive}
+        className={`w-full py-2 rounded-md mb-2 text-white ${
+          loadingFromDrive 
+            ? 'bg-gray-500 cursor-not-allowed' 
+            : 'bg-green-600 hover:bg-green-700'
+        }`}
+      >
+        {loadingFromDrive ? 'Loading from Drive...' : 'Load Latest from Drive'}
+      </button>
       
       <button
         onClick={handleReset}

@@ -68,9 +68,8 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  // --- Centralized content state ---
-  const { content, updateContent, saveContentToDrive, loading } = useContentManager(isAdmin); // `content` is the state from the hook
+  const [password, setPassword] = useState("");  // --- Centralized content state ---
+  const { content, updateContent, saveContentToDrive, reloadFromDrive, loading } = useContentManager(isAdmin); // `content` is the state from the hook
   
   const [heroName, setHeroName] = useState('');
   const [heroDesc, setHeroDesc] = useState('');
@@ -524,44 +523,9 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       });
       setTimeout(() => setDriveMessage(null), 5000);
     } finally {
-      setDriveSaving(false);
-    }
+      setDriveSaving(false);    }
   };
-    // Add a Google Drive save button to the admin interface
-  const renderAdminControls = () => (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-      {isAdmin && (
-        <button
-          onClick={saveContentToDriveHandler}
-          disabled={driveSaving}
-          className={`px-4 py-2 rounded-full shadow-lg text-white flex items-center gap-2 ${
-            driveSaving ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-        >
-          {driveSaving ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Saving...
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
-              Save to Google Drive
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  );
-  
-  // Message notification for drive operations
+    // Message notification for drive operations
   const renderDriveMessage = () => {
     if (!driveMessage) return null;
     
@@ -598,12 +562,15 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         setShowLogin={setShowLogin}
         isAdmin={isAdmin}
         signOut={signOut}
-        auth={auth}
-      />
+        auth={auth}      />
       {showLogin && renderAdminLogin()}
-      <AdminPanel isAdmin={isAdmin} />
-      {renderDriveMessage()}
-      {renderAdminControls()}
+      <AdminPanel 
+        isAdmin={isAdmin} 
+        reloadFromDrive={reloadFromDrive} 
+        saveContentToDrive={saveContentToDriveHandler}
+        driveSaving={driveSaving}
+        driveMessage={driveMessage}
+      />
       
       {isDesktop ? (
         <main

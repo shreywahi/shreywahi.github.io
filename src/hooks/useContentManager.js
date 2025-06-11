@@ -17,14 +17,31 @@ export function useContentManager(isAdmin) {
     certificates: initialContent.certificates || [],
     contact: initialContent.contact || {},
   });
-  
-  // Initialize content
+    // Initialize content
   useEffect(() => {
     let isMounted = true;
     
     async function loadContent() {
       try {
-        const content = await initContentFromDrive();
+        // Check if we should load from Drive (after reset)
+        const shouldLoadFromDrive = localStorage.getItem('loadFromDriveOnStart') === 'true';
+        
+        let content;
+        if (shouldLoadFromDrive) {
+          console.log('Loading content from Drive due to reset flag');
+          // Clear the flag first
+          localStorage.removeItem('loadFromDriveOnStart');
+          
+          try {
+            content = await loadContentFromDrive();
+            console.log('Successfully loaded content from Drive');
+          } catch (driveError) {
+            console.error('Failed to load from Drive, falling back to local:', driveError);
+            content = await initContentFromDrive();
+          }
+        } else {
+          content = await initContentFromDrive();
+        }
         
         if (isMounted) {
           setContentState({
@@ -102,10 +119,40 @@ export function useContentManager(isAdmin) {
       return false;
     }
   };
-    return {
+  // Function to reload content from Drive (for admin use)
+  const reloadFromDrive = async () => {
+    if (!isAdmin) return false;
+    
+    try {
+      setContentState(prev => ({ ...prev, loading: true }));
+      
+      const content = await loadContentFromDrive();
+      
+      setContentState({
+        loading: false,
+        error: null,
+        hero: content.hero || {},
+        about: content.about || {},
+        experiences: content.experiences || [],
+        skillCategories: content.skillCategories || [],
+        projects: content.projects || [],
+        certificates: content.certificates || [],
+        contact: content.contact || {},
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to reload content from Drive:', error);
+      setContentState(prev => ({ ...prev, loading: false }));
+      return false;
+    }
+  };
+
+  return {
     content: contentState,
     updateContent,
     saveContentToDrive,
+    reloadFromDrive,
     loading: contentState.loading,
     error: contentState.error
   };
