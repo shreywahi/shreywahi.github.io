@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { resetDriveMode, loadContentFromDrive } from '../utils/contentLoader';
 import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
+import { toggleLocalContentMode } from '../utils/driveContentManager';
 
-const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving, driveMessage }) => {
+const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving, driveMessage, screenSize = 'desktop' }) => {
   const [showCspFix, setShowCspFix] = useState(false);
   const [cspIssues, setCspIssues] = useState([]);
   const [loadingFromDrive, setLoadingFromDrive] = useState(false);
+  const [usingLocalContent, setUsingLocalContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('useLocalContent') === 'true';
+    }
+    return false;
+  });
   
   useEffect(() => {
     // Check for CSP issues
     const issues = detectCspIssues();
     setCspIssues(issues);
+    
+    // Check current content source
+    const isUsingLocal = localStorage.getItem('useLocalContent') === 'true';
+    setUsingLocalContent(isUsingLocal);
   }, []);
   
-  if (!isAdmin) return null;const handleLoadFromDrive = async () => {
+  if (!isAdmin) return null;
+  const handleLoadFromDrive = async () => {
     console.log('AdminPanel: Loading latest content from Drive');
     setLoadingFromDrive(true);
     
@@ -36,6 +48,38 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
       alert('Failed to load content from Drive: ' + error.message);
     } finally {
       setLoadingFromDrive(false);
+    }
+  };
+
+  const handleSwitchToLocal = async () => {
+    console.log('AdminPanel: Switching to local content');
+    
+    try {
+      // Enable local content mode
+      toggleLocalContentMode(true);
+      setUsingLocalContent(true);
+      
+      // Force reload to use local content
+      window.location.reload();
+    } catch (error) {
+      console.error('Error switching to local content:', error);
+      alert('Failed to switch to local content: ' + error.message);
+    }
+  };
+
+  const handleSwitchToDrive = async () => {
+    console.log('AdminPanel: Switching back to Drive content');
+    
+    try {
+      // Disable local content mode
+      toggleLocalContentMode(false);
+      setUsingLocalContent(false);
+      
+      // Force reload to try Drive content again
+      window.location.reload();
+    } catch (error) {
+      console.error('Error switching to Drive content:', error);
+      alert('Failed to switch to Drive content: ' + error.message);
     }
   };
 
@@ -65,10 +109,86 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
       localStorage.setItem('loadFromDriveOnStart', 'true');
       window.location.reload();
     }
-  };
-    const cspFix = getSuggestedCspFix();
+  };  
+  const cspFix = getSuggestedCspFix();
   const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
   
+  const handleToggleLocalContent = () => {
+    const newValue = !usingLocalContent;
+    setUsingLocalContent(newValue);
+    localStorage.setItem('useLocalContent', newValue);
+    toggleLocalContentMode(newValue);
+    
+    if (newValue) {
+      alert('Switched to local content. Please reload the page.');
+    } else {
+      alert('Switched to Google Drive content. Please reload the page.');
+    }
+  };
+
+  // Mobile/Tablet layout with 2x2 grid
+  if (screenSize === 'mobile' || screenSize === 'tablet') {
+    return (
+      <div className="fixed top-4 right-4 z-50">
+        <div className="grid grid-cols-2 gap-2 w-64">
+          {/* Use Local / Switch to Drive */}
+          {usingLocalContent ? (
+            <button
+              onClick={handleSwitchToDrive}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
+            >
+              Switch to Drive
+            </button>
+          ) : (
+            <button
+              onClick={handleSwitchToLocal}
+              className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-xs font-medium"
+            >
+              Use Local
+            </button>
+          )}
+          
+          {/* Save to Drive */}
+          <button
+            onClick={saveContentToDrive}
+            disabled={driveSaving || usingLocalContent}
+            className={`px-3 py-2 rounded-md text-xs font-medium ${
+              driveSaving || usingLocalContent 
+                ? 'bg-gray-500 cursor-not-allowed text-gray-300' 
+                : 'bg-purple-600 hover:bg-purple-700 text-white'
+            }`}
+            title={usingLocalContent ? 'Cannot save to Drive while in local content mode' : ''}
+          >
+            {driveSaving ? 'Saving...' : 'Save to Drive'}
+          </button>
+          
+          {/* Reset/Reload */}
+          <button
+            onClick={handleReset}
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium"
+          >
+            Reset/Reload
+          </button>
+          
+          {/* Load from Drive */}
+          <button
+            onClick={handleLoadFromDrive}
+            disabled={loadingFromDrive || usingLocalContent}
+            className={`px-3 py-2 rounded-md text-xs font-medium ${
+              loadingFromDrive || usingLocalContent
+                ? 'bg-gray-500 cursor-not-allowed text-gray-300' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
+            title={usingLocalContent ? 'Cannot load from Drive while in local content mode' : ''}
+          >
+            {loadingFromDrive ? 'Loading...' : 'Load from Drive'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout (original full panel)
   return (
     <div className="fixed top-8 right-8 z-50 bg-slate-800 text-white p-4 rounded-lg shadow-lg max-w-md">
       <h3 className="text-lg font-bold mb-2">Admin Content Settings</h3>
@@ -113,27 +233,60 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
           </button>        </div>
       )}      <div className="mb-4 p-3 bg-slate-700 rounded-md">
         <p className="text-sm font-semibold mb-1">📂 Content Source</p>
-        <p className="text-xs">Content loads from Google Drive first, then falls back to local files if Drive is unavailable. Use "Save to Google Drive" to save changes.</p>
+        <p className="text-xs">
+          Currently using: <span className="font-semibold text-yellow-300">
+            {usingLocalContent ? 'Local Files (content.json)' : 'Google Drive (with local fallback)'}
+          </span>
+        </p>
+        <p className="text-xs mt-1">
+          {usingLocalContent 
+            ? 'Content loads from local files. Switch to Drive mode to sync with Google Drive.'
+            : 'Content loads from Google Drive first, then falls back to local files if Drive is unavailable.'
+          }
+        </p>
+      </div>
+      
+      {/* Content Source Toggle Buttons */}
+      <div className="mb-4 flex gap-2">
+        {usingLocalContent ? (
+          <button
+            onClick={handleSwitchToDrive}
+            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
+          >
+            Switch to Drive Mode
+          </button>
+        ) : (
+          <button
+            onClick={handleSwitchToLocal}
+            className="flex-1 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-sm"
+          >
+            Use Local Content
+          </button>
+        )}
       </div>
       
       <button
         onClick={saveContentToDrive}
-        disabled={driveSaving}
+        disabled={driveSaving || usingLocalContent}
         className={`w-full py-2 rounded-md mb-2 text-white ${
-          driveSaving ? 'bg-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+          driveSaving || usingLocalContent 
+            ? 'bg-gray-500 cursor-not-allowed' 
+            : 'bg-purple-600 hover:bg-purple-700'
         }`}
+        title={usingLocalContent ? 'Cannot save to Drive while in local content mode' : ''}
       >
         {driveSaving ? 'Saving...' : 'Save to Google Drive'}
       </button>
       
       <button
         onClick={handleLoadFromDrive}
-        disabled={loadingFromDrive}
+        disabled={loadingFromDrive || usingLocalContent}
         className={`w-full py-2 rounded-md mb-2 text-white ${
-          loadingFromDrive 
+          loadingFromDrive || usingLocalContent
             ? 'bg-gray-500 cursor-not-allowed' 
             : 'bg-green-600 hover:bg-green-700'
         }`}
+        title={usingLocalContent ? 'Cannot load from Drive while in local content mode' : ''}
       >
         {loadingFromDrive ? 'Loading from Drive...' : 'Load Latest from Drive'}
       </button>

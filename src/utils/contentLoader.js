@@ -13,28 +13,17 @@ let hasLogged = false;
 // Flag to track if we've tried to load from Drive
 let hasTried = false;
 
-// Function to initialize content - tries Drive first, falls back to local content.json
+// Function to initialize content - uses local content.json by default
 export const initContentFromDrive = async () => {
-  // Always start with local content as immediate fallback
+  // Always start with local content as default
   contentData = defaultContentData;
   
   if (!hasLogged) {
-    console.log('Initializing content - trying Google Drive first...');
+    console.log('Initializing content with local content.json...');
     hasLogged = true;
-    
-    try {
-      // Try to load from Drive first (without authentication)
-      const driveContent = await loadContentFromDrive();
-      console.log('Successfully loaded initial content from Google Drive');
-      return driveContent;
-    } catch (error) {
-      console.log('Failed to load from Drive during initialization, using local content.json:', error.message);
-      // Return local content as fallback
-      return contentData;
-    }
   }
   
-  // This can be called later to load from Drive if needed
+  // Only try to load from Drive if explicitly requested (not during normal initialization)
   return contentData;
 };
 
@@ -148,7 +137,7 @@ export const resetDriveMode = async () => {
     console.warn('Could not reset drive content state:', e);
   }
   
-  // Force a fresh load
+  // After reset, load from local content (Drive will only be used if explicitly requested)
   return await initContentFromDrive();
 };
 

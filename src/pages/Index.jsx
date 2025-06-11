@@ -55,6 +55,17 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [fade, setFade] = useState(true);
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1024);
   
+  // Add screen size detection similar to Sidebar
+  const [screenSize, setScreenSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const w = window.innerWidth;
+      if (w <= 640) return 'mobile';
+      else if (w <= 1024) return 'tablet';
+      else return 'desktop';
+    }
+    return 'desktop';
+  });
+  
   // Keep a stable reference to the current active section
   const activeSectionRef = useRef(activeSection);
   
@@ -136,6 +147,11 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       resizeTimer = setTimeout(() => {
         const wasDesktop = isDesktop;
         const nowDesktop = window.innerWidth > 1024;
+        
+        // Update screen size
+        const w = window.innerWidth;
+        const newScreenSize = w <= 640 ? 'mobile' : w <= 1024 ? 'tablet' : 'desktop';
+        setScreenSize(newScreenSize);
         
         if (wasDesktop !== nowDesktop) {
           setIsDesktop(nowDesktop);
@@ -570,6 +586,7 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         saveContentToDrive={saveContentToDriveHandler}
         driveSaving={driveSaving}
         driveMessage={driveMessage}
+        screenSize={screenSize}
       />
       
       {isDesktop ? (

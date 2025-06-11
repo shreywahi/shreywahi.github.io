@@ -19,27 +19,26 @@ export function useContentManager(isAdmin) {
   });
     // Initialize content
   useEffect(() => {
-    let isMounted = true;
-      async function loadContent() {
+    let isMounted = true;      async function loadContent() {
       try {
-        // Check if we should load from Drive (after reset)
+        // Check if we should load from Drive (only after explicit admin reset)
         const shouldLoadFromDrive = localStorage.getItem('loadFromDriveOnStart') === 'true';
         
         let content;
         if (shouldLoadFromDrive) {
-          console.log('Loading content from Drive due to reset flag');
+          console.log('Loading content from Drive due to admin reset flag');
           // Clear the flag first
           localStorage.removeItem('loadFromDriveOnStart');
           
           try {
             content = await loadContentFromDrive();
-            console.log('Successfully loaded content from Drive after reset');
+            console.log('Successfully loaded content from Drive after admin reset');
           } catch (driveError) {
             console.error('Failed to load from Drive after reset, falling back to local:', driveError);
             content = await initContentFromDrive();
           }
         } else {
-          // Normal initialization - this now tries Drive first, then falls back to local
+          // Normal initialization - uses local content only (no automatic Drive loading)
           content = await initContentFromDrive();
         }
         
