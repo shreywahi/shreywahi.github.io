@@ -1,7 +1,7 @@
 import { gapi } from 'gapi-script';
 import defaultContentData from '../data/content.json';
 import { logCspSuggestion } from './cspHelper';
-import { fetchWithCorsProxy, generatePublicGoogleDriveUrl } from './corsProxy';
+import { fetchWithCorsProxy } from './corsProxy';
 
 // Replace with your actual Google API credentials
 const API_KEY = 'AIzaSyA0XN9LpLvaFKOEINnOOVYnfOQe59fZ0vs'; // The API Key you created
