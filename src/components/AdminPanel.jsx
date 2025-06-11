@@ -5,7 +5,6 @@ import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
 
 const AdminPanel = ({ isAdmin }) => {
   const [useLocalContent, setUseLocalContent] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [showCspFix, setShowCspFix] = useState(false);
   const [cspIssues, setCspIssues] = useState([]);
   
@@ -122,28 +121,6 @@ const AdminPanel = ({ isAdmin }) => {
       >
         Reset & Try Google Drive
       </button>
-      
-      <button
-        onClick={() => setShowHelp(!showHelp)}
-        className="w-full py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md"
-      >
-        {showHelp ? 'Hide Help' : 'Show Help'}
-      </button>
-      
-      {showHelp && (
-        <div className="mt-4 text-sm bg-slate-700 p-3 rounded">
-          <p className="mb-2"><strong>Local Content:</strong> Uses content.json from your project files.</p>
-          <p className="mb-2"><strong>Google Drive:</strong> Attempts to load content from your configured Google Drive file.</p>
-          <p className="mb-2"><strong>Localhost Limitation:</strong> Google Drive API has CORS restrictions on localhost. Use local content mode for development.</p>
-          <p className="mb-2"><strong>Production:</strong> Google Drive integration works when deployed to a real domain.</p>
-          <p><strong>File Sharing:</strong> Ensure your Google Drive file is shared as "Anyone with the link can view".</p>
-        </div>
-      )}
-      
-      <div className="mt-4 text-xs text-gray-400">
-        <p>Debug: Open browser console to see detailed logs</p>
-        <p className="mt-1">Localhost: Use local content mode for development</p>
-      </div>
     </div>
   );
 };

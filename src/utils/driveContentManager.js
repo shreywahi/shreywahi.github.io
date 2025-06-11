@@ -241,19 +241,13 @@ export const isSignedInToGoogle = async () => {
 export const fetchContentFromDrive = async () => {
   // Check if we should skip Drive entirely - check localStorage first
   if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
-    console.log('Skipping Drive: useLocalContent is true');
     return defaultContent;
   }
   
   // Check if we should skip Drive entirely
   if (forceLocalContent || checkForCspErrors()) {
-    console.log('Skipping Drive: forceLocalContent or CSP errors detected');
     return defaultContent;
   }
-  
-  console.log('Attempting to fetch from Google Drive API...');
-  console.log('Drive File ID:', DRIVE_FILE_ID);
-  console.log('API Key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'NOT SET');
   
   // Check if we're on localhost
   const isLocalhost = typeof window !== 'undefined' && 
@@ -262,10 +256,8 @@ export const fetchContentFromDrive = async () => {
      window.location.hostname === '');
   
   if (isLocalhost) {
-    console.log('Localhost detected - using CORS proxy approach');
     return await fetchFromDriveWithProxy();
   } else {
-    console.log('Production environment - attempting direct fetch');
     return await fetchFromDriveDirect();
   }
 };
@@ -274,7 +266,6 @@ export const fetchContentFromDrive = async () => {
 const fetchFromDriveDirect = async () => {
   try {
     const apiUrl = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media&key=${API_KEY}`;
-    console.log('Direct API URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -290,10 +281,8 @@ const fetchFromDriveDirect = async () => {
     
     const contentText = await response.text();
     const driveContent = JSON.parse(contentText);
-    console.log('Successfully loaded content from Google Drive (direct)');
     return driveContent;
   } catch (error) {
-    console.error('Direct Drive access failed:', error.message);
     return defaultContent;
   }
 };
@@ -303,7 +292,6 @@ const fetchFromDriveWithProxy = async () => {
   try {
     // Try the public download URL first
     const publicUrl = `https://drive.google.com/uc?export=download&id=${DRIVE_FILE_ID}`;
-    console.log('Trying public URL with CORS proxy:', publicUrl);
     
     const response = await fetchWithCorsProxy(publicUrl);
     
@@ -312,48 +300,31 @@ const fetchFromDriveWithProxy = async () => {
     }
     
     const contentText = await response.text();
-    console.log('Raw response text length:', contentText.length);
-    console.log('First 200 chars:', contentText.substring(0, 200));
     
     // Check if the response looks like HTML (Google's download page)
     if (contentText.trim().startsWith('<!DOCTYPE html') || contentText.trim().startsWith('<html')) {
-      console.warn('Received HTML instead of JSON - file may not be publicly accessible');
-      console.warn('Please ensure your Google Drive file is shared as "Anyone with the link can view"');
-      
       // Try alternative approach with manual file URL
       return await tryAlternativeUrls();
     }
     
     try {
       const driveContent = JSON.parse(contentText);
-      console.log('Successfully parsed Drive content via CORS proxy');
       return driveContent;
     } catch (parseError) {
-      console.error('Failed to parse JSON response');
       return await tryAlternativeUrls();
     }
     
   } catch (error) {
-    console.error('CORS proxy approach failed:', error.message);
     return await tryAlternativeUrls();
   }
 };
 
 // Try alternative URLs and approaches
 const tryAlternativeUrls = async () => {
-  console.log('Trying alternative approaches...');
-  
-  // Provide clear instructions for manual setup
-  console.error('Google Drive CORS access failed. For localhost development:');
-  console.error('1. Make sure your Google Drive file is shared as "Anyone with the link can view"');
-  console.error('2. Consider using the local content mode for development');
-  console.error('3. Deploy to a real domain for full Google Drive integration');
-  
   // Check if there's cached content available
   try {
     const cachedContent = localStorage.getItem('cachedContent');
     if (cachedContent) {
-      console.log('Using cached Drive content as fallback');
       return JSON.parse(cachedContent);
     }
   } catch (e) {
@@ -364,7 +335,6 @@ const tryAlternativeUrls = async () => {
   if (typeof window !== 'undefined' && 
       (window.location.hostname === 'localhost' || 
        window.location.hostname === '127.0.0.1')) {
-    console.log('Automatically switching to local content mode for localhost development');
     toggleLocalContentMode(true);
   }
   

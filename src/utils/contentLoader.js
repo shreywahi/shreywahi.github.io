@@ -21,7 +21,6 @@ let hasTried = false;
 export const initContentFromDrive = async () => {
   // Always check localStorage first - this is the key fix
   if (typeof window !== 'undefined' && localStorage.getItem('useLocalContent') === 'true') {
-    console.log('Using local content (localStorage setting)');
     contentData = { ...defaultContent };
     hasLogged = true;
     return contentData;
@@ -29,18 +28,14 @@ export const initContentFromDrive = async () => {
 
   try {
     if (DISABLE_GOOGLE_DRIVE) {
-      console.log('Google Drive disabled in config');
       contentData = { ...defaultContent };
       hasLogged = true;
       return contentData;
     }
     
-    console.log('Attempting to load content from Google Drive...');
-    
     // Increase timeout and add better error handling
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        console.log('Google Drive request timed out after 10 seconds');
         reject(new Error('TIMEOUT'));
       }, 10000); // Increased to 10 seconds
     });
@@ -60,8 +55,6 @@ export const initContentFromDrive = async () => {
     // Check if we got real content or just the default fallback
     if (driveContent && driveContent !== defaultContent && typeof driveContent === 'object' && Object.keys(driveContent).length > 1) {
       // We got real Drive content
-      console.log('Successfully received Drive content with keys:', Object.keys(driveContent));
-      
       contentData = { 
         ...defaultContent,
         ...driveContent,
@@ -70,20 +63,17 @@ export const initContentFromDrive = async () => {
         iconColorMap: { ...defaultContent.iconColorMap, ...(driveContent.iconColorMap || {}) }
       };
       
-      console.log('Successfully loaded and merged content from Google Drive');
       hasLogged = true;
       
       // Store in localStorage as a cache
       try {
         localStorage.setItem('cachedContent', JSON.stringify(contentData));
         localStorage.setItem('contentCacheTime', Date.now().toString());
-        console.log('Cached Drive content to localStorage');
       } catch (e) {
-        console.warn('Failed to cache content:', e);
+        // Ignore cache errors
       }
     } else {
       // We got the default content back, means Drive access failed
-      console.log('Received default content - Drive access failed or returned empty');
       contentData = { ...defaultContent };
       hasLogged = true;
       
@@ -99,25 +89,16 @@ export const initContentFromDrive = async () => {
           if (cacheValid) {
             const parsedCache = JSON.parse(cachedContent);
             contentData = parsedCache;
-            console.log('Using cached Drive content from localStorage (age:', Math.round(cacheAge / 1000 / 60), 'minutes)');
             return contentData;
-          } else {
-            console.log('Cached content expired (age:', Math.round(cacheAge / 1000 / 60 / 60), 'hours)');
           }
         }
       } catch (e) {
-        console.warn('Failed to load cached content:', e);
+        // Ignore cache errors
       }
     }
     
     return contentData;
   } catch (error) {
-    console.warn('Error during content loading:', error.message);
-    
-    if (error.message === 'TIMEOUT') {
-      console.log('Google Drive access timed out - using local content');
-    }
-    
     contentData = { ...defaultContent };
     hasLogged = true;
     
@@ -126,11 +107,10 @@ export const initContentFromDrive = async () => {
       const cachedContent = localStorage.getItem('cachedContent');
       if (cachedContent) {
         contentData = JSON.parse(cachedContent);
-        console.log('Using cached content from localStorage after error');
         return contentData;
       }
     } catch (e) {
-      console.warn('Failed to load cached content after error:', e);
+      // Ignore cache errors
     }
     
     return contentData;

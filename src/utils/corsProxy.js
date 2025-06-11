@@ -18,13 +18,12 @@ export const fetchWithCorsProxy = async (url, options = {}) => {
       return response;
     }
   } catch (directError) {
-    console.log('Direct fetch failed, trying CORS proxies...');
+    // Silent fallback to proxies
   }
   
   // Try CORS proxies for localhost development
   for (const proxy of CORS_PROXIES) {
     try {
-      console.log(`Trying CORS proxy: ${proxy}`);
       const proxiedUrl = proxy + encodeURIComponent(url);
       
       const response = await fetch(proxiedUrl, {
@@ -33,11 +32,9 @@ export const fetchWithCorsProxy = async (url, options = {}) => {
       });
       
       if (response.ok) {
-        console.log(`Success with proxy: ${proxy}`);
         return response;
       }
     } catch (proxyError) {
-      console.log(`Proxy ${proxy} failed:`, proxyError.message);
       continue;
     }
   }

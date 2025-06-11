@@ -24,12 +24,9 @@ export function useContentManager(isAdmin) {
     
     async function loadContent() {
       try {
-        console.log('useContentManager: Loading content...');
-        
         const content = await initContentFromDrive();
         
         if (isMounted) {
-          console.log('useContentManager: Content loaded successfully');
           setContentState({
             loading: false,
             error: null,
@@ -43,7 +40,6 @@ export function useContentManager(isAdmin) {
           });
         }
       } catch (error) {
-        console.error('useContentManager: Error loading content:', error);
         if (isMounted) {
           setContentState(prev => ({
             ...prev,
