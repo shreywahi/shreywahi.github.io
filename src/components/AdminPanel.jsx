@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { resetDriveMode, loadContentFromDrive } from '../utils/contentLoader';
 import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
-import { toggleLocalContentMode } from '../utils/driveContentManager';
 
 const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving, driveMessage, screenSize = 'desktop' }) => {
   const [showCspFix, setShowCspFix] = useState(false);
@@ -50,12 +49,12 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
       setLoadingFromDrive(false);
     }
   };
-
   const handleSwitchToLocal = async () => {
     console.log('AdminPanel: Switching to local content');
     
     try {
       // Enable local content mode
+      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
       toggleLocalContentMode(true);
       setUsingLocalContent(true);
       
@@ -66,12 +65,12 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
       alert('Failed to switch to local content: ' + error.message);
     }
   };
-
   const handleSwitchToDrive = async () => {
     console.log('AdminPanel: Switching back to Drive content');
     
     try {
       // Disable local content mode
+      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
       toggleLocalContentMode(false);
       setUsingLocalContent(false);
       
@@ -112,11 +111,12 @@ const AdminPanel = ({ isAdmin, reloadFromDrive, saveContentToDrive, driveSaving,
   };  
   const cspFix = getSuggestedCspFix();
   const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
-  
-  const handleToggleLocalContent = () => {
+    const handleToggleLocalContent = async () => {
     const newValue = !usingLocalContent;
     setUsingLocalContent(newValue);
     localStorage.setItem('useLocalContent', newValue);
+    
+    const { toggleLocalContentMode } = await import('../utils/driveContentManager');
     toggleLocalContentMode(newValue);
     
     if (newValue) {

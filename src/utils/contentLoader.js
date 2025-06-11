@@ -1,5 +1,4 @@
 import { Code, Database, Globe, Smartphone, Shield } from 'lucide-react';
-import { fetchContentFromDrive } from './driveContentManager';
 import defaultContentData from '../data/content.json';
 
 // State to hold the content data - initially loaded from content.json
@@ -38,6 +37,7 @@ export const loadContentFromDrive = async () => {
       }, 10000);
     });
     
+    const { fetchContentFromDrive } = await import('./driveContentManager');
     const driveContentPromise = fetchContentFromDrive();
     const driveContent = await Promise.race([driveContentPromise, timeoutPromise]);
     

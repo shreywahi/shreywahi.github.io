@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { initContentFromDrive, getContent, loadContentFromDrive } from '../utils/contentLoader';
-import { saveAndReplaceDriveFile, isSignedInToGoogle, signInToGoogle } from '../utils/driveContentManager';
 
 export function useContentManager(isAdmin) {
   // Start with content from the module state to prevent blank screen
@@ -90,9 +89,9 @@ export function useContentManager(isAdmin) {
   // Function to save all content to Drive (called when save button is clicked)
   const saveContentToDrive = async () => {
     if (!isAdmin) return false;
-    
-    try {
+      try {
       // Check if signed in to Google - authenticate only when saving
+      const { isSignedInToGoogle, signInToGoogle, saveAndReplaceDriveFile } = await import('../utils/driveContentManager');
       const signedIn = await isSignedInToGoogle();
       if (!signedIn) {
         await signInToGoogle();

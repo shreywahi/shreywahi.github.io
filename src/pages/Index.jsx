@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import Sidebar from '../components/Sidebar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -7,7 +7,8 @@ import Skills from '../components/Skills';
 import Projects from '../components/Projects';
 import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
-import AdminPanel from '../components/AdminPanel';
+// Lazy load AdminPanel since it's only used by admin users
+const AdminPanel = lazy(() => import('../components/AdminPanel'));
 import '../App.css';
 // --- Firebase imports ---
 import { initializeApp } from "firebase/app";
@@ -605,16 +606,17 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         setShowLogin={setShowLogin}
         isAdmin={isAdmin}
         signOut={signOut}
-        auth={auth}      />
-      {showLogin && renderAdminLogin()}
-      <AdminPanel 
-        isAdmin={isAdmin} 
-        reloadFromDrive={reloadFromDrive} 
-        saveContentToDrive={saveContentToDriveHandler}
-        driveSaving={driveSaving}
-        driveMessage={driveMessage}
-        screenSize={screenSize}
-      />
+        auth={auth}      />      {showLogin && renderAdminLogin()}
+      <Suspense fallback={<div></div>}>
+        <AdminPanel 
+          isAdmin={isAdmin} 
+          reloadFromDrive={reloadFromDrive} 
+          saveContentToDrive={saveContentToDriveHandler}
+          driveSaving={driveSaving}
+          driveMessage={driveMessage}
+          screenSize={screenSize}
+        />
+      </Suspense>
       
       {isDesktop ? (        <main
           id="main-scroll-container"
