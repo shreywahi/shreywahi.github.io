@@ -45,7 +45,24 @@ const SidebarNavButton = ({ label, icon: Icon, onClick, active }) => (
 	</button>
 );
 
-const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, auth }) => {
+const Sidebar = ({ 
+  onNavigate, 
+  activeSection, 
+  setShowLogin, 
+  isAdmin, 
+  signOut, 
+  auth,
+  // Admin panel props
+  reloadFromDrive,
+  saveContentToDrive,
+  driveSaving,
+  loadingFromDrive,
+  usingLocalContent,
+  handleSwitchToLocal,
+  handleSwitchToDrive,
+  handleReset,
+  handleLoadFromDrive
+}) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
@@ -304,8 +321,102 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 						{showMoreMenu && (							<div
 								ref={moreMenuRef}
 								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
-							>								<div className="flex flex-col gap-6 py-1 px-2">
-									{/* Admin Login/Exit Admin button (mobile/tablet) */}
+							>								<div className="flex flex-col gap-4 py-1 px-2">
+									{/* Admin panel buttons - only show if admin */}
+									{isAdmin && (
+										<>
+											{/* Use Local / Switch to Drive */}
+											{usingLocalContent ? (
+												<button
+													onClick={() => {
+														handleSwitchToDrive();
+														setShowMoreMenu(false);
+													}}
+													className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+													aria-label="Switch to Drive"
+													tabIndex={0}
+												>
+													<FileText size={20} />
+													<span className="text-xs mt-1">Switch to Drive</span>
+												</button>
+											) : (
+												<button
+													onClick={() => {
+														handleSwitchToLocal();
+														setShowMoreMenu(false);
+													}}
+													className="flex flex-col items-center text-white hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
+													aria-label="Use Local"
+													tabIndex={0}
+												>
+													<FileText size={20} />
+													<span className="text-xs mt-1">Use Local</span>
+												</button>
+											)}
+											
+											{/* Reset/Reload */}
+											<button
+												onClick={() => {
+													handleReset();
+													setShowMoreMenu(false);
+												}}
+												className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+												aria-label="Reset/Reload"
+												tabIndex={0}
+											>
+												<Smartphone size={20} />
+												<span className="text-xs mt-1">Reset/Reload</span>
+											</button>
+										</>
+									)}
+											{/* More admin panel buttons - only show if admin */}
+									{isAdmin && (
+										<>
+											{/* Save to Drive */}
+											<button
+												onClick={() => {
+													if (!driveSaving && !usingLocalContent) {
+														saveContentToDrive();
+													}
+													setShowMoreMenu(false);
+												}}
+												disabled={driveSaving || usingLocalContent}
+												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
+													driveSaving || usingLocalContent
+														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
+														: 'text-white hover:text-purple-400 focus:ring-purple-400'
+												}`}
+												aria-label="Save to Drive"
+												tabIndex={0}
+											>
+												<FileText size={20} />
+												<span className="text-xs mt-1">{driveSaving ? 'Saving...' : 'Save to Drive'}</span>
+											</button>
+											
+											{/* Load from Drive */}
+											<button
+												onClick={() => {
+													if (!loadingFromDrive && !usingLocalContent) {
+														handleLoadFromDrive();
+													}
+													setShowMoreMenu(false);
+												}}
+												disabled={loadingFromDrive || usingLocalContent}
+												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
+													loadingFromDrive || usingLocalContent
+														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
+														: 'text-white hover:text-green-400 focus:ring-green-400'
+												}`}
+												aria-label="Load from Drive"
+												tabIndex={0}
+											>
+												<FileText size={20} />
+												<span className="text-xs mt-1">{loadingFromDrive ? 'Loading...' : 'Load from Drive'}</span>
+											</button>
+										</>
+									)}
+									
+									{/* Admin Login/Exit Admin button (mobile/tablet) - moved below Load from Drive */}
 									{!isAdmin ? (
 										<button
 											onClick={() => {
@@ -319,8 +430,7 @@ const Sidebar = ({ onNavigate, activeSection, setShowLogin, isAdmin, signOut, au
 											<LogIn size={20} />
 											<span className="text-xs mt-1">Admin Login</span>
 										</button>
-									) : (
-										<button
+									) : (										<button
 											onClick={() => {
 												signOut(auth);
 												setShowMoreMenu(false);

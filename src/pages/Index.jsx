@@ -125,7 +125,108 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       }
     });
     return () => unsubscribe();
-  }, []);  // Save activeSection to localStorage whenever it changes
+  }, []);
+
+  // Admin panel functions
+  const [loadingFromDrive, setLoadingFromDrive] = useState(false);
+  const [usingLocalContent, setUsingLocalContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('useLocalContent') === 'true';
+    }
+    return false;
+  });
+
+  const handleLoadFromDrive = async () => {
+    console.log('Index: Loading latest content from Drive');
+    setLoadingFromDrive(true);
+    
+    try {
+      if (reloadFromDrive) {
+        // Use the hook's reload function if available
+        const success = await reloadFromDrive();
+        if (success) {
+          console.log('Successfully reloaded content from Drive');
+        } else {
+          throw new Error('Failed to reload content');
+        }
+      } else {
+        // Fallback to direct load and reload
+        const { loadContentFromDrive } = await import('../utils/contentLoader');
+        await loadContentFromDrive();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error loading from Drive:', error);
+      alert('Failed to load content from Drive: ' + error.message);
+    } finally {
+      setLoadingFromDrive(false);
+    }
+  };
+
+  const handleSwitchToLocal = async () => {
+    console.log('Index: Switching to local content');
+    
+    try {
+      // Enable local content mode
+      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
+      toggleLocalContentMode(true);
+      setUsingLocalContent(true);
+      
+      // Force reload to use local content
+      window.location.reload();
+    } catch (error) {
+      console.error('Error switching to local content:', error);
+      alert('Failed to switch to local content: ' + error.message);
+    }
+  };
+
+  const handleSwitchToDrive = async () => {
+    console.log('Index: Switching back to Drive content');
+    
+    try {
+      // Disable local content mode
+      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
+      toggleLocalContentMode(false);
+      setUsingLocalContent(false);
+      
+      // Force reload to try Drive content again
+      window.location.reload();
+    } catch (error) {
+      console.error('Error switching to Drive content:', error);
+      alert('Failed to switch to Drive content: ' + error.message);
+    }
+  };
+
+  const handleReset = async () => {
+    console.log('Index: Resetting Drive content cache');
+    
+    try {
+      // Clear all content-related localStorage
+      localStorage.removeItem('cachedContent');
+      localStorage.removeItem('contentCacheTime');
+      localStorage.removeItem('useLocalContent');
+      
+      // Reset drive content manager flags
+      const { resetContentState } = await import('../utils/driveContentManager');
+      const { resetDriveMode } = await import('../utils/contentLoader');
+      resetContentState();
+      
+      await resetDriveMode();
+      
+      // Set a flag to indicate we want to load from Drive on next load
+      localStorage.setItem('loadFromDriveOnStart', 'true');
+      
+      // Force reload
+      window.location.reload();
+    } catch (e) {
+      console.error('Error resetting Drive mode:', e);
+      // Set the flag even if reset fails, then reload
+      localStorage.setItem('loadFromDriveOnStart', 'true');
+      window.location.reload();
+    }
+  };
+
+  // Save activeSection to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeSection', activeSection);
@@ -599,15 +700,24 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   // Rest of your component...
   // Modify the return statement to include the new components
   return (
-    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
-      <Sidebar
+    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>      <Sidebar
         onNavigate={handleNavigate}
         activeSection={activeSection}
         setShowLogin={setShowLogin}
         isAdmin={isAdmin}
         signOut={signOut}
-        auth={auth}      />      {showLogin && renderAdminLogin()}
-      <Suspense fallback={<div></div>}>
+        auth={auth}
+        // Admin panel props
+        reloadFromDrive={reloadFromDrive}
+        saveContentToDrive={saveContentToDriveHandler}
+        driveSaving={driveSaving}
+        loadingFromDrive={loadingFromDrive}
+        usingLocalContent={usingLocalContent}
+        handleSwitchToLocal={handleSwitchToLocal}
+        handleSwitchToDrive={handleSwitchToDrive}
+        handleReset={handleReset}
+        handleLoadFromDrive={handleLoadFromDrive}
+      />{showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>
         <AdminPanel 
           isAdmin={isAdmin} 
           reloadFromDrive={reloadFromDrive} 
@@ -615,6 +725,13 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
           driveSaving={driveSaving}
           driveMessage={driveMessage}
           screenSize={screenSize}
+          // Admin functions
+          loadingFromDrive={loadingFromDrive}
+          usingLocalContent={usingLocalContent}
+          handleSwitchToLocal={handleSwitchToLocal}
+          handleSwitchToDrive={handleSwitchToDrive}
+          handleReset={handleReset}
+          handleLoadFromDrive={handleLoadFromDrive}
         />
       </Suspense>
       
