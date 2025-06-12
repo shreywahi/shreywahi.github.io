@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { detectCspIssues, getSuggestedCspFix } from '../utils/cspHelper';
 
 const AdminPanel = ({ 
   isAdmin, 
@@ -8,119 +7,82 @@ const AdminPanel = ({
   driveSaving, 
   driveMessage, 
   screenSize = 'desktop',
-  // Admin functions from parent
-  loadingFromDrive,
-  setLoadingFromDrive, // <-- add this line
-  usingLocalContent,
-  setUsingLocalContent, // <-- add this line
-  onClose // <-- add onClose prop
-}) => {  
-  const [showCspFix, setShowCspFix] = useState(false);
-  const [cspIssues, setCspIssues] = useState([]);
+  // Content state from useContentManager
+  content,
+  loadLocalContent,
+  loadContentFromDrive,
+  loading,
+  onClose
+}) => {
+  const [switchingContent, setSwitchingContent] = useState(false);
   
-  useEffect(() => {
-    // Check for CSP issues
-    const issues = detectCspIssues();
-    setCspIssues(issues);
-  }, []);
-  
-  if (!isAdmin) return null;  const handleLoadFromDrive = async () => {
-    console.log('AdminPanel: Loading latest content from Drive');
-    setLoadingFromDrive(true);
+  if (!isAdmin) return null;
+
+  // Determine current content source
+  const isUsingLocalContent = content?.fallbackUsed || false;
+  const isUsingDriveContent = content?.driveAttempted && !content?.fallbackUsed;  const handleToggleContentSource = async () => {
+    setSwitchingContent(true);
     
     try {
-      if (reloadFromDrive) {
-        // Use the hook's reload function if available
-        const success = await reloadFromDrive();
-        if (success) {
-          console.log('Successfully reloaded content from Drive');
-        } else {
-          throw new Error('Failed to reload content');
+      if (isUsingLocalContent) {
+        // Currently using local, switch to Drive
+        console.log('Switching from local to Drive content...');        // Force fresh load from Drive by clearing all caches first
+        try {
+          const { clearContentCache } = await import('../utils/contentLoader');
+          clearContentCache(); // Clear module cache
+          
+          // Use simple public fetch method
+          await loadContentFromDrive(false);
+          
+          console.log('Successfully loaded fresh Drive content for admin');
+        } catch (importError) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔄 Using fallback method in development mode');
+          } else {
+            console.warn('Could not import load functions, using standard method');
+          }
+          await loadContentFromDrive(false);
         }
       } else {
-        // Fallback to direct load and reload
-        const { loadContentFromDrive } = await import('../utils/contentLoader');
-        await loadContentFromDrive();
-        window.location.reload();
+        // Currently using Drive, switch to Local
+        console.log('Switching from Drive to local content...');
+        await loadLocalContent(false); // Pass false to prevent loading screen
       }
     } catch (error) {
-      console.error('Error loading from Drive:', error);
-      alert('Failed to load content from Drive: ' + error.message);
+      console.error('Error switching content source:', error);
+      alert('Failed to switch content source: ' + error.message);
     } finally {
-      setLoadingFromDrive(false);
+      setSwitchingContent(false);
     }
-  };
-  const handleSwitchToLocal = async () => {
-    console.log('AdminPanel: Switching to local content');
+  };const handleRefreshContent = async () => {
+    console.log('AdminPanel: Refreshing current content source');
+    setSwitchingContent(true);
+
     try {
-      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
-      toggleLocalContentMode(true);
-      setUsingLocalContent(true);
-      window.location.reload();
+      if (isUsingLocalContent) {
+        // Currently using local content, refresh local
+        console.log('Refreshing local content...');
+        await loadLocalContent(false); // Pass false to prevent loading screen
+      } else {
+        // Currently using Drive content, refresh from Drive
+        console.log('Refreshing Drive content...');
+        // Force fresh load from Drive by clearing caches first
+        try {
+          const { clearContentCache } = await import('../utils/contentLoader');
+          clearContentCache(); // Clear module cache
+          await loadContentFromDrive(false); // Pass false to prevent loading screen
+        } catch (importError) {
+          console.warn('Could not import fresh load functions, using standard method');
+          await loadContentFromDrive(false);
+        }
+      }
+      console.log('Successfully refreshed content');
     } catch (error) {
-      console.error('Error switching to local content:', error);
-      alert('Failed to switch to local content: ' + (error && error.message ? error.message : JSON.stringify(error)));
-    }
-  };
-  const handleSwitchToDrive = async () => {
-    console.log('AdminPanel: Switching back to Drive content');
-    
-    try {
-      // Disable local content mode
-      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
-      toggleLocalContentMode(false);
-      setUsingLocalContent(false);
-      
-      // Force reload to try Drive content again
-      window.location.reload();
-    } catch (error) {
-      console.error('Error switching to Drive content:', error);
-      alert('Failed to switch to Drive content: ' + error.message);
-    }
-  };
-  const handleReset = async () => {
-    console.log('AdminPanel: Resetting Drive content cache');
-    
-    try {
-      // Clear all content-related localStorage
-      localStorage.removeItem('cachedContent');
-      localStorage.removeItem('contentCacheTime');
-      localStorage.removeItem('useLocalContent');
-      
-      // Reset drive content manager flags
-      const { resetContentState } = await import('../utils/driveContentManager');
-      resetContentState();
-      
-      const { resetDriveMode } = await import('../utils/contentLoader');
-      await resetDriveMode();
-      
-      // Set a flag to indicate we want to load from Drive on next load
-      localStorage.setItem('loadFromDriveOnStart', 'true');
-      
-      // Force reload
-      window.location.reload();
-    } catch (e) {
-      console.error('Error resetting Drive mode:', e);
-      // Set the flag even if reset fails, then reload
-      localStorage.setItem('loadFromDriveOnStart', 'true');
-      window.location.reload();
-    }
-  };
-  const cspFix = getSuggestedCspFix();
-  const hasCspIssues = cspIssues.length > 0 || window.googleCspBlocked;
-    const handleToggleLocalContent = async () => {
-    const newValue = !usingLocalContent;
-    setUsingLocalContent(newValue);
-    localStorage.setItem('useLocalContent', newValue);
-    
-    const { toggleLocalContentMode } = await import('../utils/driveContentManager');
-    toggleLocalContentMode(newValue);
-    
-    if (newValue) {
-      alert('Switched to local content. Please reload the page.');
-    } else {
-      alert('Switched to Google Drive content. Please reload the page.');
-    }  };
+      console.error('Error refreshing content:', error);
+      alert('Failed to refresh content: ' + error.message);
+    } finally {
+      setSwitchingContent(false);
+    }};
   
   // Mobile/Tablet - admin buttons are now in the Sidebar popup menu
   if (screenSize === 'mobile' || screenSize === 'tablet') {
@@ -153,93 +115,62 @@ const AdminPanel = ({
         </div>
       )}
       
-      {hasCspIssues && (
-        <div className="mb-4 p-3 bg-red-900 rounded-md">
-          <p className="text-sm font-semibold mb-1">⚠️ CSP Issues Detected</p>
-          <p className="text-xs">Google Drive access is blocked by Content Security Policy.</p>
-          <button
-            onClick={() => setShowCspFix(!showCspFix)}
-            className="text-xs underline mt-1"
-          >
-            {showCspFix ? 'Hide Fix' : 'Show Fix'}
-          </button>
-        </div>
-      )}
-      
-      {showCspFix && (
-        <div className="mb-4 p-3 bg-slate-700 rounded-md text-xs">
-          <p className="font-semibold mb-2">Add this to your HTML head:</p>
-          <textarea 
-            readOnly 
-            value={cspFix.html}
-            className="w-full h-32 bg-slate-900 text-white p-2 rounded text-xs font-mono"
-          />
-          <button
-            onClick={() => navigator.clipboard.writeText(cspFix.html)}
-            className="mt-2 px-2 py-1 bg-blue-600 rounded text-xs"
-          >
-            Copy to Clipboard
-          </button>        </div>
-      )}      <div className="mb-4 p-3 bg-slate-700 rounded-md">
+      <div className="mb-4 p-3 bg-slate-700 rounded-md">
         <p className="text-sm font-semibold mb-1">📂 Content Source</p>
-        <p className="text-xs">
-          Currently using: <span className="font-semibold text-yellow-300">
-            {usingLocalContent ? 'Local Files (content.json)' : 'Google Drive (with local fallback)'}
-          </span>
-        </p>
-        <p className="text-xs mt-1">
-          {usingLocalContent 
-            ? 'Content loads from local files. Switch to Drive mode to sync with Google Drive.'
-            : 'Content loads from Google Drive first, then falls back to local files if Drive is unavailable.'
-          }
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs">
+              Currently using: <span className={`font-semibold ${isUsingLocalContent ? 'text-yellow-300' : 'text-blue-300'}`}>
+                {isUsingLocalContent ? 'Local Files' : 'Google Drive'}
+              </span>
+            </p>
+            {loading && <p className="text-xs text-gray-400 mt-1">Loading content...</p>}
+          </div>
+        </div>
       </div>
-      
-      {/* Content Source Toggle Buttons */}
-      <div className="mb-4 flex gap-2 flex-row">
-        {usingLocalContent ? (
+
+      {/* Content Management Buttons */}
+      <div className="mb-4 flex gap-2 flex-col">
+        <div className="flex gap-2">
           <button
-            onClick={handleSwitchToDrive}
-            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
+            onClick={handleRefreshContent}
+            disabled={switchingContent || loading}
+            className={`flex-1 py-2 rounded-md text-white text-sm ${
+              switchingContent || loading
+                ? 'bg-gray-500 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            Switch to Drive Mode
+            {switchingContent ? 'Refreshing...' : 'Refresh Content'}
           </button>
-        ) : (
           <button
-            onClick={handleSwitchToLocal}
-            className="flex-1 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md text-sm"
+            onClick={saveContentToDrive}
+            disabled={driveSaving || loading}
+            className={`flex-1 py-2 rounded-md text-white text-sm ${
+              driveSaving || loading
+                ? 'bg-gray-500 cursor-not-allowed' 
+                : 'bg-purple-600 hover:bg-purple-700'
+            }`}
           >
-            Use Local Content
+            {driveSaving ? 'Saving...' : 'Save to Drive'}
           </button>
-        )}
-        <button
-          onClick={handleReset}
-          className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
-        >
-          Reset Drive Cache & Reload
-        </button>
-        <button
-          onClick={saveContentToDrive}
-          disabled={driveSaving || usingLocalContent}
-          className={`flex-1 py-2 rounded-md text-white ${
-            driveSaving || usingLocalContent 
+        </div>        <button
+          onClick={handleToggleContentSource}
+          disabled={switchingContent || loading}
+          className={`w-full py-2 rounded-md text-white text-sm ${
+            switchingContent || loading
               ? 'bg-gray-500 cursor-not-allowed' 
-              : 'bg-purple-600 hover:bg-purple-700'
+              : isUsingLocalContent 
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-orange-600 hover:bg-orange-700'
           }`}
-          title={usingLocalContent ? 'Cannot save to Drive while in local content mode' : ''}
         >
-          {driveSaving ? 'Saving...' : 'Save to Google Drive'}
-        </button>
-        <button
-          onClick={handleLoadFromDrive}
-          disabled={loadingFromDrive || usingLocalContent}
-          className={`flex-1 py-2 rounded-md text-white ${
-            loadingFromDrive || usingLocalContent
-              ? 'bg-gray-500 cursor-not-allowed' 
-              : 'bg-green-600 hover:bg-green-700'
-          }`}
-          title={usingLocalContent ? 'Cannot load from Drive while in local content mode' : ''}        >
-          {loadingFromDrive ? 'Loading from Drive...' : 'Load Latest from Drive'}
+          {switchingContent 
+            ? 'Switching...' 
+            : isUsingLocalContent 
+              ? '🌐 Load from Google Drive' 
+              : '📁 Load from Local Files'
+          }
         </button>
       </div>
     </div>

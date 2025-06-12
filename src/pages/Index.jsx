@@ -7,6 +7,7 @@ import Skills from '../components/Skills';
 import Projects from '../components/Projects';
 import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
+import LoadingScreen from '../components/LoadingScreen';
 // Lazy load AdminPanel since it's only used by admin users
 const AdminPanel = lazy(() => import('../components/AdminPanel'));
 import '../App.css';
@@ -15,7 +16,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 // --- Centralized content ---
 import { useContentManager } from '../hooks/useContentManager';
-import { logCspSuggestion } from '../utils/cspHelper';
 
 // --- Firebase config (replace with your own config) ---
 const firebaseConfig = {
@@ -31,7 +31,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const Index = ({ driveInitialized = false, driveError = null }) => {
+const Index = () => {
   // Initialize with a function to ensure localStorage is read only once on mount
   const getInitialSection = () => {
     if (typeof window !== 'undefined') {
@@ -69,7 +69,16 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");  // --- Centralized content state ---
-  const { content, updateContent, saveContentToDrive, reloadFromDrive, loading } = useContentManager(isAdmin); // `content` is the state from the hook
+  const { 
+    content, 
+    updateContent, 
+    saveContentToDrive, 
+    reloadFromDrive, 
+    loadLocalContent,
+    loadContentFromDrive,
+    loading, 
+    loadingStep 
+  } = useContentManager(isAdmin, false); // Don't auto-load, let LoadingScreen control it
   
   const [heroName, setHeroName] = useState('');
   const [heroDesc, setHeroDesc] = useState('');
@@ -115,15 +124,11 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
     });
     return () => unsubscribe();
   }, []);
-
   // Admin panel functions
   const [loadingFromDrive, setLoadingFromDrive] = useState(false);
-  const [usingLocalContent, setUsingLocalContent] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('useLocalContent') === 'true';
-    }
-    return false;
-  });
+  
+  // Note: usingLocalContent is no longer used since we always try Drive first
+  const [usingLocalContent, setUsingLocalContent] = useState(false);
 
   const handleLoadFromDrive = async () => {
     console.log('Index: Loading latest content from Drive');
@@ -151,62 +156,34 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
       setLoadingFromDrive(false);
     }
   };
-
   const handleSwitchToLocal = async () => {
-    console.log('Index: Switching to local content');
+    console.log('Index: Refreshing to load fresh content');
     try {
-      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
-      toggleLocalContentMode(true);
-      setUsingLocalContent(true);
       window.location.reload();
     } catch (error) {
-      console.error('Error switching to local content:', error);
-      alert('Failed to switch to local content: ' + (error && error.message ? error.message : JSON.stringify(error)));
+      console.error('Error refreshing page:', error);
+      alert('Failed to refresh page: ' + (error && error.message ? error.message : JSON.stringify(error)));
     }
   };
 
   const handleSwitchToDrive = async () => {
-    console.log('Index: Switching back to Drive content');
+    console.log('Index: Refreshing to load fresh content');
     
     try {
-      // Disable local content mode
-      const { toggleLocalContentMode } = await import('../utils/driveContentManager');
-      toggleLocalContentMode(false);
-      setUsingLocalContent(false);
-      
-      // Force reload to try Drive content again
       window.location.reload();
     } catch (error) {
-      console.error('Error switching to Drive content:', error);
-      alert('Failed to switch to Drive content: ' + error.message);
+      console.error('Error refreshing page:', error);
+      alert('Failed to refresh page: ' + error.message);
     }
   };
 
   const handleReset = async () => {
-    console.log('Index: Resetting Drive content cache');
+    console.log('Index: Refreshing to reload content');
     
     try {
-      // Clear all content-related localStorage
-      localStorage.removeItem('cachedContent');
-      localStorage.removeItem('contentCacheTime');
-      localStorage.removeItem('useLocalContent');
-      
-      // Reset drive content manager flags
-      const { resetContentState } = await import('../utils/driveContentManager');
-      const { resetDriveMode } = await import('../utils/contentLoader');
-      resetContentState();
-      
-      await resetDriveMode();
-      
-      // Set a flag to indicate we want to load from Drive on next load
-      localStorage.setItem('loadFromDriveOnStart', 'true');
-      
-      // Force reload
       window.location.reload();
     } catch (e) {
-      console.error('Error resetting Drive mode:', e);
-      // Set the flag even if reset fails, then reload
-      localStorage.setItem('loadFromDriveOnStart', 'true');
+      console.error('Error refreshing page:', e);
       window.location.reload();
     }
   };
@@ -378,12 +355,6 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
     };
   }, [isDesktop, loading]);
 
-  // Add CSP logging on mount - ALWAYS call this hook
-  useEffect(() => {
-    setTimeout(() => {
-      logCspSuggestion();
-    }, 2000);
-  }, []);
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
     // Set navigation flag to prevent scroll tracking during navigation
@@ -671,20 +642,10 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         {driveMessage.text}
       </div>
     );
-  };
-  
-  // Update the loading indicator with a better fallback
+  };    // Enhanced loading screen with Drive attempt and fallback
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-blue-950 dark:bg-gray-950">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white text-lg">Loading content...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen onLoadLocal={loadLocalContent} onLoadDrive={loadContentFromDrive} />;
   }
-
   // Rest of your component...
   // Modify the return statement to include the new components
   return (
@@ -698,27 +659,22 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
         >
           ⚙️
         </button>
-      )}
-      <Sidebar
+      )}      <Sidebar
         onNavigate={handleNavigate}
         activeSection={activeSection}
         setShowLogin={setShowLogin}
         isAdmin={isAdmin}
         signOut={signOut}
         auth={auth}
-        reloadFromDrive={reloadFromDrive}
+        content={content}
+        loadLocalContent={loadLocalContent}
+        loadContentFromDrive={loadContentFromDrive}
         saveContentToDrive={saveContentToDriveHandler}
         driveSaving={driveSaving}
-        loadingFromDrive={loadingFromDrive}
-        usingLocalContent={usingLocalContent}
-        handleSwitchToLocal={handleSwitchToLocal}
-        handleSwitchToDrive={handleSwitchToDrive}
-        handleReset={handleReset}
-        handleLoadFromDrive={handleLoadFromDrive}
+        loading={loading}
       />
       {showLogin && renderAdminLogin()}
-      <Suspense fallback={<div></div>}>
-        {isDesktop && isAdmin && showAdminPanel && (
+      <Suspense fallback={<div></div>}>        {isDesktop && isAdmin && showAdminPanel && (
           <AdminPanel
             isAdmin={isAdmin}
             reloadFromDrive={reloadFromDrive}
@@ -726,18 +682,13 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
             driveSaving={driveSaving}
             driveMessage={driveMessage}
             screenSize={screenSize}
-            loadingFromDrive={loadingFromDrive}
-            setLoadingFromDrive={setLoadingFromDrive}
-            usingLocalContent={usingLocalContent}
-            setUsingLocalContent={setUsingLocalContent} // <-- pass setter
-            handleSwitchToLocal={handleSwitchToLocal}
-            handleSwitchToDrive={handleSwitchToDrive}
-            handleReset={handleReset}
-            handleLoadFromDrive={handleLoadFromDrive}
+            content={content}
+            loadLocalContent={loadLocalContent}
+            loadContentFromDrive={loadContentFromDrive}
+            loading={loading}
             onClose={() => setShowAdminPanel(false)}
           />
-        )}
-        {/* Mobile/tablet: keep as before */}
+        )}        {/* Mobile/tablet: keep as before */}
         {(!isDesktop || !isAdmin) && (
           <AdminPanel
             isAdmin={isAdmin}
@@ -746,14 +697,10 @@ const Index = ({ driveInitialized = false, driveError = null }) => {
             driveSaving={driveSaving}
             driveMessage={driveMessage}
             screenSize={screenSize}
-            loadingFromDrive={loadingFromDrive}
-            setLoadingFromDrive={setLoadingFromDrive}
-            usingLocalContent={usingLocalContent}
-            setUsingLocalContent={setUsingLocalContent} // <-- pass setter
-            handleSwitchToLocal={handleSwitchToLocal}
-            handleSwitchToDrive={handleSwitchToDrive}
-            handleReset={handleReset}
-            handleLoadFromDrive={handleLoadFromDrive}
+            content={content}
+            loadLocalContent={loadLocalContent}
+            loadContentFromDrive={loadContentFromDrive}
+            loading={loading}
           />
         )}
       </Suspense>

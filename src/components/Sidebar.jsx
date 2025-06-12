@@ -52,16 +52,13 @@ const Sidebar = ({
   isAdmin, 
   signOut, 
   auth,
-  // Admin panel props
-  reloadFromDrive,
+  // Admin panel props - updated to match AdminPanel
+  content,
+  loadLocalContent,
+  loadContentFromDrive,
   saveContentToDrive,
   driveSaving,
-  loadingFromDrive,
-  usingLocalContent,
-  handleSwitchToLocal,
-  handleSwitchToDrive,
-  handleReset,
-  handleLoadFromDrive
+  loading
 }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
@@ -76,10 +73,80 @@ const Sidebar = ({
 	const clickTimeoutRef = useRef(null);
 		// Portfolio triple click detection state
 	const [portfolioClickCount, setPortfolioClickCount] = useState(0);
-	const portfolioClickTimeoutRef = useRef(null);
-	const [showAdminLogin, setShowAdminLogin] = useState(false);
+	const portfolioClickTimeoutRef = useRef(null);	const [showAdminLogin, setShowAdminLogin] = useState(false);
 	const [adminLoginClicked, setAdminLoginClicked] = useState(false);
-	const adminLoginRef = useRef(null);useEffect(() => {
+	const adminLoginRef = useRef(null);
+	
+	// Admin panel state matching AdminPanel.jsx
+	const [switchingContent, setSwitchingContent] = useState(false);
+		// Determine current content source
+	const isUsingLocalContent = content?.fallbackUsed || false;
+	const isUsingDriveContent = content?.driveAttempted && !content?.fallbackUsed;
+
+	// Admin functions matching AdminPanel.jsx
+	const handleToggleContentSource = async () => {
+		setSwitchingContent(true);
+		
+		try {
+			if (isUsingLocalContent) {
+				// Currently using local, switch to Drive
+				console.log('Switching from local to Drive content...');
+				// Force fresh load from Drive by clearing all caches first
+				try {
+					const { clearContentCache } = await import('../utils/contentLoader');
+					clearContentCache(); // Clear module cache
+					
+					// Use simple public fetch method
+					await loadContentFromDrive(false);
+					
+					console.log('Successfully loaded fresh Drive content for admin');
+				} catch (importError) {
+					if (process.env.NODE_ENV === 'development') {
+						console.log('🔄 Using fallback method in development mode');
+					} else {
+						console.warn('Could not import load functions, using standard method');
+					}
+					await loadContentFromDrive(false);
+				}
+			} else {
+				// Currently using Drive, switch to Local
+				console.log('Switching from Drive to local content...');
+				await loadLocalContent(false); // Pass false to prevent loading screen
+			}
+		} catch (error) {
+			console.error('Error switching content source:', error);
+			alert('Failed to switch content source: ' + error.message);
+		} finally {
+			setSwitchingContent(false);
+		}
+	};
+
+	const handleRefreshContent = async () => {
+		console.log('Sidebar: Refreshing current content source');
+		setSwitchingContent(true);
+		
+		try {
+			if (isUsingLocalContent) {
+				await loadLocalContent(false); // Pass false to prevent loading screen
+			} else {
+				// Force fresh load from Drive by clearing caches first
+				try {
+					const { clearContentCache } = await import('../utils/contentLoader');
+					clearContentCache(); // Clear module cache
+					await loadContentFromDrive(false); // Pass false to prevent loading screen
+				} catch (importError) {
+					console.warn('Could not import fresh load functions, using standard method');
+					await loadContentFromDrive(false);
+				}
+			}
+			console.log('Successfully refreshed content');
+		} catch (error) {
+			console.error('Error refreshing content:', error);
+			alert('Failed to refresh content: ' + error.message);
+		} finally {
+			setSwitchingContent(false);
+		}
+	};useEffect(() => {
 		setMounted(true);
 		// Detect screen size
 		const checkScreen = () => {
@@ -375,64 +442,36 @@ const Sidebar = ({
 									{/* Admin panel buttons - only show if admin */}
 									{isAdmin && (
 										<>
-											{/* Use Local / Switch to Drive */}
-											{usingLocalContent ? (
-												<button
-													onClick={() => {
-														handleSwitchToDrive();
-														setShowMoreMenu(false);
-													}}
-													className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-													aria-label="Switch to Drive"
-													tabIndex={0}
-												>
-													<FileText size={20} />
-													<span className="text-xs mt-1">Switch to Drive</span>
-												</button>
-											) : (
-												<button
-													onClick={() => {
-														handleSwitchToLocal();
-														setShowMoreMenu(false);
-													}}
-													className="flex flex-col items-center text-white hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
-													aria-label="Use Local"
-													tabIndex={0}
-												>
-													<FileText size={20} />
-													<span className="text-xs mt-1">Use Local</span>
-												</button>
-											)}
-											
-											{/* Reset/Reload */}
+											{/* Refresh Content */}
 											<button
 												onClick={() => {
-													handleReset();
+													handleRefreshContent();
 													setShowMoreMenu(false);
 												}}
-												className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-												aria-label="Reset/Reload"
+												disabled={switchingContent || loading}
+												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
+													switchingContent || loading
+														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
+														: 'text-white hover:text-blue-400 focus:ring-blue-400'
+												}`}
+												aria-label="Refresh Content"
 												tabIndex={0}
 											>
-												<Smartphone size={20} />
-												<span className="text-xs mt-1">Reset/Reload</span>
+												<FileText size={20} />
+												<span className="text-xs mt-1">{switchingContent ? 'Refreshing...' : 'Refresh Content'}</span>
 											</button>
-										</>
-									)}
-											{/* More admin panel buttons - only show if admin */}
-									{isAdmin && (
-										<>
+											
 											{/* Save to Drive */}
 											<button
 												onClick={() => {
-													if (!driveSaving && !usingLocalContent) {
+													if (!driveSaving && !loading) {
 														saveContentToDrive();
 													}
 													setShowMoreMenu(false);
 												}}
-												disabled={driveSaving || usingLocalContent}
+												disabled={driveSaving || loading}
 												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
-													driveSaving || usingLocalContent
+													driveSaving || loading
 														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
 														: 'text-white hover:text-purple-400 focus:ring-purple-400'
 												}`}
@@ -443,25 +482,32 @@ const Sidebar = ({
 												<span className="text-xs mt-1">{driveSaving ? 'Saving...' : 'Save to Drive'}</span>
 											</button>
 											
-											{/* Load from Drive */}
+											{/* Load from Local Files */}
 											<button
 												onClick={() => {
-													if (!loadingFromDrive && !usingLocalContent) {
-														handleLoadFromDrive();
-													}
+													handleToggleContentSource();
 													setShowMoreMenu(false);
 												}}
-												disabled={loadingFromDrive || usingLocalContent}
+												disabled={switchingContent || loading}
 												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
-													loadingFromDrive || usingLocalContent
+													switchingContent || loading
 														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
-														: 'text-white hover:text-green-400 focus:ring-green-400'
+														: isUsingLocalContent 
+															? 'text-white hover:text-green-400 focus:ring-green-400'
+															: 'text-white hover:text-orange-400 focus:ring-orange-400'
 												}`}
-												aria-label="Load from Drive"
+												aria-label={isUsingLocalContent ? 'Load from Google Drive' : 'Load from Local Files'}
 												tabIndex={0}
 											>
 												<FileText size={20} />
-												<span className="text-xs mt-1">{loadingFromDrive ? 'Loading...' : 'Load from Drive'}</span>
+												<span className="text-xs mt-1">
+													{switchingContent 
+														? 'Switching...' 
+														: isUsingLocalContent 
+															? 'Load from Drive' 
+															: 'Load from Local'
+													}
+												</span>
 											</button>
 										</>
 									)}

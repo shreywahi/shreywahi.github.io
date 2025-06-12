@@ -1,7 +1,7 @@
 {
   "hero": {
-    "name": " Shrey Wahi",
-    "description": "Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions."
+    "name": "Local Shrey Wahi",
+    "description": "Local Desc - Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions."
   },
   "about": {
     "text": "I am a Software Engineer at Microsoft, specializing in UX Engineering. I leverage my expertise in frontend development to craft secure, intuitive, and high-performance web applications. My approach blends creative design principles with robust technical execution, consistently prioritizing an exceptional user experience alongside stringent security measures.\n\nWith over four years of experience, I am proficient in ReactJS, TypeScript, and various cloud technologies. My daily work involves enhancing security solutions and designing user interfaces that safeguard millions of users without compromising on a seamless experience. I also focus on optimizing application performance and architecting scalable frontend solutions."
