@@ -510,9 +510,7 @@ const Sidebar = ({
 												</span>
 											</button>
 										</>
-									)}
-									
-									{/* Admin Login/Exit Admin button (mobile/tablet) - moved below Load from Drive */}
+									)}									{/* Admin Login/Exit Admin button (mobile/tablet) - moved below Load from Drive */}
 									{!isAdmin ? (
 										<button
 											onClick={() => {
@@ -526,7 +524,8 @@ const Sidebar = ({
 											<LogIn size={20} />
 											<span className="text-xs mt-1">Admin Login</span>
 										</button>
-									) : (										<button
+									) : (
+										<button
 											onClick={() => {
 												signOut(auth);
 												setShowMoreMenu(false);

@@ -61,14 +61,12 @@ const Index = () => {
   // Update ref when state changes
   useEffect(() => {
     activeSectionRef.current = activeSection;
-  }, [activeSection]);
-
-  // --- Admin mode state using Firebase Auth ---
+  }, [activeSection]);  // --- Admin mode state using Firebase Auth ---
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");  // --- Centralized content state ---
+  const [password, setPassword] = useState("");// --- Centralized content state ---
   const { 
     content, 
     updateContent, 
@@ -112,10 +110,11 @@ const Index = () => {
       setContactHeading(content.contact?.heading || '');
       setContactIntro(content.contact?.intro || '');
     }
-  }, [content, loading]);
-
-  // Listen to Firebase auth state
+  }, [content, loading]);  // Listen to Firebase auth state and auto-logout on page refresh
   useEffect(() => {
+    // Force logout on page refresh/reload by clearing Firebase auth state
+    signOut(auth).catch(() => {}); // Ignore errors if already logged out
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAdmin(!!user);
       if (!user) {
@@ -649,8 +648,7 @@ const Index = () => {
   // Rest of your component...
   // Modify the return statement to include the new components
   return (
-    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>
-      {/* Floating Admin Panel open button (desktop only) */}
+    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>      {/* Floating Admin Panel open button (desktop only) */}
       {isDesktop && isAdmin && !showAdminPanel && (
         <button
           onClick={() => setShowAdminPanel(true)}
@@ -673,8 +671,7 @@ const Index = () => {
         driveSaving={driveSaving}
         loading={loading}
       />
-      {showLogin && renderAdminLogin()}
-      <Suspense fallback={<div></div>}>        {isDesktop && isAdmin && showAdminPanel && (
+      {showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>        {isDesktop && isAdmin && showAdminPanel && (
           <AdminPanel
             isAdmin={isAdmin}
             reloadFromDrive={reloadFromDrive}
@@ -687,22 +684,7 @@ const Index = () => {
             loadContentFromDrive={loadContentFromDrive}
             loading={loading}
             onClose={() => setShowAdminPanel(false)}
-          />
-        )}        {/* Mobile/tablet: keep as before */}
-        {(!isDesktop || !isAdmin) && (
-          <AdminPanel
-            isAdmin={isAdmin}
-            reloadFromDrive={reloadFromDrive}
-            saveContentToDrive={saveContentToDriveHandler}
-            driveSaving={driveSaving}
-            driveMessage={driveMessage}
-            screenSize={screenSize}
-            content={content}
-            loadLocalContent={loadLocalContent}
-            loadContentFromDrive={loadContentFromDrive}
-            loading={loading}
-          />
-        )}
+          />        )}        {/* Mobile/tablet: AdminPanel functionality is integrated into Sidebar popup menu */}
       </Suspense>
       
       {isDesktop ? (        <main
