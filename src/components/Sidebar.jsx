@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut, Monitor } from 'lucide-react';
+import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -31,7 +31,7 @@ const socialLinks = [
 ];
 
 // Sidebar nav button component with responsive sizing
-const SidebarNavButton = ({ label, icon: Icon, onClick, active, windowWidth }) => {
+const SidebarNavButton = ({ label, icon: Icon, onClick, active, windowWidth, isCollapsed }) => {
 	const isSmall = windowWidth < 768;
 	const isMedium = windowWidth >= 768 && windowWidth < 1024;
 	const iconSize = isSmall ? 20 : isMedium ? 22 : 24;
@@ -40,14 +40,14 @@ const SidebarNavButton = ({ label, icon: Icon, onClick, active, windowWidth }) =
 	return (
 		<button
 			onClick={onClick}
-			className={`flex flex-row items-center justify-start gap-4 py-3 px-4 rounded-lg transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 w-full
+			className={`flex flex-row items-center ${isCollapsed ? 'justify-center px-2 py-2' : 'justify-start px-4 py-3'} gap-4 rounded-lg transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 w-full
 				${active ? "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" : "text-white hover:text-blue-700 hover:bg-blue-100"}
 			`}
 			aria-label={`Go to ${label}`}
 			tabIndex={0}
 		>
 			{Icon && <Icon size={iconSize} />}
-			<span className={`${fontSize} leading-tight`}>{label}</span>
+			{!isCollapsed && <span className={`${fontSize} leading-tight`}>{label}</span>}
 		</button>
 	);
 };
@@ -69,7 +69,9 @@ const Sidebar = ({
   // View toggle callback
   onViewModeChange,
   // Current view mode from parent
-  viewMode
+  viewMode,
+  // Sidebar collapse callback
+  onSidebarCollapseChange
 }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
@@ -101,13 +103,15 @@ const Sidebar = ({
 			xxl: isSmallDesktop ? 'text-xl' : isMediumDesktop ? 'text-2xl' : 'text-3xl'
 		};
 		return sizes[baseSize] || sizes.base;
-	};
-	// Use view mode from parent (single source of truth)
+	};	// Use view mode from parent (single source of truth)
 	const currentViewMode = viewMode || 'desktop';
 	const isCurrentlyDesktop = currentViewMode === 'desktop';
 	
+	// Sidebar collapse state (desktop only)
+	const [isCollapsed, setIsCollapsed] = useState(false);
+	
 	// Admin access states
-	const [showAdminToggle, setShowAdminToggle] = useState(false);	
+	const [showAdminToggle, setShowAdminToggle] = useState(false);
 	// Mobile/tablet navigation states
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [showAlternateButtons, setShowAlternateButtons] = useState(false);
@@ -352,36 +356,37 @@ const Sidebar = ({
 			}
 		};
 	}, []);
-
-	return (		<>			{/* Sidebar only for desktop view */}
-			{isCurrentlyDesktop && (				<aside
-					ref={sidebarRef}
-					className="sidebar-responsive fixed top-0 left-0 h-full bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col border-r border-blue-300 overflow-y-auto"
-					role="navigation"
-					aria-label="Sidebar Navigation"
-					tabIndex={-1}
-					style={{ 
-						width: Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256)),
-						minWidth: '160px',
-						maxWidth: '256px'
-					}}
-				>
-					{/* Portfolio Header */}
-					<div className="flex flex-col items-center py-4">
-						<div
-							className={`flex items-center justify-center text-center font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer px-2 ${
-								isSmallDesktop ? 'h-14' : isMediumDesktop ? 'h-16' : 'h-20'
-							} ${getTextSize('xl')}`}
-							onClick={handlePortfolioClick}
-							tabIndex={0}
-							aria-label="Portfolio - Triple click for admin access"
-							role="button"
-						>
-							Portfolio
-						</div>
-						
-						{/* Admin Toggle Button (appears after 3 clicks on Portfolio) */}
-						{showAdminToggle && (
+	return (
+		<>
+			{/* Sidebar only for desktop view */}
+			{isCurrentlyDesktop && (
+				<div className="relative">
+					<aside
+						ref={sidebarRef}
+						className={`fixed top-0 left-0 h-full bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col border-r border-blue-300 overflow-y-auto transition-all duration-300
+    					${isCollapsed ? 'w-28' : 'w-60'}`}
+						role="navigation"
+						aria-label="Sidebar Navigation"
+						tabIndex={-1}
+					>
+						{/* Portfolio Header */}
+						<div className="flex flex-col items-center py-4">
+							{!isCollapsed && (
+								<div
+									className={`flex items-center justify-center text-center font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer px-2 ${
+										isSmallDesktop ? 'h-14' : isMediumDesktop ? 'h-16' : 'h-20'
+									} ${getTextSize('xl')}`}
+									onClick={handlePortfolioClick}
+									tabIndex={0}
+									aria-label="Portfolio - Triple click for admin access"
+									role="button"
+								>
+									Portfolio
+								</div>
+							)}
+							
+							{/* Admin Toggle Button (appears after 3 clicks on Portfolio) */}
+							{!isCollapsed && showAdminToggle && (
 							<div className="flex justify-center">
 								{!isAdmin ? (
 									<button
@@ -414,11 +419,9 @@ const Sidebar = ({
 								)}
 							</div>
 						)}
-					</div>
-
-					{/* Centered Navigation */}
+					</div>					{/* Centered Navigation */}
 					<div className="flex-1 flex flex-col justify-center">
-						<nav className={`flex flex-col gap-1 w-full ${isSmallDesktop ? 'px-2' : 'px-4'}`} aria-label="Main navigation">
+						<nav className={`flex flex-col ${isCollapsed ? 'gap-2 px-0.5' : 'gap-1 px-4'} w-full`} aria-label="Main navigation">
 							{navLinks.map((link) => (
 								<SidebarNavButton
 									key={link.section}
@@ -429,59 +432,86 @@ const Sidebar = ({
 									}}
 									active={activeSection === link.section}
 									windowWidth={windowWidth}
+									isCollapsed={isCollapsed}
 								/>
 							))}
 						</nav>
-					</div>
-
-					{/* Footer section */}
+					</div>{/* Footer section */}
 					<div className="flex flex-col items-center pb-4">
-						{/* Social Links */}
-						<div className={`flex flex-row items-center justify-center gap-3 mb-4 ${isSmallDesktop ? 'px-2' : 'px-4'}`}>
-							{socialLinks.map(({ href, icon: Icon, label }) => (
-								<a
-									key={label}
-									href={href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-									aria-label={label}
+						{/* Social Links - hide when collapsed */}
+						{!isCollapsed && (
+							<div className={`flex flex-row items-center justify-center gap-3 mb-4 ${isSmallDesktop ? 'px-2' : 'px-4'}`}>
+								{socialLinks.map(({ href, icon: Icon, label }) => (
+									<a
+										key={label}
+										href={href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+										aria-label={label}
+										tabIndex={0}
+									>
+										<Icon size={getIconSize('large')} />
+									</a>
+								))}
+							</div>
+						)}
+						
+						{/* Theme Toggle and View Toggle buttons side by side - hide when collapsed */}
+						{!isCollapsed && (
+							<div className="flex flex-row items-center justify-center gap-3 mb-4">
+								{/* Theme Toggle Button */}
+								<button
+									onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+									className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
+									aria-label="Toggle Theme"
 									tabIndex={0}
 								>
-									<Icon size={getIconSize('large')} />
-								</a>
-							))}
-						</div>						{/* Theme Toggle and View Toggle buttons side by side */}
-						<div className="flex flex-row items-center justify-center gap-3 mb-4">
-							{/* Theme Toggle Button */}
-							<button
-								onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-								className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
-								aria-label="Toggle Theme"
-								tabIndex={0}
-							>
-								{resolvedTheme === "dark" ? <Sun size={getIconSize('xxlarge')} /> : <Moon size={getIconSize('xxlarge')} />}
-								<span className="text-center leading-tight">Theme</span>
-							</button>
+									{resolvedTheme === "dark" ? <Sun size={getIconSize('xxlarge')} /> : <Moon size={getIconSize('xxlarge')} />}
+									<span className="text-center leading-tight">Theme</span>
+								</button>
 
-							{/* View Toggle Button */}
-							<button
-								onClick={() => {
-									// Direct toggle between desktop and mobile
-									const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
-									if (onViewModeChange) onViewModeChange(newViewMode);
-								}}
-								className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
-								aria-label={`${isCurrentlyDesktop ? 'Mobile' : 'Desktop'} View`}
-								tabIndex={0}
-							>
-								<Smartphone size={getIconSize('xxlarge')} />
-								<span className="text-center leading-tight text-xs">Mobile</span>
-							</button>
-						</div>
+								{/* View Toggle Button */}
+								<button
+									onClick={() => {
+										// Direct toggle between desktop and mobile
+										const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
+										if (onViewModeChange) onViewModeChange(newViewMode);
+									}}
+									className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
+									aria-label={`${isCurrentlyDesktop ? 'Mobile' : 'Desktop'} View`}
+									tabIndex={0}
+								>
+									<Smartphone size={getIconSize('xxlarge')} />
+									<span className="text-center leading-tight text-xs">Mobile</span>
+								</button>
+							</div>
+						)}
 					</div>
-				</aside>
-			)}			{/* Mobile sticky footer nav */}
+				</aside>				{/* Sidebar Collapse/Expand Button */}				<button
+					onClick={() => {
+						const newCollapsedState = !isCollapsed;
+						setIsCollapsed(newCollapsedState);
+						if (onSidebarCollapseChange) {
+							onSidebarCollapseChange(newCollapsedState);
+						}
+					}}
+					className = {
+						`fixed top-1/2 transform -translate-y-1/2 
+						bg-black/90 hover:bg-black text-white rounded-full border border-blue-300
+						p-2 transition-all duration-300 focus:outline-none
+						focus:ring-2 focus:ring-blue-400 z-[60] shadow-lg
+						${isCollapsed ? 'left-24' : 'left-56'}
+					`}
+					aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+				>					{isCollapsed ? (
+						<ChevronRight size={20} />
+					) : (
+						<ChevronLeft size={20} />
+					)}
+				</button>
+				</div>
+			)}{/* Mobile sticky footer nav */}
 			{!isCurrentlyDesktop && (
 				<nav
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex items-center h-16 border-t border-blue-300"

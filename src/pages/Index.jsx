@@ -42,8 +42,7 @@ const Index = () => {
     return 'hero';
   };
   const [activeSection, setActiveSection] = useState(getInitialSection);
-  const [fade, setFade] = useState(true);
-  // Simple view mode system with device detection for initial state
+  const [fade, setFade] = useState(true);  // Simple view mode system with device detection for initial state
   // 'desktop' = sidebar view, 'mobile' = bottom nav view
   // Detect device type on initialization, then allow user override
   const getInitialViewMode = () => {
@@ -63,13 +62,20 @@ const Index = () => {
   const [viewMode, setViewMode] = useState(getInitialViewMode);
   const isDesktopView = viewMode === 'desktop';
   
+  // Sidebar collapse state for desktop view
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
   // Handle view mode changes from Sidebar and save user preference
   const handleViewModeChange = (newViewMode) => {
     setViewMode(newViewMode);
     // Save user preference to override device detection in future visits
     localStorage.setItem('userViewMode', newViewMode);
   };
-  
+  // Handle sidebar collapse changes
+  const handleSidebarCollapseChange = (isCollapsed) => {
+    setSidebarCollapsed(isCollapsed);
+  };
+
   // For responsive main content layout
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   
@@ -668,6 +674,7 @@ const Index = () => {
         loading={loading}
         onViewModeChange={handleViewModeChange}
         viewMode={viewMode}
+        onSidebarCollapseChange={handleSidebarCollapseChange}
       />
       {showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>        {isDesktopView && isAdmin && showAdminPanel && (
           <AdminPanel
@@ -691,9 +698,9 @@ const Index = () => {
             height: '100vh',
             minWidth: 0,
             marginLeft: isDesktopView ? 
-              `${Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256))}px` : '0',
+              (sidebarCollapsed ? '95px' : '205px') : '0',
             maxWidth: isDesktopView ? 
-              `calc(100vw - ${Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256))}px)` : '100vw'
+              (sidebarCollapsed ? 'calc(100vw - 95px)' : 'calc(100vw - 205px)') : '100vw',
           }}
         >
           {/* Remove scroll snap classes */}
