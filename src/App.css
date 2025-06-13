@@ -72,10 +72,83 @@
   pointer-events: none;
 }
 
-/* Add this if you are not using Tailwind's ml-64 */
+/* Layout is now handled via device type detection in React components */
+
+/* Responsive layout helpers for small desktop windows */
+@media (max-width: 1024px) {
+  /* Ensure content doesn't overflow on small desktop screens */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Ensure main content never goes behind sidebar */
+  main {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Sidebar should stay above main content but below modals */
+  aside {
+    z-index: 50 !important;
+  }
+}
+
+/* Prevent horizontal scrollbars and overflow issues */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  min-width: 320px;
+}
+
+#root {
+  width: 100%;
+  overflow-x: hidden;
+  min-width: 320px;
+}
+
+/* Ensure responsive content layout */
+.responsive-content {
+  min-width: 0;
+  flex: 1;
+  overflow-x: hidden;
+}
+
+/* Additional responsive helpers */
+@media (max-width: 768px) {
+  /* Small desktop/large tablet specific adjustments */
+  .sidebar-responsive {
+    width: 192px !important;
+    min-width: 160px !important;
+  }
+  
+  .main-content-responsive {
+    margin-left: 192px !important;
+    max-width: calc(100vw - 192px) !important;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+  /* Medium desktop specific adjustments */
+  .sidebar-responsive {
+    width: 224px !important;
+    min-width: 160px !important;
+  }
+  
+  .main-content-responsive {
+    margin-left: 224px !important;
+    max-width: calc(100vw - 224px) !important;
+  }
+}
+
 @media (min-width: 1024px) {
-  .main-content {
-    margin-left: 16rem; /* 256px, same as w-64 */
-    transition: margin-left 0.3s;
+  /* Large desktop specific adjustments */
+  .sidebar-responsive {
+    width: 256px !important;
+    min-width: 160px !important;
+  }
+  
+  .main-content-responsive {
+    margin-left: 256px !important;
+    max-width: calc(100vw - 256px) !important;
   }
 }

@@ -16,6 +16,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 // --- Centralized content ---
 import { useContentManager } from '../hooks/useContentManager';
+// --- Device detection for initial view mode ---
+import { getDeviceType } from '../utils/deviceDetection';
 
 // --- Firebase config (replace with your own config) ---
 const firebaseConfig = {
@@ -39,21 +41,46 @@ const Index = () => {
     }
     return 'hero';
   };
-  
   const [activeSection, setActiveSection] = useState(getInitialSection);
   const [fade, setFade] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth > 1024);
-  
-  // Add screen size detection similar to Sidebar
-  const [screenSize, setScreenSize] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const w = window.innerWidth;
-      if (w <= 640) return 'mobile';
-      else if (w <= 1024) return 'tablet';
-      else return 'desktop';
+  // Simple view mode system with device detection for initial state
+  // 'desktop' = sidebar view, 'mobile' = bottom nav view
+  // Detect device type on initialization, then allow user override
+  const getInitialViewMode = () => {
+    if (typeof window === 'undefined') return 'desktop';
+    
+    // Check if user has previously overridden the view mode
+    const savedViewMode = localStorage.getItem('userViewMode');
+    if (savedViewMode && (savedViewMode === 'desktop' || savedViewMode === 'mobile')) {
+      return savedViewMode;
     }
-    return 'desktop';
-  });
+    
+    // Use device detection for initial view mode
+    const deviceType = getDeviceType();
+    return deviceType === 'desktop' ? 'desktop' : 'mobile';
+  };
+  
+  const [viewMode, setViewMode] = useState(getInitialViewMode);
+  const isDesktopView = viewMode === 'desktop';
+  
+  // Handle view mode changes from Sidebar and save user preference
+  const handleViewModeChange = (newViewMode) => {
+    setViewMode(newViewMode);
+    // Save user preference to override device detection in future visits
+    localStorage.setItem('userViewMode', newViewMode);
+  };
+  
+  // For responsive main content layout
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Keep a stable reference to the current active section
   const activeSectionRef = useRef(activeSection);
@@ -192,51 +219,23 @@ const Index = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeSection', activeSection);
     }
-  }, [activeSection]);
-  // Handle resize with a stable reference to active section
+  }, [activeSection]);  // Handle device type changes with a stable reference to active section
   useEffect(() => {
-    let resizeTimer;
-    
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
+    // Keep activeSectionRef in sync for device type changes
+    const currentSection = localStorage.getItem('activeSection') || 'hero';
+      if (isDesktopView && currentSection !== activeSectionRef.current) {
+      setActiveSection(currentSection);
       
-      resizeTimer = setTimeout(() => {
-        const wasDesktop = isDesktop;
-        const nowDesktop = window.innerWidth > 1024;
-        
-        // Update screen size
-        const w = window.innerWidth;
-        const newScreenSize = w <= 640 ? 'mobile' : w <= 1024 ? 'tablet' : 'desktop';
-        setScreenSize(newScreenSize);
-        
-        if (wasDesktop !== nowDesktop) {
-          setIsDesktop(nowDesktop);
-          
-          if (!wasDesktop && nowDesktop) {
-            const currentSection = localStorage.getItem('activeSection') || 'hero';
-            
-            if (currentSection !== activeSectionRef.current) {
-              setActiveSection(currentSection);
-            }
-            
-            setTimeout(() => {
-              const el = document.getElementById(currentSection);
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }
-        }
-      }, 50);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [isDesktop]);  // Single unified scroll tracking effect
+      setTimeout(() => {
+        const el = document.getElementById(currentSection);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []); // Remove device type dependency
+
+// Single unified scroll tracking effect
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!isDesktopView) return;
 
     const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
     let scrollContainer = null;    // Get the scrolling container (main element)
@@ -349,10 +348,9 @@ const Index = () => {
       if (scrollContainer) {
         scrollContainer.removeEventListener('scroll', handleScroll);
       }
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchmove', handleWheel);
+      window.removeEventListener('wheel', handleWheel);      window.removeEventListener('touchmove', handleWheel);
     };
-  }, [isDesktop, loading]);
+  }, [isDesktopView, loading]);
 
   // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
@@ -361,7 +359,7 @@ const Index = () => {
     
     setActiveSection(sectionId);
     
-    if (isDesktop) {
+    if (isDesktopView) {
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -645,11 +643,10 @@ const Index = () => {
   if (loading) {
     return <LoadingScreen onLoadLocal={loadLocalContent} onLoadDrive={loadContentFromDrive} />;
   }
-  // Rest of your component...
-  // Modify the return statement to include the new components
-  return (
-    <div className={isDesktop ? "flex flex-row min-h-screen" : ""}>      {/* Floating Admin Panel open button (desktop only) */}
-      {isDesktop && isAdmin && !showAdminPanel && (
+    // Main component render
+  return (    <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden`} style={{ minWidth: '320px' }}>
+      {/* Floating Admin Panel open button (desktop only) */}
+      {isDesktopView && isAdmin && !showAdminPanel && (
         <button
           onClick={() => setShowAdminPanel(true)}
           className="fixed top-8 right-8 z-50 bg-blue-700 hover:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -660,8 +657,7 @@ const Index = () => {
       )}      <Sidebar
         onNavigate={handleNavigate}
         activeSection={activeSection}
-        setShowLogin={setShowLogin}
-        isAdmin={isAdmin}
+        setShowLogin={setShowLogin}        isAdmin={isAdmin}
         signOut={signOut}
         auth={auth}
         content={content}
@@ -670,40 +666,48 @@ const Index = () => {
         saveContentToDrive={saveContentToDriveHandler}
         driveSaving={driveSaving}
         loading={loading}
+        onViewModeChange={handleViewModeChange}
+        viewMode={viewMode}
       />
-      {showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>        {isDesktop && isAdmin && showAdminPanel && (
+      {showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>        {isDesktopView && isAdmin && showAdminPanel && (
           <AdminPanel
             isAdmin={isAdmin}
             reloadFromDrive={reloadFromDrive}
             saveContentToDrive={saveContentToDriveHandler}
             driveSaving={driveSaving}
             driveMessage={driveMessage}
-            screenSize={screenSize}
+            screenSize={viewMode}
             content={content}
             loadLocalContent={loadLocalContent}
             loadContentFromDrive={loadContentFromDrive}
             loading={loading}
             onClose={() => setShowAdminPanel(false)}
-          />        )}        {/* Mobile/tablet: AdminPanel functionality is integrated into Sidebar popup menu */}
-      </Suspense>
-      
-      {isDesktop ? (        <main
+          />
+        )}{/* Mobile/tablet: AdminPanel functionality is integrated into Sidebar popup menu */}
+      </Suspense>      {isDesktopView ? (        <main
           id="main-scroll-container"
-          className="flex-1 w-full ml-0 lg:ml-64 transition-all duration-300 overflow-y-auto"
-          style={{ minHeight: '100vh', height: '100vh' }}
+          className={`responsive-content main-content-responsive flex-1 w-full transition-all duration-300 overflow-y-auto overflow-x-hidden`}style={{ 
+            minHeight: '100vh', 
+            height: '100vh',
+            minWidth: 0,
+            marginLeft: isDesktopView ? 
+              `${Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256))}px` : '0',
+            maxWidth: isDesktopView ? 
+              `calc(100vw - ${Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256))}px)` : '100vw'
+          }}
         >
           {/* Remove scroll snap classes */}
-          <div>
+          <div className="w-full min-w-0">
             {sections.map(({ id, component }) => (
-              <section id={id} key={id} className="min-h-screen">
+              <section id={id} key={id} className="min-h-screen w-full">
                 {component}
               </section>
             ))}
           </div>
         </main>
       ) : (
-        <div className="ml-0 lg:ml-64 transition-all duration-300">
-          <div className={`fade-section ${fade ? 'fade-in' : 'fade-out'}`}>{currentSection}</div>
+        <div className={`transition-all duration-300 w-full min-w-0`} style={{ marginLeft: 0 }}>
+          <div className={`fade-section ${fade ? 'fade-in' : 'fade-out'} w-full`}>{currentSection}</div>
         </div>
       )}
     </div>

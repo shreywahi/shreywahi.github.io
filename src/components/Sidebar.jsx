@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut } from 'lucide-react';
+import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut, Monitor } from 'lucide-react';
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -30,20 +30,27 @@ const socialLinks = [
 	},
 ];
 
-// Sidebar nav button component
-const SidebarNavButton = ({ label, icon: Icon, onClick, active }) => (
-	<button
-		onClick={onClick}
-		className={`flex items-center gap-3 text-lg py-3 px-4 rounded-lg transition-colors text-left font-medium focus:outline-none focus:ring-2 focus:ring-blue-400
-			${active ? "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" : "text-white hover:text-blue-700 hover:bg-blue-100"}
-		`}
-		aria-label={`Go to ${label}`}
-		tabIndex={0}
-	>
-		{Icon && <Icon size={22} />}
-		<span>{label}</span>
-	</button>
-);
+// Sidebar nav button component with responsive sizing
+const SidebarNavButton = ({ label, icon: Icon, onClick, active, windowWidth }) => {
+	const isSmall = windowWidth < 768;
+	const isMedium = windowWidth >= 768 && windowWidth < 1024;
+	const iconSize = isSmall ? 20 : isMedium ? 22 : 24;
+	const fontSize = isSmall ? 'text-base' : isMedium ? 'text-lg' : 'text-lg';
+	
+	return (
+		<button
+			onClick={onClick}
+			className={`flex flex-row items-center justify-start gap-4 py-3 px-4 rounded-lg transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 w-full
+				${active ? "bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200" : "text-white hover:text-blue-700 hover:bg-blue-100"}
+			`}
+			aria-label={`Go to ${label}`}
+			tabIndex={0}
+		>
+			{Icon && <Icon size={iconSize} />}
+			<span className={`${fontSize} leading-tight`}>{label}</span>
+		</button>
+	);
+};
 
 const Sidebar = ({ 
   onNavigate, 
@@ -58,22 +65,68 @@ const Sidebar = ({
   loadContentFromDrive,
   saveContentToDrive,
   driveSaving,
-  loading
+  loading,
+  // View toggle callback
+  onViewModeChange,
+  // Current view mode from parent
+  viewMode
 }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
-	const openButtonRef = useRef(null);	const [screenSize, setScreenSize] = useState('desktop');	const [showMoreMenu, setShowMoreMenu] = useState(false);
+	const openButtonRef = useRef(null);
+		// Responsive sizing based on window width
+	const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+	const isSmallDesktop = windowWidth < 768;
+	const isMediumDesktop = windowWidth >= 768 && windowWidth < 1024;
+	const isLargeDesktop = windowWidth >= 1024;
+		// Helper functions for responsive sizing
+	const getIconSize = (baseSize = 'medium') => {
+		const sizes = {
+			small: isSmallDesktop ? 14 : isMediumDesktop ? 16 : 18,
+			medium: isSmallDesktop ? 16 : isMediumDesktop ? 18 : 20,
+			large: isSmallDesktop ? 18 : isMediumDesktop ? 20 : 22,
+			xlarge: isSmallDesktop ? 22 : isMediumDesktop ? 24 : 28,
+			xxlarge: isSmallDesktop ? 26 : isMediumDesktop ? 28 : 32
+		};
+		return sizes[baseSize] || sizes.medium;
+	};
+	const getTextSize = (baseSize = 'base') => {
+		const sizes = {
+			xs: isSmallDesktop ? 'text-xs' : 'text-xs',
+			sm: isSmallDesktop ? 'text-xs' : isMediumDesktop ? 'text-sm' : 'text-sm',
+			base: isSmallDesktop ? 'text-sm' : isMediumDesktop ? 'text-base' : 'text-base',
+			lg: isSmallDesktop ? 'text-base' : isMediumDesktop ? 'text-lg' : 'text-xl',
+			xl: isSmallDesktop ? 'text-lg' : isMediumDesktop ? 'text-xl' : 'text-2xl',
+			xxl: isSmallDesktop ? 'text-xl' : isMediumDesktop ? 'text-2xl' : 'text-3xl'
+		};
+		return sizes[baseSize] || sizes.base;
+	};
+	// Use view mode from parent (single source of truth)
+	const currentViewMode = viewMode || 'desktop';
+	const isCurrentlyDesktop = currentViewMode === 'desktop';
+	
+	// Admin access states
+	const [showAdminToggle, setShowAdminToggle] = useState(false);	
+	// Mobile/tablet navigation states
+	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [showAlternateButtons, setShowAlternateButtons] = useState(false);
 	const [userToggledNavigation, setUserToggledNavigation] = useState(false);
 	const moreButtonRef = useRef(null);
 	const moreMenuRef = useRef(null);
-		// Triple click detection state
-	const [clickCount, setClickCount] = useState(0);
-	const clickTimeoutRef = useRef(null);
-		// Portfolio triple click detection state
+		
+	// Mobile toggle button triple click detection state (for admin access)
+	const [mobileToggleClickCount, setMobileToggleClickCount] = useState(0);
+	const [showMobileAdminAccess, setShowMobileAdminAccess] = useState(false);
+	const mobileToggleClickTimeoutRef = useRef(null);		// Portfolio triple click detection state
 	const [portfolioClickCount, setPortfolioClickCount] = useState(0);
-	const portfolioClickTimeoutRef = useRef(null);	const [showAdminLogin, setShowAdminLogin] = useState(false);
+	const portfolioClickTimeoutRef = useRef(null);
+	
+	// Admin toggle auto-hide timer
+	const adminToggleTimeoutRef = useRef(null);
+	
+	// Admin login state
+	const [showAdminLogin, setShowAdminLogin] = useState(false);
 	const [adminLoginClicked, setAdminLoginClicked] = useState(false);
 	const adminLoginRef = useRef(null);
 	
@@ -146,24 +199,14 @@ const Sidebar = ({
 		} finally {
 			setSwitchingContent(false);
 		}
-	};useEffect(() => {
+	};	useEffect(() => {
 		setMounted(true);
-		// Detect screen size
-		const checkScreen = () => {
-			const w = window.innerWidth;
-			if (w <= 640) setScreenSize('mobile');
-			else if (w <= 1024) setScreenSize('tablet');
-			else setScreenSize('desktop');
-		};
-		checkScreen();
-		window.addEventListener('resize', checkScreen);
-		return () => {
-			window.removeEventListener('resize', checkScreen);
-		};
-	}, []);	// Sync navigation mode with active section when screen size changes or active section changes
+	}, []);
+
+	// Sync navigation mode with active section when in mobile/tablet view
 	useEffect(() => {
-		// Only apply this logic for mobile/tablet screens
-		if (screenSize === 'desktop') return;
+		// Only apply this logic for mobile/tablet view
+		if (isCurrentlyDesktop) return;
 		
 		// Don't auto-sync if user has manually toggled navigation
 		if (userToggledNavigation) return;
@@ -174,14 +217,14 @@ const Sidebar = ({
 		
 		// Update navigation mode if it doesn't match the current active section
 		setShowAlternateButtons(shouldShowAlternate);
-	}, [activeSection, screenSize, userToggledNavigation]);
+	}, [activeSection, isCurrentlyDesktop, userToggledNavigation]);
 
-	// Reset user toggle flag only when screen size changes to desktop (to enable auto-sync when returning to mobile)
+	// Reset user toggle flag when switching to desktop view
 	useEffect(() => {
-		if (screenSize === 'desktop') {
+		if (isCurrentlyDesktop) {
 			setUserToggledNavigation(false);
 		}
-	}, [screenSize]);
+	}, [isCurrentlyDesktop]);
 	// Hide More menu when clicking outside
 	useEffect(() => {
 		if (!showMoreMenu) return;
@@ -196,108 +239,139 @@ const Sidebar = ({
 			}
 		}
 		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [showMoreMenu]);
+		return () => document.removeEventListener("mousedown", handleClickOutside);	}, [showMoreMenu]);
 
-	// Handle Portfolio triple click detection
+	// Handle view mode changes and notify parent
+	const handleViewModeChange = (newViewMode) => {
+		if (onViewModeChange) {
+			onViewModeChange(newViewMode);
+		}
+	};	// Handle mobile toggle button click detection (navigation toggle + admin access)
+	const handleMobileToggleClick = () => {
+		setMobileToggleClickCount(prev => {
+			const newCount = prev + 1;
+			
+			// Clear existing timeout
+			if (mobileToggleClickTimeoutRef.current) {
+				clearTimeout(mobileToggleClickTimeoutRef.current);
+			}
+			
+			// Set a new timeout to reset click count after 300ms
+			mobileToggleClickTimeoutRef.current = setTimeout(() => {				if (newCount === 3) {
+					// Triple click - show admin access in mobile menu
+					console.log('Mobile triple-click detected - showing admin button and starting 10s timer');
+					setShowMobileAdminAccess(true);
+					setShowMoreMenu(true); // Ensure menu is open to see admin option
+					
+					// Start auto-hide timer (hide after 10 seconds if not clicked)
+					if (adminToggleTimeoutRef.current) {
+						clearTimeout(adminToggleTimeoutRef.current);
+					}					adminToggleTimeoutRef.current = setTimeout(() => {
+						console.log('Mobile admin access auto-hide timer triggered - hiding mobile admin button');
+						setShowMobileAdminAccess(false);
+					}, 3000); // Hide after 10 seconds
+				}else if (newCount === 1) {
+					// Single click - toggle navigation buttons AND show menu
+					setShowAlternateButtons(prev => !prev);
+					setUserToggledNavigation(true);
+					setShowMoreMenu(true);
+				} else if (newCount === 2) {
+					// Double click - just toggle menu without changing navigation
+					setShowMoreMenu(prev => !prev);
+				}
+				
+				setMobileToggleClickCount(0);
+			}, 300); // 300ms window for detecting multiple clicks
+			
+			return newCount;
+		});
+	};	// Handle Portfolio triple click detection (desktop only - for admin access)
 	const handlePortfolioClick = () => {
-		setPortfolioClickCount(prev => prev + 1);
+		// Only handle triple clicks on desktop
+		if (!isCurrentlyDesktop) return;
 		
-		// Clear existing timeout
-		if (portfolioClickTimeoutRef.current) {
-			clearTimeout(portfolioClickTimeoutRef.current);
-		}
-		
-		// Set a new timeout to reset click count after 500ms
-		portfolioClickTimeoutRef.current = setTimeout(() => {
-			const currentCount = portfolioClickCount + 1; // +1 because state update is async
+		setPortfolioClickCount(prev => {
+			const newCount = prev + 1;
 			
-			if (currentCount === 3) {
-				// Triple click - show admin login button
-				setShowAdminLogin(true);
-			}
-			
-			setPortfolioClickCount(0);
-		}, 300); // 300ms window for detecting multiple clicks
-	};
-
-	// Handle triple click detection
-	const handleToggleClick = () => {
-		setClickCount(prev => prev + 1);
-		
-		// Clear existing timeout
-		if (clickTimeoutRef.current) {
-			clearTimeout(clickTimeoutRef.current);
-		}
-		
-		// Set a new timeout to reset click count after 500ms
-		clickTimeoutRef.current = setTimeout(() => {
-			const currentCount = clickCount + 1; // +1 because state update is async
-			
-			if (currentCount === 3) {
-				// Triple click - open menu popup
-				setShowMoreMenu(true);
-			} else {
-				// Single or double click - toggle navigation buttons
-				setShowAlternateButtons(prev => !prev);
-				// Mark that user has manually toggled navigation
-				setUserToggledNavigation(true);
-			}
-			
-			setClickCount(0);
-		}, 300); // 300ms window for detecting multiple clicks
-	};	// Hide admin login button when user exits admin mode
-	useEffect(() => {
-		if (!isAdmin) {
-			setShowAdminLogin(false);
-			setAdminLoginClicked(false);
-		}
-	}, [isAdmin]);
-
-	// Hide admin login button when clicking outside of it (only if not clicked yet)
-	useEffect(() => {
-		if (!showAdminLogin || adminLoginClicked) return;
-		
-		function handleClickOutside(e) {
-			if (
-				adminLoginRef.current &&
-				!adminLoginRef.current.contains(e.target)
-			) {
-				setShowAdminLogin(false);
-			}
-		}
-		
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [showAdminLogin, adminLoginClicked]);
-
-	// Cleanup timeout on unmount
-	useEffect(() => {
-		return () => {
-			if (clickTimeoutRef.current) {
-				clearTimeout(clickTimeoutRef.current);
-			}
+			// Clear existing timeout
 			if (portfolioClickTimeoutRef.current) {
 				clearTimeout(portfolioClickTimeoutRef.current);
+			}
+			
+			// Set a new timeout to reset click count after 300ms
+			portfolioClickTimeoutRef.current = setTimeout(() => {				if (newCount === 3) {
+					// Triple click - show admin toggle button
+					console.log('Desktop triple-click detected - showing admin button and starting 10s timer');
+					setShowAdminToggle(true);
+					
+					// Start auto-hide timer (hide after 10 seconds if not clicked)
+					if (adminToggleTimeoutRef.current) {
+						clearTimeout(adminToggleTimeoutRef.current);
+					}					adminToggleTimeoutRef.current = setTimeout(() => {
+						console.log('Admin toggle auto-hide timer triggered - hiding desktop admin button');
+						setShowAdminToggle(false);
+					}, 3000); // Hide after 10 seconds
+				}
+				
+				setPortfolioClickCount(0);
+			}, 300); // 300ms window for detecting multiple clicks
+			
+			return newCount;
+		});
+	};// Hide admin UI when user exits admin mode
+	useEffect(() => {
+		if (!isAdmin) {
+			setShowAdminToggle(false);
+			setShowMobileAdminAccess(false);
+			// Clear admin toggle timeout when hiding admin UI
+			if (adminToggleTimeoutRef.current) {
+				clearTimeout(adminToggleTimeoutRef.current);
+				adminToggleTimeoutRef.current = null;
+			}
+		}
+	}, [isAdmin]);
+	// Window resize listener for responsive sidebar
+	useEffect(() => {
+		const handleResize = () => {
+			setWindowWidth(window.innerWidth);
+		};
+
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (portfolioClickTimeoutRef.current) {
+				clearTimeout(portfolioClickTimeoutRef.current);
+			}
+			if (mobileToggleClickTimeoutRef.current) {
+				clearTimeout(mobileToggleClickTimeoutRef.current);
+			}
+			if (adminToggleTimeoutRef.current) {
+				clearTimeout(adminToggleTimeoutRef.current);
 			}
 		};
 	}, []);
 
-	return (
-		<>
-			{/* Sidebar only for desktop */}
-			{screenSize === 'desktop' && (
-				<aside
+	return (		<>			{/* Sidebar only for desktop view */}
+			{isCurrentlyDesktop && (				<aside
 					ref={sidebarRef}
-					className="fixed top-0 left-0 h-full w-72 max-w-xs bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col justify-between border-r border-blue-300 overflow-y-auto"
+					className="sidebar-responsive fixed top-0 left-0 h-full bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col border-r border-blue-300 overflow-y-auto"
 					role="navigation"
 					aria-label="Sidebar Navigation"
 					tabIndex={-1}
-					style={{ width: '16rem', maxWidth: '16rem' }}
+					style={{ 
+						width: Math.max(160, Math.min(256, windowWidth < 768 ? 192 : windowWidth < 1024 ? 224 : 256)),
+						minWidth: '160px',
+						maxWidth: '256px'
+					}}
 				>
-					<div>
-						<br /><br />						<div
-							className="flex items-center justify-center h-24 text-3xl font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer"
+					{/* Portfolio Header */}
+					<div className="flex flex-col items-center py-4">
+						<div
+							className={`flex items-center justify-center text-center font-bold text-white tracking-wide hover:text-blue-700 transition-colors cursor-pointer px-2 ${
+								isSmallDesktop ? 'h-14' : isMediumDesktop ? 'h-16' : 'h-20'
+							} ${getTextSize('xl')}`}
 							onClick={handlePortfolioClick}
 							tabIndex={0}
 							aria-label="Portfolio - Triple click for admin access"
@@ -305,8 +379,46 @@ const Sidebar = ({
 						>
 							Portfolio
 						</div>
-						{/* Navigation */}
-						<nav className="flex flex-col gap-2 mt-10 px-6" aria-label="Main navigation">
+						
+						{/* Admin Toggle Button (appears after 3 clicks on Portfolio) */}
+						{showAdminToggle && (
+							<div className="flex justify-center">
+								{!isAdmin ? (
+									<button
+										onClick={() => {
+											console.log('Desktop admin login button clicked - clearing timer');
+											setShowLogin(true);
+											// Clear auto-hide timer since user clicked the admin button
+											if (adminToggleTimeoutRef.current) {
+												clearTimeout(adminToggleTimeoutRef.current);
+												adminToggleTimeoutRef.current = null;
+											}
+										}}
+										className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 ${getTextSize('sm')}`}
+										aria-label="Admin Login"
+										tabIndex={0}
+									>
+										<LogIn size={getIconSize('medium')} />
+										<span>Admin</span>
+									</button>
+								) : (
+									<button
+										onClick={() => signOut(auth)}
+										className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg bg-red-700 hover:bg-red-800 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 ${getTextSize('sm')}`}
+										aria-label="Exit Admin"
+										tabIndex={0}
+									>
+										<LogOut size={getIconSize('medium')} />
+										<span>Exit</span>
+									</button>
+								)}
+							</div>
+						)}
+					</div>
+
+					{/* Centered Navigation */}
+					<div className="flex-1 flex flex-col justify-center">
+						<nav className={`flex flex-col gap-1 w-full ${isSmallDesktop ? 'px-2' : 'px-4'}`} aria-label="Main navigation">
 							{navLinks.map((link) => (
 								<SidebarNavButton
 									key={link.section}
@@ -316,70 +428,61 @@ const Sidebar = ({
 										if (onNavigate) onNavigate(link.section);
 									}}
 									active={activeSection === link.section}
+									windowWidth={windowWidth}
 								/>
 							))}
-						</nav>						{/* Admin Login/Exit Admin button (desktop) */}
-						{showAdminLogin && (
-							<div className="flex justify-center my-4" ref={adminLoginRef}>
-								{!isAdmin ? (
-									<button
-										onClick={() => {
-											setShowLogin(true);
-											setAdminLoginClicked(true);
-										}}
-										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-										aria-label="Admin Login"
-										tabIndex={0}
-									>
-										<LogIn size={20} />
-										<span>Admin Login</span>
-									</button>
-								) : (
-									<button
-										onClick={() => signOut(auth)}
-										className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
-										aria-label="Exit Admin"
-										tabIndex={0}
-									>
-										<LogOut size={20} />
-										<span>Exit Admin</span>
-									</button>
-								)}
-							</div>
-						)}
-						<div className="flex justify-center my-4">
-							{mounted && (
-								<button
-									onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-									className="flex items-center gap-2 px-4 py-2 w-44 justify-center rounded-lg bg-gray-900 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-									aria-label="Toggle theme"
+						</nav>
+					</div>
+
+					{/* Footer section */}
+					<div className="flex flex-col items-center pb-4">
+						{/* Social Links */}
+						<div className={`flex flex-row items-center justify-center gap-3 mb-4 ${isSmallDesktop ? 'px-2' : 'px-4'}`}>
+							{socialLinks.map(({ href, icon: Icon, label }) => (
+								<a
+									key={label}
+									href={href}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+									aria-label={label}
 									tabIndex={0}
 								>
-									{resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-									<span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-								</button>
-							)}
-						</div>
-					</div>
-					{/* Social Links */}
-					<div className="flex flex-row items-center gap-4 mb-8 px-16">
-						{socialLinks.map(({ href, icon: Icon, label }) => (
-							<a
-								key={label}
-								href={href}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-white hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-								aria-label={label}
+									<Icon size={getIconSize('large')} />
+								</a>
+							))}
+						</div>						{/* Theme Toggle and View Toggle buttons side by side */}
+						<div className="flex flex-row items-center justify-center gap-3 mb-4">
+							{/* Theme Toggle Button */}
+							<button
+								onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+								className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
+								aria-label="Toggle Theme"
 								tabIndex={0}
 							>
-								<Icon size={24} />
-							</a>
-						))}
+								{resolvedTheme === "dark" ? <Sun size={getIconSize('xxlarge')} /> : <Moon size={getIconSize('xxlarge')} />}
+								<span className="text-center leading-tight">Theme</span>
+							</button>
+
+							{/* View Toggle Button */}
+							<button
+								onClick={() => {
+									// Direct toggle between desktop and mobile
+									const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
+									if (onViewModeChange) onViewModeChange(newViewMode);
+								}}
+								className={`flex flex-row items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 w-24 h-12 ${getTextSize('sm')}`}
+								aria-label={`${isCurrentlyDesktop ? 'Mobile' : 'Desktop'} View`}
+								tabIndex={0}
+							>
+								<Smartphone size={getIconSize('xxlarge')} />
+								<span className="text-center leading-tight text-xs">Mobile</span>
+							</button>
+						</div>
 					</div>
 				</aside>
-			)}			{/* Mobile/tablet sticky footer nav */}
-			{(screenSize === 'mobile' || screenSize === 'tablet') && (
+			)}			{/* Mobile sticky footer nav */}
+			{!isCurrentlyDesktop && (
 				<nav
 					className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur flex items-center h-16 border-t border-blue-300"
 					aria-label="Footer Navigation"
@@ -422,15 +525,28 @@ const Sidebar = ({
 					>						{showAlternateButtons ? <Award size={24} /> : <User size={24} />}
 						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Certs" : "About"}</span>
 					</button>					{/* More button and its popup */}
-					<div className="relative flex flex-col items-center justify-center flex-1 h-full">						<button
+					<div className="relative flex flex-col items-center justify-center flex-1 h-full">
+						<button
 							ref={moreButtonRef}
-							onClick={handleToggleClick}
+							onClick={(e) => {
+								e.preventDefault();
+								handleMobileToggleClick();
+							}}
+							onTouchStart={(e) => {
+								e.preventDefault();
+							}}
+							style={{ 
+								touchAction: 'manipulation',
+								userSelect: 'none',
+								WebkitUserSelect: 'none',
+								WebkitTouchCallout: 'none'
+							}}
 							className={`flex flex-col items-center justify-center w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-400
 								${showMoreMenu
 									? 'text-blue-400'
 									: 'text-white hover:text-blue-400'}
 							`}
-							aria-label="Toggle navigation options and settings menu. Triple click to open menu."
+							aria-label="Toggle navigation options and settings menu. Triple click for admin access."
 							tabIndex={0}
 						><ArrowLeftRight size={24} />
 							<span className="text-xs mt-1 text-center leading-tight">Toggle</span>
@@ -509,34 +625,55 @@ const Sidebar = ({
 													}
 												</span>
 											</button>
-										</>
-									)}									{/* Admin Login/Exit Admin button (mobile/tablet) - moved below Load from Drive */}
-									{!isAdmin ? (
-										<button
-											onClick={() => {
-												setShowLogin(true);
-												setShowMoreMenu(false);
-											}}
-											className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-											aria-label="Admin Login"
-											tabIndex={0}
-										>
-											<LogIn size={20} />
-											<span className="text-xs mt-1">Admin Login</span>
-										</button>
-									) : (
-										<button
-											onClick={() => {
-												signOut(auth);
-												setShowMoreMenu(false);
-											}}
-											className="flex flex-col items-center text-white hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-											aria-label="Exit Admin"
-											tabIndex={0}
-										>
-											<LogOut size={20} />
-											<span className="text-xs mt-1">Exit Admin</span>
-										</button>
+										</>									)}									{/* View Toggle button (mobile/tablet) - always show */}
+									<button
+										onClick={() => {
+											// Toggle between desktop and mobile view
+											const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
+											if (onViewModeChange) onViewModeChange(newViewMode);
+											setShowMoreMenu(false);
+										}}
+										className="flex flex-col items-center text-white hover:text-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+										aria-label={isCurrentlyDesktop ? "Switch to Mobile View" : "Switch to Desktop View"}
+										tabIndex={0}
+									>
+										<Monitor size={20} />
+										<span className="text-xs mt-1">Desktop View</span>
+									</button>
+
+									{/* Admin Login/Exit Admin button (mobile/tablet) - show only after triple click or if already admin */}
+									{(showMobileAdminAccess || isAdmin) && (										!isAdmin ? (											<button
+												onClick={() => {
+													console.log('Mobile admin login button clicked - clearing timer');
+													setShowLogin(true);
+													setShowMoreMenu(false);
+													// Clear auto-hide timer since user clicked the admin button
+													if (adminToggleTimeoutRef.current) {
+														clearTimeout(adminToggleTimeoutRef.current);
+														adminToggleTimeoutRef.current = null;
+													}
+												}}
+												className="flex flex-col items-center text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+												aria-label="Admin Login"
+												tabIndex={0}
+											>
+												<LogIn size={20} />
+												<span className="text-xs mt-1">Admin Login</span>
+											</button>
+										) : (
+											<button
+												onClick={() => {
+													signOut(auth);
+													setShowMoreMenu(false);
+												}}
+												className="flex flex-col items-center text-white hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+												aria-label="Exit Admin"
+												tabIndex={0}
+											>
+												<LogOut size={20} />
+												<span className="text-xs mt-1">Exit Admin</span>
+											</button>
+										)
 									)}
 								</div>
 							</div>

@@ -13,11 +13,10 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
       setTempDesc(heroDesc);
     }
   }, [editMode, heroName, heroDesc]);
-
   return (
-    <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-blue-950 pb-24 sm:pb-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 text-center">
-        <div className="animate-fade-in">
+    <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-blue-950 pb-24 sm:pb-0 w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 text-center w-full">
+        <div className="animate-fade-in w-full">
           <br /><br />
           {isAdmin && editMode ? (
             <div>
@@ -76,24 +75,23 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
                 </button>
               )}
             </>
-          )}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-16">
+          )}          <div className="flex flex-col xl:flex-row gap-4 xl:gap-6 justify-center items-center mb-8 sm:mb-16 w-full max-w-4xl mx-auto">
             <button
-              className="bg-blue-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+              className="bg-blue-700 text-white px-6 lg:px-10 py-3 lg:py-5 rounded-xl text-lg lg:text-xl font-semibold hover:bg-blue-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full xl:w-auto min-w-0"
               aria-label="Download Resume PDF"
             >
-              <a href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg" className="flex items-center justify-center gap-3">
-                <Download size={24} />
-                Resume PDF
+              <a href="https://drive.google.com/uc?export=download&id=1S0nqdpUimw_mBBQNxVdTZzinGrdFv7Xg" className="flex items-center justify-center gap-3 min-w-0">
+                <Download size={20} />
+                <span className="truncate">Resume PDF</span>
               </a>
             </button>            
             <button
-              className="bg-yellow-700 text-white px-10 py-5 rounded-xl text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+              className="bg-yellow-700 text-white px-6 lg:px-10 py-3 lg:py-5 rounded-xl text-lg lg:text-xl font-semibold hover:bg-yellow-800 transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full xl:w-auto min-w-0"
               aria-label="Get WebApp Apk"
             >
-              <a href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0" className="flex items-center justify-center gap-3">
-                <Smartphone size={24} />
-                Portfolio Apk
+              <a href="https://drive.google.com/uc?export=download&id=1FUFbRulij4fiG6oSb_dS6hqKEGz95Ok0" className="flex items-center justify-center gap-3 min-w-0">
+                <Smartphone size={20} />
+                <span className="truncate">Portfolio Apk</span>
               </a>
             </button>
             <button
@@ -104,12 +102,11 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
                   const el = document.getElementById('contact');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }
-              }}
-              className="border-2 border-gray-700 dark:border-gray-200 text-gray-900 dark:text-gray-200 px-10 py-5 rounded-xl text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center w-full sm:w-auto"
+              }}              className="border-2 border-gray-700 dark:border-gray-200 text-gray-900 dark:text-gray-200 px-6 lg:px-10 py-3 lg:py-5 rounded-xl text-lg lg:text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center w-full xl:w-auto min-w-0"
               aria-label="Scroll to Contact section"
               >
-              <Mail size={24} />
-              Get In Touch
+              <Mail size={20} />
+              <span className="truncate">Get In Touch</span>
             </button>
           </div>
         </div>
