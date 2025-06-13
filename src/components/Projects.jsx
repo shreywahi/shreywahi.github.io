@@ -17,6 +17,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
         return null;
     });
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategories, setSelectedCategories] = useState([]);
 
     // Persist modal state to localStorage
     useEffect(() => {
@@ -45,14 +46,39 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
         }
     }, [selectedProject, onSectionChange]);
 
-    // Filter projects by name (case-insensitive) for display only
-    const filteredProjects = projectList.filter(project =>
-        project.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Filter projects by name and categories
+    const filteredProjects = projectList.filter(project => {
+        // Filter by search query
+        const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        // Filter by categories (if any are selected)
+        const matchesCategory = selectedCategories.length === 0 || 
+            selectedCategories.some(selectedCat => 
+                project.category && project.category.includes(selectedCat)
+            );
+        
+        return matchesSearch && matchesCategory;
+    });
+
+    // Get all unique categories from projects
+    const allCategories = [...new Set(projectList.flatMap(project => project.category || []))].sort();
+
+    // Handle category selection
+    const toggleCategory = (category) => {
+        setSelectedCategories(prev => 
+            prev.includes(category) 
+                ? prev.filter(cat => cat !== category)
+                : [...prev, category]
+        );
+    };
+
+    const removeCategory = (category) => {
+        setSelectedCategories(prev => prev.filter(cat => cat !== category));
+    };
 
     // Custom handler to update the order in the full list, not just filtered
     const handleDragDrop = (newFilteredOrder) => {
-        if (!searchQuery) {
+        if (!searchQuery && selectedCategories.length === 0) {
             // No filter: update the whole list
             setProjectList(newFilteredOrder);
         } else {
@@ -83,7 +109,9 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
     const cancelEdit = () => {
         setEditIdx(null);
         setEditData(null);
-    };    const saveEdit = async idx => {
+    };
+    
+    const saveEdit = async idx => {
         if (!setProjectList) return;
         const newList = projectList.slice();
         newList[idx] = editData;
@@ -98,9 +126,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                 await saveContentToDrive();
             }
         }
-    };
-
-    return (
+    };    return (
         <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="text-center mb-8">
@@ -113,22 +139,37 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                         placeholder="Search projects by name..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full max-w-md mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white dark:bg-gray-800 dark:border-gray-700"
+                        className="w-full max-w-md mx-auto px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white dark:bg-gray-800 dark:border-gray-700 mb-4"
                         aria-label="Search projects"
                     />
+                    
+                    {/* Category Filters */}
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                        {allCategories.map(category => (
+                            <button
+                                key={category}
+                                onClick={() => toggleCategory(category)}
+                                className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                                    selectedCategories.includes(category)
+                                        ? 'bg-blue-600 text-white border-2 border-blue-600'
+                                        : 'bg-gray-200 text-gray-700 border-2 border-gray-300 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600'
+                                }`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Results count */}
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Showing {filteredProjects.length} of {projectList.length} projects
+                    </div>
                 </div>
 
-                {isAdmin ? (                  <DragDrop
-                    items={projectList}
-                    onChange={async newOrder => {
-                      setProjectList(newOrder);
-                      if (updateContent) {
-                        await updateContent('projects', newOrder);
-                      }
-                      if (saveContentToDrive) {
-                        await saveContentToDrive();
-                      }
-                    }}
+                {isAdmin ? (
+                  <DragDrop
+                    items={filteredProjects}
+                    onChange={handleDragDrop}
                     className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
                     renderItem={(project, dragProps, idx, isDragged, isDropTarget) => {
                       const realIdx = projectList.findIndex(p => p.title === project.title);
@@ -167,6 +208,15 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                               placeholder="Image URL"
                               style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                           />
+                          <div>
+                              <label>Categories (comma separated):</label>
+                              <input
+                                  value={(editData.category || []).join(', ')}
+                                  onChange={e => setEditData({ ...editData, category: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                                  className="w-full mb-2 p-2 rounded border"
+                                  style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
+                              />
+                          </div>
                           <div>
                               <label>Tags (comma separated):</label>
                               <input
@@ -269,6 +319,15 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                               placeholder="Image URL"
                               style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                           />
+                          <div>
+                              <label>Categories (comma separated):</label>
+                              <input
+                                  value={(editData.category || []).join(', ')}
+                                  onChange={e => setEditData({ ...editData, category: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                                  className="w-full mb-2 p-2 rounded border"
+                                  style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
+                              />
+                          </div>
                           <div>
                               <label>Tags (comma separated):</label>
                               <input

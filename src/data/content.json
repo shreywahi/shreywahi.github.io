@@ -106,91 +106,91 @@
       "skills": ["OOP", "KQL", "Microservices", "Distributed Systems"]
     }
   ],
-  "projects": [
-    {
+  "projects": [    {
       "title": "Dashboard Monitoring Tool",
       "description": "A mini project showcasing the dashboard development capabilities using React.",
+      "category": ["React Applications", "Utilities", "Templates"],
       "tags": ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/shreywahi/dashboard",
       "demoUrl": "https://shreywahi.github.io/dashboard",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749065716/dashboard_zpipsa.jpg"
-    },
-    {
+    },    {
       "title": "Online Code Editor",
       "description": "Made a code editor using React.",
+      "category": ["React Applications", "Utilities", "Templates"],
       "tags": ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/shreywahi/code_editor",
       "demoUrl": "https://shreywahi.github.io/code_editor/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1749084649/code_editor_luxfl9.jpg"
-    },
-    {
+    },    {
       "title": "Crypto Tracker",
       "description": "A cryptocurrency tracker that allows users to search for cryptocurrencies and view their details.",
+      "category": ["React Applications", "Utilities"],
       "tags": ["ReactJS", "Node.js", "RESTful API", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/dodoshrey/crypto",
       "demoUrl": "https://dodoshrey.github.io/crypto",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748442893/crypto_tracker_icfxbf.jpg"
-    },
-    {
+    },    {
       "title": "Robot Name Search App",
       "description": "A project to show 'filter name functionality'. Ensured responsiveness of the design on smartphones and other devices.",
-      "tags": ["ReactJS", "Node.js", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
+      "category": ["React Applications", "Utilities"],
+      "tags": ["Learnings", "ReactJS", "Node.js", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/dodoshrey/robots",
       "demoUrl": "https://dodoshrey.github.io/robots",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/robots_hdtguk.jpg"
-    },
-    {
+    },    {
       "title": "Tic Tac Toe",
       "description": "Created Tic Tac Toe, a fun 2 player game with ReactJS.",
+      "category": ["React Applications", "Games"],
       "tags": ["ReactJS", "JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/dodoshrey/tic-tac-toe",
       "demoUrl": "https://dodoshrey.github.io/tic-tac-toe/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441348/tic_tac_toe_lmkrcm.jpg"
-    },
-    {
+    },    {
       "title": "Budget Calculator",
       "description": "A smart budget calculator app that helps you manage your finances effectively.",
+      "category": ["Utilities"],
       "tags": ["JavaScript", "CSS3", "HTML5"],
       "githubUrl": "https://github.com/dodoshrey/budget-calculator-app",
       "demoUrl": "https://dodoshrey.github.io/budget-calculator-app/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/budget_calculator_qrd3np.jpg"
-    },
-    {
+    },    {
       "title": "Pig Game",
       "description": "Created a 2 player dice sum counting game using HTML, CSS, Javascript. The game is played by rolling a dice and accumulating points until one player reaches 100 points.",
+      "category": ["Games"],
       "tags": ["JavaScript", "CSS3", "HTML5", "Responsive Design"],
       "githubUrl": "https://github.com/dodoshrey/pig-game",
       "demoUrl": "https://dodoshrey.github.io/pig-game/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/pig_game_zptoaj.jpg"
-    },
-    {
+    },    {
       "title": "DOM Manipulation Example",
       "description": "Made a shopping list example in which you can add new items or delete existing items.",
-      "tags": ["JavaScript", "CSS3", "HTML5"],
+      "category": ["Web Development"],
+      "tags": ["Learnings", "JavaScript", "CSS3", "HTML5"],
       "githubUrl": "https://github.com/dodoshrey/DOM-Manupulation-Example",
       "demoUrl": "https://dodoshrey.github.io/DOM-Manupulation-Example",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/DOM_Manipulation_xwdy6i.jpg"
-    },
-    {
+    },    {
       "title": "Furniture Shopping Site",
       "description": "Created a furniture shopping site using HTML, CSS, and JavaScript.",
-      "tags": ["JavaScript", "CSS3", "HTML5"],
+      "category": ["Web Development", "Utilities", "Templates"],
+      "tags": ["Learnings","JavaScript", "CSS3", "HTML5"],
       "githubUrl": "https://github.com/dodoshrey/first-site",
       "demoUrl": "https://dodoshrey.github.io/first-site/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/furniture_shop_wiwkdz.jpg"
-    },
-    {
+    },    {
       "title": "Basic Template for Website",
       "description": "A template/design for creating a webpage using HTML and CSS. It includes a header, footer, and a main section with a simple layout.",
-      "tags": ["HTML5", "CSS3"],
+      "category": ["Utilities", "Templates"],
+      "tags": ["Learnings", "HTML5", "CSS3"],
       "githubUrl": "https://github.com/dodoshrey/basic-template-for-a-website",
       "demoUrl": "https://dodoshrey.github.io/basic-template-for-a-website/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441347/basic_template_czaefq.jpg"
-    },
-    {
+    },    {
       "title": "Animation Using Hover",
       "description": "Basic hover command is used to implement animation in this project. It is a simple example of using hover effects to create animations on elements.",
-      "tags": ["HTML5", "CSS3"],
+      "category": ["Templates"],
+      "tags": ["Learnings", "HTML5", "CSS3"],
       "githubUrl": "https://github.com/dodoshrey/Example-of-using-hover-command-HTML-CSS",
       "demoUrl": "https://dodoshrey.github.io/Example-of-using-hover-command-HTML-CSS/",
       "imageUrl": "https://res.cloudinary.com/dhynxy2n3/image/upload/v1748441349/hover_animation_ctwhj3.jpg"
