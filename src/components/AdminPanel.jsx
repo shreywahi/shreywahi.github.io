@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const AdminPanel = ({ 
   isAdmin, 
-  reloadFromDrive, 
   saveContentToDrive, 
   driveSaving, 
   driveMessage, 
   screenSize = 'desktop',
-  // Content state from useContentManager
   content,
   loadLocalContent,
   loadContentFromDrive,

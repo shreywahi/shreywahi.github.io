@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Briefcase, Calendar, ArrowRight } from 'lucide-react';
 import Modal from "./ui/Modal";
 

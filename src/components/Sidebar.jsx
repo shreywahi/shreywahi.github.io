@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Github, Linkedin, Mail, Sun, Moon, Home, User, FolderKanban, Mail as MailIcon, Briefcase, ArrowLeftRight, Award, Layers, Smartphone, FileText, LogIn, LogOut, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from "next-themes";
 
