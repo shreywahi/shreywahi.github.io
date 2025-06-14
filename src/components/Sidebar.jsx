@@ -364,7 +364,7 @@ const Sidebar = ({
 					<aside
 						ref={sidebarRef}
 						className={`fixed top-0 left-0 h-full bg-black/80 backdrop-blur shadow-xl z-50 flex flex-col border-r border-blue-300 overflow-y-auto transition-all duration-300
-    					${isCollapsed ? 'w-28' : 'w-60'}`}
+    					${isCollapsed ? 'w-20' : 'w-52'}`}
 						role="navigation"
 						aria-label="Sidebar Navigation"
 						tabIndex={-1}
@@ -501,7 +501,7 @@ const Sidebar = ({
 						bg-black/90 hover:bg-black text-white rounded-full border border-blue-300
 						p-2 transition-all duration-300 focus:outline-none
 						focus:ring-2 focus:ring-blue-400 z-[60] shadow-lg
-						${isCollapsed ? 'left-24' : 'left-56'}
+						${isCollapsed ? 'left-16' : 'left-48'}
 					`}
 					aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
 				>					{isCollapsed ? (
