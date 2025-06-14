@@ -483,7 +483,7 @@ const Sidebar = ({
 									tabIndex={0}
 								>
 									<Smartphone size={getIconSize('xxlarge')} />
-									<span className="text-center leading-tight text-xs">Mobile</span>
+									<span className="text-center leading-tight text-xs">Mobile View</span>
 								</button>
 							</div>
 						)}
@@ -553,7 +553,7 @@ const Sidebar = ({
 						aria-label={showAlternateButtons ? "Certificates" : "About"}
 						tabIndex={0}
 					>						{showAlternateButtons ? <Award size={24} /> : <User size={24} />}
-						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Certs" : "About"}</span>
+						<span className="text-xs mt-1 text-center leading-tight">{showAlternateButtons ? "Certificates" : "About"}</span>
 					</button>					{/* More button and its popup */}
 					<div className="relative flex flex-col items-center justify-center flex-1 h-full">
 						<button
