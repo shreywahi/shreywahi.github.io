@@ -698,9 +698,7 @@ const Index = () => {
             height: '100vh',
             minWidth: 0,
             marginLeft: isDesktopView ? 
-              (sidebarCollapsed ? '100px' : '200px') : '0',
-            maxWidth: isDesktopView ? 
-              (sidebarCollapsed ? 'calc(100vw - 100px)' : 'calc(100vw - 200px)') : '100vw',
+              (sidebarCollapsed ? '95px' : '210px') : '0',
           }}
         >
           {/* Remove scroll snap classes */}
