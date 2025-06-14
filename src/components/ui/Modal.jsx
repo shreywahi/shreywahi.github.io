@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const Modal = ({ open, onClose, children, ariaLabel = "Modal Dialog" }) => {
   const modalRef = useRef(null);
@@ -53,18 +54,19 @@ const Modal = ({ open, onClose, children, ariaLabel = "Modal Dialog" }) => {
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
       role="presentation"
       aria-hidden="false"
       style={{ margin: 0, padding: 0 }}
-    >      <div
+    >
+      <div
         ref={modalRef}
         className="bg-blue-400 dark:bg-gray-800 rounded-xl shadow-4xl w-full max-w-[95vw] xl:max-w-screen-2xl p-3 sm:p-6 relative mx-4"
-        style={{ 
+        style={{
           maxHeight: "80vh",
-          maxWidth: "min(95vw, 1536px)" // Ensure modal doesn't exceed 95% of viewport width
+          maxWidth: "min(95vw, 1536px)", // Ensure modal doesn't exceed 95% of viewport width
         }}
         role="dialog"
         aria-modal="true"
@@ -80,12 +82,17 @@ const Modal = ({ open, onClose, children, ariaLabel = "Modal Dialog" }) => {
         </button>
         <div
           className="overflow-y-auto pt-10"
-          style={{ maxHeight: "65vh", scrollbarGutter: "stable both-edges", scrollbarWidth: "thin" }}
+          style={{
+            maxHeight: "65vh",
+            scrollbarGutter: "stable both-edges",
+            scrollbarWidth: "thin",
+          }}
         >
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

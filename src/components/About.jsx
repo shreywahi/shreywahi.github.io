@@ -64,7 +64,7 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
               </>
             )}
 
-            <div className="grid grid-cols-3 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-8">
               <div className="text-center p-4 sm:p-6 bg-blue-50 dark:bg-blue-900 rounded-lg">
                 <Code className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-300 mx-auto mb-2 sm:mb-3" />
                 <h3 className="font-sans text-base sm:text-lg text-gray-900 dark:text-white">Clean Code</h3>
