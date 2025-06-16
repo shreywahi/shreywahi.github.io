@@ -18,13 +18,14 @@ const AdminPanel = ({
 
   // Determine current content source
   const isUsingLocalContent = content?.fallbackUsed || false;
-  const isUsingDriveContent = content?.driveAttempted && !content?.fallbackUsed;  const handleToggleContentSource = async () => {
+
+  const handleToggleContentSource = async () => {
     setSwitchingContent(true);
-    
     try {
       if (isUsingLocalContent) {
         // Currently using local, switch to Drive
-        console.log('Switching from local to Drive content...');        // Force fresh load from Drive by clearing all caches first
+        console.log('Switching from local to Drive content...');
+        // Force fresh load from Drive by clearing all caches first
         try {
           const { clearContentCache } = await import('../utils/contentLoader');
           clearContentCache(); // Clear module cache
@@ -52,10 +53,11 @@ const AdminPanel = ({
     } finally {
       setSwitchingContent(false);
     }
-  };const handleRefreshContent = async () => {
+  };
+  
+  const handleRefreshContent = async () => {
     console.log('AdminPanel: Refreshing current content source');
     setSwitchingContent(true);
-
     try {
       if (isUsingLocalContent) {
         // Currently using local content, refresh local
@@ -80,7 +82,8 @@ const AdminPanel = ({
       alert('Failed to refresh content: ' + error.message);
     } finally {
       setSwitchingContent(false);
-    }};
+    }
+  };
   
   // Mobile/Tablet - admin buttons are now in the Sidebar popup menu
   if (screenSize === 'mobile' || screenSize === 'tablet') {

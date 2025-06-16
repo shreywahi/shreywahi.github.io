@@ -3,25 +3,16 @@ import { Card, CardHeader, CardTitle } from "./ui/card";
 import Modal from "./ui/Modal";
 import DragDrop from "./ui/DragDrop";
 
-const scrollToTop = () => {
-    const element = document.getElementById('hero');
-    element?.scrollIntoView({ behavior: 'smooth' });
-};
-
 const Certificates = ({ onSectionChange, isAdmin, certList, setCertList, updateContent, saveContentToDrive }) => {
     const [selectedCert, setselectedCert] = useState(null);
-    const [certs, setCerts] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
     const [editData, setEditData] = useState(null);
-    const [certsLoaded, setCertsLoaded] = useState(false);
 
     // Load certs data on component mount
     useEffect(() => {
         const loadCerts = async () => {
             try {
                 const { certs: certsData } = await import('../utils/contentLoader');
-                setCerts(certsData);
-                setCertsLoaded(true);
                 
                 // Check for saved modal state after data is loaded
                 if (typeof window !== "undefined") {

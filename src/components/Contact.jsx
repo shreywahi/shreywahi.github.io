@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Linkedin, Github } from 'lucide-react';
 import Email from './Email';
 
@@ -6,17 +6,6 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
   const [editMode, setEditMode] = useState(false);
   const [tempHeading, setTempHeading] = useState(heading);
   const [tempIntro, setTempIntro] = useState(intro);
-
-  useEffect(() => {
-    localStorage.setItem("contactHeading", heading);
-  }, [heading]);
-  useEffect(() => {
-    localStorage.setItem("contactIntro", intro);
-  }, [intro]);
-  useEffect(() => {
-    setTempHeading(heading);
-    setTempIntro(intro);
-  }, [editMode, heading, intro]);
 
   return (
     <section

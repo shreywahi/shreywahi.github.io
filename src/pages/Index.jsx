@@ -107,8 +107,7 @@ const Index = () => {
     reloadFromDrive, 
     loadLocalContent,
     loadContentFromDrive,
-    loading, 
-    loadingStep 
+    loading
   } = useContentManager(isAdmin, false); // Don't auto-load, let LoadingScreen control it
   
   const [heroName, setHeroName] = useState('');
@@ -124,7 +123,7 @@ const Index = () => {
   // Add new state for drive operations - ALWAYS declare these
   const [driveSaving, setDriveSaving] = useState(false);
   const [driveMessage, setDriveMessage] = useState(null);
-  const [contentLoading, setContentLoading] = useState(true);
+
   // Add a ref to track if user has manually scrolled
   const userScrolledRef = useRef(false);
   const isNavigatingRef = useRef(false);
@@ -156,70 +155,7 @@ const Index = () => {
     });
     return () => unsubscribe();
   }, []);
-  // Admin panel functions
-  const [loadingFromDrive, setLoadingFromDrive] = useState(false);
   
-  // Note: usingLocalContent is no longer used since we always try Drive first
-  const [usingLocalContent, setUsingLocalContent] = useState(false);
-
-  const handleLoadFromDrive = async () => {
-    console.log('Index: Loading latest content from Drive');
-    setLoadingFromDrive(true);
-    
-    try {
-      if (reloadFromDrive) {
-        // Use the hook's reload function if available
-        const success = await reloadFromDrive();
-        if (success) {
-          console.log('Successfully reloaded content from Drive');
-        } else {
-          throw new Error('Failed to reload content');
-        }
-      } else {
-        // Fallback to direct load and reload
-        const { loadContentFromDrive } = await import('../utils/contentLoader');
-        await loadContentFromDrive();
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Error loading from Drive:', error);
-      alert('Failed to load content from Drive: ' + error.message);
-    } finally {
-      setLoadingFromDrive(false);
-    }
-  };
-  const handleSwitchToLocal = async () => {
-    console.log('Index: Refreshing to load fresh content');
-    try {
-      window.location.reload();
-    } catch (error) {
-      console.error('Error refreshing page:', error);
-      alert('Failed to refresh page: ' + (error && error.message ? error.message : JSON.stringify(error)));
-    }
-  };
-
-  const handleSwitchToDrive = async () => {
-    console.log('Index: Refreshing to load fresh content');
-    
-    try {
-      window.location.reload();
-    } catch (error) {
-      console.error('Error refreshing page:', error);
-      alert('Failed to refresh page: ' + error.message);
-    }
-  };
-
-  const handleReset = async () => {
-    console.log('Index: Refreshing to reload content');
-    
-    try {
-      window.location.reload();
-    } catch (e) {
-      console.error('Error refreshing page:', e);
-      window.location.reload();
-    }
-  };
-
   // Save activeSection to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -239,7 +175,7 @@ const Index = () => {
     }
   }, []); // Remove device type dependency
 
-// Single unified scroll tracking effect
+  // Single unified scroll tracking effect
   useEffect(() => {
     if (!isDesktopView) return;
 
@@ -320,33 +256,31 @@ const Index = () => {
     const handleWheel = () => {
       userScrolledRef.current = true;
     };
-      // Initialize after content loads
+    // Initialize after content loads
     const timer = setTimeout(() => {
       // Initialize the scroll container
       if (initializeScrollContainer()) {
         initializeScrollPosition();
         updateActiveSection();
         // Enable scroll tracking immediately
-        userScrolledRef.current = true;
-        
+        handleWheel();
         // Attach listeners to the correct scroll container
         scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-        
         // Wheel and touch events still go on window for broader capture
         window.addEventListener('wheel', handleWheel, { passive: true });
         window.addEventListener('touchmove', handleWheel, { passive: true });
-      } else {
-        // Retry if container not found yet
-        setTimeout(() => {
-          if (initializeScrollContainer()) {
-            scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-            window.addEventListener('wheel', handleWheel, { passive: true });
-            window.addEventListener('touchmove', handleWheel, { passive: true });
-            updateActiveSection();
-          }
-        }, 500);
-      }
-    }, 300);
+        } else {
+          // Retry if container not found yet
+          setTimeout(() => {
+            if (initializeScrollContainer()) {
+              scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+              window.addEventListener('wheel', handleWheel, { passive: true });
+              window.addEventListener('touchmove', handleWheel, { passive: true });
+              updateActiveSection();
+            }
+          }, 500);
+        }
+      }, 300);
       return () => {
       clearTimeout(timer);
       
@@ -396,16 +330,13 @@ const Index = () => {
       if (desc !== undefined) setHeroDesc(desc);
     }
   };
-  
-  const updateAbout = async (text) => {
-    const updated = await updateContent('about', { ...content.about, text });
-    if (updated) setAboutText(text);
-  };
 
   // Section mapping (must be inside component to access handleNavigate)
   const sections = [
     {
-      id: "hero",      component: (        <Hero
+      id: "hero",
+      component: (
+        <Hero
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
           heroName={heroName}
@@ -632,25 +563,13 @@ const Index = () => {
     } finally {
       setDriveSaving(false);    }
   };
-    // Message notification for drive operations
-  const renderDriveMessage = () => {
-    if (!driveMessage) return null;
-    
-    const bgColor = driveMessage.type === 'error' ? 'bg-red-500' : 
-                   driveMessage.type === 'success' ? 'bg-green-500' : 
-                   'bg-blue-500';
-    
-    return (
-      <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-white ${bgColor}`}>
-        {driveMessage.text}
-      </div>
-    );
-  };    // Enhanced loading screen with Drive attempt and fallback
+
   if (loading) {
     return <LoadingScreen onLoadLocal={loadLocalContent} onLoadDrive={loadContentFromDrive} />;
   }
     // Main component render
-  return (    <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden`} style={{ minWidth: '320px' }}>
+  return (    
+    <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden`} style={{ minWidth: '320px' }}>
       {/* Floating Admin Panel open button (desktop only) */}
       {isDesktopView && isAdmin && !showAdminPanel && (
         <button
@@ -676,7 +595,9 @@ const Index = () => {
         viewMode={viewMode}
         onSidebarCollapseChange={handleSidebarCollapseChange}
       />
-      {showLogin && renderAdminLogin()}      <Suspense fallback={<div></div>}>        {isDesktopView && isAdmin && showAdminPanel && (
+      {showLogin && renderAdminLogin()}
+        <Suspense fallback={<div></div>}>
+        {isDesktopView && isAdmin && showAdminPanel && (
           <AdminPanel
             isAdmin={isAdmin}
             reloadFromDrive={reloadFromDrive}
@@ -691,16 +612,19 @@ const Index = () => {
             onClose={() => setShowAdminPanel(false)}
           />
         )}{/* Mobile/tablet: AdminPanel functionality is integrated into Sidebar popup menu */}
-      </Suspense>      {isDesktopView ? (        <main
-          id="main-scroll-container"
-          className={`responsive-content main-content-responsive flex-1 w-full transition-all duration-300 overflow-y-auto overflow-x-hidden`}style={{ 
-            minHeight: '100vh', 
-            height: '100vh',
-            minWidth: 0,
-            marginLeft: isDesktopView ? 
-              (sidebarCollapsed ? '80px' : '208px') : '0',
-          }}
-        >
+      </Suspense>
+        {isDesktopView ? (        
+          <main
+            id="main-scroll-container"
+            className={`responsive-content main-content-responsive flex-1 w-full transition-all duration-300 overflow-y-auto overflow-x-hidden`}
+            style={{ 
+              minHeight: '100vh', 
+              height: '100vh',
+              minWidth: 0,
+              marginLeft: isDesktopView ? 
+                (sidebarCollapsed ? '80px' : '208px') : '0',
+            }}
+          >
           {/* Remove scroll snap classes */}
           <div className="w-full min-w-0">
             {sections.map(({ id, component }) => (
