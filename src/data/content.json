@@ -1,34 +1,31 @@
 {
   "hero": {
     "name": "Shrey Wahi",
-    "description": "Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure, and efficient solutions."
+    "description": "Highly motivated Software Engineer specializing in ReactJS and TypeScript, with a keen interest in crafting exceptional front-end web experiences. I excel at logically breaking down complex problems and designing systematic, secure and efficient solutions."
   },
   "about": {
-    "text": "I am a Software Engineer at Microsoft, specializing in UX Engineering. I leverage my expertise in frontend development to craft secure, intuitive, and high-performance web applications. My approach blends creative design principles with robust technical execution, consistently prioritizing an exceptional user experience alongside stringent security measures.\n\nWith over four years of experience, I am proficient in ReactJS, TypeScript, and various cloud technologies. My daily work involves enhancing security solutions and designing user interfaces that safeguard millions of users without compromising on a seamless experience. I also focus on optimizing application performance and architecting scalable frontend solutions."
+    "text": "I am a Software Engineer, specializing in UX Engineering. I leverage my expertise in frontend development to craft secure, intuitive and high-performance web applications. My approach blends creative design principles with robust technical execution, consistently prioritizing an exceptional user experience alongside stringent security measures.\n\nWith over four years of experience, I am proficient in ReactJS, TypeScript and various cloud technologies. I also focus on optimizing application performance and architecting scalable frontend solutions"
   },
   "experiences": [
     {
-      "title": "Software Engineer - Level 60",
+      "title": "Software Engineer",
       "company": "Microsoft Ireland",
-      "period": "April 2022 - Present",
+      "period": "April 2022 - July 2025",
       "location": "Dublin, Ireland",
-      "description": "Building solutions to improve security and privacy for Microsoft and connect to Microsoft services on login.live.com and account.live.com to provide authentication to 2+ billion customers per month.",
+      "description": "Designed and developed scalable, secure and privacy-focused authentication solutions used by 2B+ monthly users via login.live.com and account.live.com.",
       "achievements": [
-        "Independently delivered solutions across multiple micro-services following the Scrum development process.",
-        "Migrated a legacy .NET Framework architecture to ReactJS, improving efficiency of service and reducing latency.",
-        "Collaborated with cross-functional teams across Microsoft—including Authenticator, Windows, Teams, and Xbox—to enhance security and privacy features for user authentication, ensuring seamless integration and platform compatibility.",
-        "Coordinated closely with design, product management, and development teams to deliver elegant, usable, and responsive UI/UX across multiple platforms and devices.",
-        "Regularly engaged in writing, debugging, and testing code, implementing key features, contributing to project planning, and mentoring engineers.",
-        "Implemented security enhancements to reduce unauthorized access attempts, significantly improving the integrity of Microsoft's authentication system.",
-        "Served as an On-Call Engineer to monitor and maintain service health, proactively resolving and mitigating incidents to ensure high availability and reliability."
+        "Built reusable and responsive UI components in React and wrote comprehensive unit, integration and E2E tests to ensure full functional coverage and long-term maintainability using tools like Playwright’s Storybook.",
+        "Independently diagnosed and fixed critical issues across multiple services, contributing to high-quality product delivery cycles. Partnered with teams across Microsoft—including Authenticator, Windows, Teams and Xbox—to ensure seamless integration of authentication services.",
+        "Authored detailed design docs outlining architecture, test coverage and feature roll-out strategies. Mentored new engineers, conducted code reviews and promoted best practices in Scrum development processes.",
+        "Acted as On-Call Engineer to monitor and maintain service health dashboards across global regions. Proactively resolved high-priority incidents to ensure system reliability, uptime and high availability of authentication services."
       ],
       "projects": [
         {
           "name": "Account Reset Password Migration to React",
           "details": [
-            "Migrated Microsoft's Account Recovery screens from Knockout.JS to React.JS.",
-            "Collaborated with Figma design team to work the UI design and successfully migrated screen by creating the right components.",
-            "Wrote integration tests and unit tests to test the integrity of migrated page on Playwright (Storybook)."
+            "Led end-to-end migration of Microsoft’s Account Recovery experience from KnockoutJS to ReactJS, resulting in a 35% faster page load time and smoother user interactions.",
+            "Collaborated closely with the Figma design team and PMs to deliver polished and user-centric UI across devices.",
+            "Refactored inefficient legacy code and reduced client-side errors by over 40%, improving user success rate."
           ]
         },
         {
@@ -43,9 +40,10 @@
         {
           "name": "Xbox Build Number Logging",
           "details": [
-            "Collaborated with Xbox teams to capture build number of Xbox and log the activity of users going through Account Login/SignUp through Xbox.",
-            "Logged new datapoint to send new parameter to data-stream by updating APIs to pick build number and then forward it to the required service for logging.",
-            "Created monitors and dashboard to keep track of the Xbox Login and Signup service."
+            "Collaborated with Xbox engineering teams to track and log user build versions during Xbox login and sign-up flows.",
+            "Added a new datapoint to backend authentication APIs, forwarding this to a logging service used for telemetry. ",
+            "Enabled real-time visibility into Xbox client usage, which improved troubleshooting time for Xbox auth issues by 25%.",
+            "Developed Grafana dashboards and alert monitors to track Xbox-specific login/signup service performance and detect anomalies proactively."
           ]
         }
       ],
@@ -56,9 +54,10 @@
       "company": "Techmates Technologies",
       "period": "May 2021 - November 2021",
       "location": "India",
-      "description": "Orchestrate reusable code and libraries (with matching documentation) to a standard to make it quick and easy to maintain the code in the future.",
+      "description": "Refactored reusable code and used libraries to a standard to make it quick and easy to maintain the code in the future.",
       "achievements": [
-        "Ensured efficient web development by supporting designers and app developers while resolving website performance issues."
+        "Completed bug fixes to improve the design and performance. ",
+        "Ensured efficient web development by supporting designers while resolving website performance issues by writing integration, functional and unit tests."
       ],
       "technologies": ["HTML", "CSS", "JavaScript", "React"]
     },
@@ -67,11 +66,22 @@
       "company": "NT-MDT",
       "period": "September 2020 - May 2021",
       "location": "Ireland",
-      "description": "Worked on interface with the design team, product management and development teams to create elegant, responsive and interactive interfaces across multiple devices.",
+      "description": "Worked on interface with the design team, product management and development teams to create elegant, usable responsive and interactive interfaces across multiple devices.",
       "achievements": [
-        "Developed an in-depth understanding of the entire web development process using HTML, CSS and Javascript. Converting UI/UX designs into prototypes, creating excellent interactions from designs as well as developing features to enhance user experience"
+        "Developed an in-depth understanding of the entire web development process using HTML, CSS and JavaScript. Converting UI/UX designs into prototypes, creating excellent interactions from designs as well as developing features to enhance user experience."
       ],
       "technologies": ["HTML", "CSS", "JavaScript", "UI/UX Design"]
+    },
+    {
+      "title": "Frontend Web Developer - Intern",
+      "company": "EdgeTech Scientific Pvt. Ltd.",
+      "period": "May 2020 - September 2020",
+      "location": "Ireland",
+      "description": "Worked on maintaining, optimizing, troubleshooting and improving company website. Ensured the website was responsive and user-friendly.",
+      "achievements": [
+        "Solved bugs to keep the system in a good shape."
+      ],
+      "technologies": ["HTML", "CSS", "JavaScript"]
     }
   ],
   "skillCategories": [
