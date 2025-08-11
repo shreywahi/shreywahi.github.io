@@ -9,11 +9,7 @@ export default defineConfig({
     // Target modern browsers for better optimization
     target: 'es2015',    rollupOptions: {
       onwarn(warning, warn) {
-        // Suppress the specific gapi-script eval warning since it's Google's official library
-        if (warning.code === 'EVAL' && warning.id && warning.id.includes('gapi-script')) {
-          return;
-        }
-        // Show all other warnings
+        // Show all warnings normally
         warn(warning);
       },
       output: {
@@ -21,8 +17,7 @@ export default defineConfig({
           // Separate vendor libraries into their own chunks
           vendor: ['react', 'react-dom'],
           ui: ['lucide-react', '@radix-ui/react-slot', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
-          forms: ['@emailjs/browser', 'react-google-recaptcha', 'react-hot-toast'],
-          google: ['gapi-script'],
+          forms: ['@emailjs/browser', 'react-hot-toast'],
           router: ['react-router-dom'],
           themes: ['next-themes'],
           utils: ['clsx', 'tailwind-merge', 'class-variance-authority']
@@ -38,8 +33,6 @@ export default defineConfig({
       compress: {
         drop_console: true, // Remove console.log in production
         drop_debugger: true,
-        // Don't remove eval from gapi-script since it's required for Google API functionality
-        pure_funcs: [], // Don't remove any specific functions
       },
       format: {
         comments: false, // Remove comments to reduce size
@@ -53,9 +46,7 @@ export default defineConfig({
       'react-dom',
       'lucide-react',
       '@emailjs/browser',
-      'react-google-recaptcha',
-      'react-hot-toast',
-      'gapi-script'
+      'react-hot-toast'
     ]
   }
 })

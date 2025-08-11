@@ -28,16 +28,16 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
   };
 
   return (
-    <section id="experience" className="min-h-[100vh] py-10 sm:py-20 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
+    <section id="experience" className="min-h-[100vh] py-10 sm:py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
       <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-16">
-          <h2 className="text-4xl font-serif font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+          <h2 className="text-4xl font-serif font-bold text-white mb-4 sm:mb-6">
             Professional Experience
           </h2>
         </div>
-        <div className="font-mono space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {experiences.map((exp, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-8 hover:shadow-xl transition-shadow duration-300">
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-300">
               {isAdmin && editIdx === index ? (
                 <div>
                   <input
@@ -64,7 +64,7 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                     className="w-full mb-2 p-2 rounded border"
                     style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
                   />
-                  <textarea
+                  <input
                     value={editData.description}
                     onChange={e => setEditData({ ...editData, description: e.target.value })}
                     className="w-full mb-2 p-2 rounded border"
@@ -148,7 +148,7 @@ const Experience = ({ isAdmin, experiences, setExperiences }) => {
                   </div>
                   <div className="flex">
                     <div className="flex-1"></div>
-                    <p className="text-gray-700 dark:text-gray-200 text-sm sm:text-lg mb-0 leading-snug w-full md:w-auto">
+                    <p className="text-gray-800 dark:text-gray-200 text-sm sm:text-base mb-0 leading-snug w-full">
                       {exp.description}
                     </p>
                   </div>

@@ -6,10 +6,10 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
   const [tempText, setTempText] = useState(aboutText);
 
   return (
-    <section id="about" className="min-h-[100vh] py-10 sm:py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center pb-24 sm:pb-0">
+    <section id="about" className="min-h-[100vh] py-10 sm:py-16 bg-yellow-900 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
       <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="text-center mb-8 sm:mb-16">
-          <h2 className="text-4xl font-serif font-bold text-orange-400 dark:text-purple-500 mb-4 sm:mb-6">
+          <h2 className="text-4xl font-serif font-bold text-orange-300 dark:text-purple-500 mb-4 sm:mb-6">
             About Me
           </h2>
         </div>
@@ -51,7 +51,7 @@ const About = ({ isAdmin, aboutText, setAboutText }) => {
             ) : (
               <>
                 {aboutText.split('\n').map((line, i) => (
-                  <p key={i} className="text-base sm:text-lg font-mono text-purple-500 dark:text-orange-400 leading-relaxed text-justify">{line}</p>
+                  <p key={i} className="text-base sm:text-lg font-mono text-purple-300 dark:text-orange-400 leading-relaxed text-justify">{line}</p>
                 ))}
                 {isAdmin && !editMode && (
                   <button

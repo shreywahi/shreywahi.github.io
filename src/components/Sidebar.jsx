@@ -59,30 +59,19 @@ const Sidebar = ({
   isAdmin, 
   signOut, 
   auth,
-  // Admin panel props - updated to match AdminPanel
-  content,
-  loadLocalContent,
-  loadContentFromDrive,
-  saveContentToDrive,
-  driveSaving,
-  loading,
   // View toggle callback
   onViewModeChange,
   // Current view mode from parent
   viewMode,
   // Sidebar collapse callback
-  onSidebarCollapseChange
+  onSidebarCollapseChange,
+  initialCollapsed = false
 }) => {
 	const { theme, setTheme, resolvedTheme } = useTheme();
-	const [mounted, setMounted] = useState(false);
 	const sidebarRef = useRef(null);
-	const openButtonRef = useRef(null);
-		// Responsive sizing based on window width
 	const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
 	const isSmallDesktop = windowWidth < 768;
 	const isMediumDesktop = windowWidth >= 768 && windowWidth < 1024;
-	const isLargeDesktop = windowWidth >= 1024;
-		// Helper functions for responsive sizing
 	const getIconSize = (baseSize = 'medium') => {
 		const sizes = {
 			small: isSmallDesktop ? 14 : isMediumDesktop ? 16 : 18,
@@ -108,7 +97,7 @@ const Sidebar = ({
 	const isCurrentlyDesktop = currentViewMode === 'desktop';
 	
 	// Sidebar collapse state (desktop only)
-	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
 	
 	// Admin access states
 	const [showAdminToggle, setShowAdminToggle] = useState(false);
@@ -128,84 +117,6 @@ const Sidebar = ({
 	
 	// Admin toggle auto-hide timer
 	const adminToggleTimeoutRef = useRef(null);
-	
-	// Admin login state
-	const [showAdminLogin, setShowAdminLogin] = useState(false);
-	const [adminLoginClicked, setAdminLoginClicked] = useState(false);
-	const adminLoginRef = useRef(null);
-	
-	// Admin panel state matching AdminPanel.jsx
-	const [switchingContent, setSwitchingContent] = useState(false);
-		// Determine current content source
-	const isUsingLocalContent = content?.fallbackUsed || false;
-	const isUsingDriveContent = content?.driveAttempted && !content?.fallbackUsed;
-
-	// Admin functions matching AdminPanel.jsx
-	const handleToggleContentSource = async () => {
-		setSwitchingContent(true);
-		
-		try {
-			if (isUsingLocalContent) {
-				// Currently using local, switch to Drive
-				console.log('Switching from local to Drive content...');
-				// Force fresh load from Drive by clearing all caches first
-				try {
-					const { clearContentCache } = await import('../utils/contentLoader');
-					clearContentCache(); // Clear module cache
-					
-					// Use simple public fetch method
-					await loadContentFromDrive(false);
-					
-					console.log('Successfully loaded fresh Drive content for admin');
-				} catch (importError) {
-					if (process.env.NODE_ENV === 'development') {
-						console.log('🔄 Using fallback method in development mode');
-					} else {
-						console.warn('Could not import load functions, using standard method');
-					}
-					await loadContentFromDrive(false);
-				}
-			} else {
-				// Currently using Drive, switch to Local
-				console.log('Switching from Drive to local content...');
-				await loadLocalContent(false); // Pass false to prevent loading screen
-			}
-		} catch (error) {
-			console.error('Error switching content source:', error);
-			alert('Failed to switch content source: ' + error.message);
-		} finally {
-			setSwitchingContent(false);
-		}
-	};
-
-	const handleRefreshContent = async () => {
-		console.log('Sidebar: Refreshing current content source');
-		setSwitchingContent(true);
-		
-		try {
-			if (isUsingLocalContent) {
-				await loadLocalContent(false); // Pass false to prevent loading screen
-			} else {
-				// Force fresh load from Drive by clearing caches first
-				try {
-					const { clearContentCache } = await import('../utils/contentLoader');
-					clearContentCache(); // Clear module cache
-					await loadContentFromDrive(false); // Pass false to prevent loading screen
-				} catch (importError) {
-					console.warn('Could not import fresh load functions, using standard method');
-					await loadContentFromDrive(false);
-				}
-			}
-			console.log('Successfully refreshed content');
-		} catch (error) {
-			console.error('Error refreshing content:', error);
-			alert('Failed to refresh content: ' + error.message);
-		} finally {
-			setSwitchingContent(false);
-		}
-	};	useEffect(() => {
-		setMounted(true);
-	}, []);
 
 	// Sync navigation mode with active section when in mobile/tablet view
 	useEffect(() => {
@@ -391,7 +302,6 @@ const Sidebar = ({
 								{!isAdmin ? (
 									<button
 										onClick={() => {
-											console.log('Desktop admin login button clicked - clearing timer');
 											setShowLogin(true);
 											// Clear auto-hide timer since user clicked the admin button
 											if (adminToggleTimeoutRef.current) {
@@ -585,96 +495,9 @@ const Sidebar = ({
 								ref={moreMenuRef}
 								className="absolute bottom-14 flex flex-col items-center gap-2 z-50 bg-gray-900 rounded-xl shadow-lg px-2 py-3"
 							>								<div className="flex flex-col gap-4 py-1 px-2">
-									{/* Admin panel buttons - only show if admin */}
-									{isAdmin && (
-										<>
-											{/* Refresh Content */}
-											<button
-												onClick={() => {
-													handleRefreshContent();
-													setShowMoreMenu(false);
-												}}
-												disabled={switchingContent || loading}
-												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
-													switchingContent || loading
-														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
-														: 'text-white hover:text-blue-400 focus:ring-blue-400'
-												}`}
-												aria-label="Refresh Content"
-												tabIndex={0}
-											>
-												<FileText size={20} />
-												<span className="text-xs mt-1">{switchingContent ? 'Refreshing...' : 'Refresh Content'}</span>
-											</button>
-											
-											{/* Save to Drive */}
-											<button
-												onClick={() => {
-													if (!driveSaving && !loading) {
-														saveContentToDrive();
-													}
-													setShowMoreMenu(false);
-												}}
-												disabled={driveSaving || loading}
-												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
-													driveSaving || loading
-														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
-														: 'text-white hover:text-purple-400 focus:ring-purple-400'
-												}`}
-												aria-label="Save to Drive"
-												tabIndex={0}
-											>
-												<FileText size={20} />
-												<span className="text-xs mt-1">{driveSaving ? 'Saving...' : 'Save to Drive'}</span>
-											</button>
-											
-											{/* Load from Local Files */}
-											<button
-												onClick={() => {
-													handleToggleContentSource();
-													setShowMoreMenu(false);
-												}}
-												disabled={switchingContent || loading}
-												className={`flex flex-col items-center focus:outline-none focus:ring-2 ${
-													switchingContent || loading
-														? 'text-gray-500 cursor-not-allowed focus:ring-gray-400'
-														: isUsingLocalContent 
-															? 'text-white hover:text-green-400 focus:ring-green-400'
-															: 'text-white hover:text-orange-400 focus:ring-orange-400'
-												}`}
-												aria-label={isUsingLocalContent ? 'Load from Google Drive' : 'Load from Local Files'}
-												tabIndex={0}
-											>
-												<FileText size={20} />
-												<span className="text-xs mt-1">
-													{switchingContent 
-														? 'Switching...' 
-														: isUsingLocalContent 
-															? 'Load from Drive' 
-															: 'Load from Local'
-													}
-												</span>
-											</button>
-										</>									)}									{/* View Toggle button (mobile/tablet) - always show */}
-									<button
-										onClick={() => {
-											// Toggle between desktop and mobile view
-											const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
-											if (onViewModeChange) onViewModeChange(newViewMode);
-											setShowMoreMenu(false);
-										}}
-										className="flex flex-col items-center text-white hover:text-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
-										aria-label={isCurrentlyDesktop ? "Switch to Mobile View" : "Switch to Desktop View"}
-										tabIndex={0}
-									>
-										<Monitor size={20} />
-										<span className="text-xs mt-1">Desktop View</span>
-									</button>
-
 									{/* Admin Login/Exit Admin button (mobile/tablet) - show only after triple click or if already admin */}
 									{(showMobileAdminAccess || isAdmin) && (										!isAdmin ? (											<button
 												onClick={() => {
-													console.log('Mobile admin login button clicked - clearing timer');
 													setShowLogin(true);
 													setShowMoreMenu(false);
 													// Clear auto-hide timer since user clicked the admin button
@@ -705,6 +528,21 @@ const Sidebar = ({
 											</button>
 										)
 									)}
+									{/* View Toggle button (mobile/tablet) - always show */}
+									<button
+										onClick={() => {
+											// Toggle between desktop and mobile view
+											const newViewMode = isCurrentlyDesktop ? 'mobile' : 'desktop';
+											if (onViewModeChange) onViewModeChange(newViewMode);
+											setShowMoreMenu(false);
+										}}
+										className="flex flex-col items-center text-white hover:text-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+										aria-label={isCurrentlyDesktop ? "Switch to Mobile View" : "Switch to Desktop View"}
+										tabIndex={0}
+									>
+										<Monitor size={20} />
+										<span className="text-xs mt-1">Desktop View</span>
+									</button>
 								</div>
 							</div>
 						)}

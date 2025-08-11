@@ -7,7 +7,6 @@ import Skills from '../components/Skills';
 import Projects from '../components/Projects';
 import Certificates from '../components/Certificates';
 import Contact from '../components/Contact';
-import LoadingScreen from '../components/LoadingScreen';
 // Lazy load AdminPanel since it's only used by admin users
 const AdminPanel = lazy(() => import('../components/AdminPanel'));
 import '../App.css';
@@ -42,19 +41,15 @@ const Index = () => {
     return 'hero';
   };
   const [activeSection, setActiveSection] = useState(getInitialSection);
-  const [fade, setFade] = useState(true);  // Simple view mode system with device detection for initial state
+  const [fade, setFade] = useState(true);
   // 'desktop' = sidebar view, 'mobile' = bottom nav view
   // Detect device type on initialization, then allow user override
   const getInitialViewMode = () => {
     if (typeof window === 'undefined') return 'desktop';
-    
-    // Check if user has previously overridden the view mode
     const savedViewMode = localStorage.getItem('userViewMode');
     if (savedViewMode && (savedViewMode === 'desktop' || savedViewMode === 'mobile')) {
       return savedViewMode;
     }
-    
-    // Use device detection for initial view mode
     const deviceType = getDeviceType();
     return deviceType === 'desktop' ? 'desktop' : 'mobile';
   };
@@ -62,21 +57,17 @@ const Index = () => {
   const [viewMode, setViewMode] = useState(getInitialViewMode);
   const isDesktopView = viewMode === 'desktop';
   
-  // Sidebar collapse state for desktop view
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Sidebar collapse state for desktop view (default to collapsed when desktop)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => (isDesktopView ? true : false));
   
-  // Handle view mode changes from Sidebar and save user preference
   const handleViewModeChange = (newViewMode) => {
     setViewMode(newViewMode);
-    // Save user preference to override device detection in future visits
     localStorage.setItem('userViewMode', newViewMode);
   };
-  // Handle sidebar collapse changes
   const handleSidebarCollapseChange = (isCollapsed) => {
     setSidebarCollapsed(isCollapsed);
   };
 
-  // For responsive main content layout
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   
   useEffect(() => {
@@ -88,27 +79,23 @@ const Index = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Keep a stable reference to the current active section
   const activeSectionRef = useRef(activeSection);
   
-  // Update ref when state changes
   useEffect(() => {
     activeSectionRef.current = activeSection;
-  }, [activeSection]);  // --- Admin mode state using Firebase Auth ---
+  }, [activeSection]);
+  // --- Admin mode state using Firebase Auth ---
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");// --- Centralized content state ---
+  const [password, setPassword] = useState("");
+  // --- Centralized content state ---
   const { 
     content, 
-    updateContent, 
-    saveContentToDrive, 
-    reloadFromDrive, 
-    loadLocalContent,
-    loadContentFromDrive,
+    updateContent,
     loading
-  } = useContentManager(isAdmin, false); // Don't auto-load, let LoadingScreen control it
+  } = useContentManager(isAdmin);
   
   const [heroName, setHeroName] = useState('');
   const [heroDesc, setHeroDesc] = useState('');
@@ -119,17 +106,12 @@ const Index = () => {
   const [certList, setCertList] = useState([]);
   const [contactHeading, setContactHeading] = useState('');
   const [contactIntro, setContactIntro] = useState('');
-  
-  // Add new state for drive operations - ALWAYS declare these
-  const [driveSaving, setDriveSaving] = useState(false);
-  const [driveMessage, setDriveMessage] = useState(null);
 
-  // Add a ref to track if user has manually scrolled
   const userScrolledRef = useRef(false);
   const isNavigatingRef = useRef(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   
-  // Update state when content loads from useContentManager
+  // Update state when content loads
   useEffect(() => {
     if (!loading && content) {
       setHeroName(content.hero?.name || '');
@@ -142,11 +124,11 @@ const Index = () => {
       setContactHeading(content.contact?.heading || '');
       setContactIntro(content.contact?.intro || '');
     }
-  }, [content, loading]);  // Listen to Firebase auth state and auto-logout on page refresh
+  }, [content, loading]);
+
+  // Listen to Firebase auth state and auto-logout on page refresh
   useEffect(() => {
-    // Force logout on page refresh/reload by clearing Firebase auth state
-    signOut(auth).catch(() => {}); // Ignore errors if already logged out
-    
+    signOut(auth).catch(() => {});
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAdmin(!!user);
       if (!user) {
@@ -156,37 +138,31 @@ const Index = () => {
     return () => unsubscribe();
   }, []);
   
-  // Save activeSection to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('activeSection', activeSection);
     }
-  }, [activeSection]);  // Handle device type changes with a stable reference to active section
+  }, [activeSection]);
+
   useEffect(() => {
-    // Keep activeSectionRef in sync for device type changes
     const currentSection = localStorage.getItem('activeSection') || 'hero';
-      if (isDesktopView && currentSection !== activeSectionRef.current) {
+    if (isDesktopView && currentSection !== activeSectionRef.current) {
       setActiveSection(currentSection);
-      
       setTimeout(() => {
         const el = document.getElementById(currentSection);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  }, []); // Remove device type dependency
+  }, []);
 
-  // Single unified scroll tracking effect
   useEffect(() => {
     if (!isDesktopView) return;
-
     const sectionIds = ["hero", "about", "experience", "skills", "projects", "certs", "contact"];
-    let scrollContainer = null;    // Get the scrolling container (main element)
+    let scrollContainer = null;
     const initializeScrollContainer = () => {
       scrollContainer = document.getElementById('main-scroll-container');
       return scrollContainer;
     };
-    
-    // Initialize scroll position after page refresh
     const initializeScrollPosition = () => {
       const savedSection = localStorage.getItem('activeSection');
       if (savedSection && savedSection !== activeSection) {
@@ -199,36 +175,24 @@ const Index = () => {
         }
       }
     };
-      // Track which section is currently in view
     const updateActiveSection = () => {
       if (isNavigatingRef.current) return;
-      
       let currentSection = null;
-      
       if (!scrollContainer) return;
-      
-      // Get the container's viewport
       const containerRect = scrollContainer.getBoundingClientRect();
       const viewportHeight = containerRect.height;
-      
-      // Find the section that's most visible in the container viewport
       for (let id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          // Calculate relative position to the container
           const relativeTop = rect.top - containerRect.top;
           const relativeBottom = rect.bottom - containerRect.top;
-          
-          // If section is in the top 60% of the container viewport, it's active
           if (relativeTop <= viewportHeight * 0.6 && relativeBottom > viewportHeight * 0.2) {
             currentSection = id;
             break;
           }
         }
       }
-      
-      // Fallback: if no section found, use the one that's most visible
       if (!currentSection) {
         for (let id of sectionIds) {
           const el = document.getElementById(id);
@@ -236,7 +200,6 @@ const Index = () => {
             const rect = el.getBoundingClientRect();
             const relativeTop = rect.top - containerRect.top;
             const relativeBottom = rect.bottom - containerRect.top;
-            
             if (relativeBottom > 100 && relativeTop < viewportHeight - 100) {
               currentSection = id;
               break;
@@ -244,66 +207,52 @@ const Index = () => {
           }
         }
       }
-      
       if (currentSection && currentSection !== activeSection) {
         setActiveSection(currentSection);
       }
     };
-      const handleScroll = () => {
+    const handleScroll = () => {
       updateActiveSection();
     };
-    
     const handleWheel = () => {
       userScrolledRef.current = true;
     };
-    // Initialize after content loads
     const timer = setTimeout(() => {
-      // Initialize the scroll container
       if (initializeScrollContainer()) {
         initializeScrollPosition();
         updateActiveSection();
-        // Enable scroll tracking immediately
         handleWheel();
-        // Attach listeners to the correct scroll container
         scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-        // Wheel and touch events still go on window for broader capture
         window.addEventListener('wheel', handleWheel, { passive: true });
         window.addEventListener('touchmove', handleWheel, { passive: true });
-        } else {
-          // Retry if container not found yet
-          setTimeout(() => {
-            if (initializeScrollContainer()) {
-              scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-              window.addEventListener('wheel', handleWheel, { passive: true });
-              window.addEventListener('touchmove', handleWheel, { passive: true });
-              updateActiveSection();
-            }
-          }, 500);
-        }
-      }, 300);
-      return () => {
+      } else {
+        setTimeout(() => {
+          if (initializeScrollContainer()) {
+            scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+            window.addEventListener('wheel', handleWheel, { passive: true });
+            window.addEventListener('touchmove', handleWheel, { passive: true });
+            updateActiveSection();
+          }
+        }, 500);
+      }
+    }, 300);
+    return () => {
       clearTimeout(timer);
-      
-      // Clean up from scroll container
       if (scrollContainer) {
         scrollContainer.removeEventListener('scroll', handleScroll);
       }
-      window.removeEventListener('wheel', handleWheel);      window.removeEventListener('touchmove', handleWheel);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleWheel);
     };
   }, [isDesktopView, loading]);
 
-  // Handler for navigation (pass to Sidebar)
   const handleNavigate = (sectionId) => {
-    // Set navigation flag to prevent scroll tracking during navigation
     isNavigatingRef.current = true;
-    
     setActiveSection(sectionId);
-    
     if (isDesktopView) {
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
-          // Re-enable scroll tracking after navigation completes
         setTimeout(() => {
           isNavigatingRef.current = false;
           userScrolledRef.current = true;
@@ -318,7 +267,7 @@ const Index = () => {
       }, 300);
     }
   };
-  // Create wrapped update functions
+
   const updateHero = async (name, desc) => {
     const updated = await updateContent('hero', { 
       ...content.hero, 
@@ -331,7 +280,6 @@ const Index = () => {
     }
   };
 
-  // Section mapping (must be inside component to access handleNavigate)
   const sections = [
     {
       id: "hero",
@@ -364,7 +312,8 @@ const Index = () => {
           setExperiences={setExperiences}
         />
       ),
-    },    {
+    },
+    {
       id: "skills",
       component: (
         <Skills
@@ -372,10 +321,10 @@ const Index = () => {
           categories={categories}
           setCategories={setCategories}
           updateContent={updateContent}
-          saveContentToDrive={saveContentToDrive}
         />
       ),
-    },    {
+    },
+    {
       id: "projects",
       component: (
         <Projects
@@ -384,10 +333,10 @@ const Index = () => {
           projectList={projectList}
           setProjectList={setProjectList}
           updateContent={updateContent}
-          saveContentToDrive={saveContentToDrive}
         />
       ),
-    },    {
+    },
+    {
       id: "certs",
       component: (
         <Certificates
@@ -396,7 +345,6 @@ const Index = () => {
           certList={certList}
           setCertList={setCertList}
           updateContent={updateContent}
-          saveContentToDrive={saveContentToDrive}
         />
       ),
     },
@@ -414,10 +362,8 @@ const Index = () => {
     },
   ];
 
-  // Find current section
   const currentSection = sections.find(s => s.id === activeSection)?.component;
 
-  // --- Admin login form using Firebase Auth ---
   const renderAdminLogin = () => (
     <div
       style={{
@@ -533,42 +479,9 @@ const Index = () => {
       </form>
     </div>
   );
-  // Function to save content to Google Drive
-  const saveContentToDriveHandler = async () => {
-    if (!isAdmin) return;
-    
-    try {
-      setDriveSaving(true);
-      setDriveMessage({ type: 'info', text: 'Saving content to Google Drive...' });
-      
-      const success = await saveContentToDrive();
-      
-      if (success) {
-        setDriveMessage({ type: 'success', text: 'Content saved to Google Drive successfully!' });
-        setTimeout(() => setDriveMessage(null), 3000);
-      } else {
-        setDriveMessage({ 
-          type: 'error', 
-          text: 'Failed to save to Google Drive. Please try again.' 
-        });
-        setTimeout(() => setDriveMessage(null), 5000);
-      }
-    } catch (error) {
-      console.error('Error saving to Drive:', error);
-      setDriveMessage({ 
-        type: 'error', 
-        text: 'Failed to save to Google Drive: ' + (error.message || 'Unknown error') 
-      });
-      setTimeout(() => setDriveMessage(null), 5000);
-    } finally {
-      setDriveSaving(false);    }
-  };
 
-  if (loading) {
-    return <LoadingScreen onLoadLocal={loadLocalContent} onLoadDrive={loadContentFromDrive} />;
-  }
-    // Main component render
-  return (    
+  // Main component render
+  return (
     <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden`} style={{ minWidth: '320px' }}>
       {/* Floating Admin Panel open button (desktop only) */}
       {isDesktopView && isAdmin && !showAdminPanel && (
@@ -586,29 +499,20 @@ const Index = () => {
         signOut={signOut}
         auth={auth}
         content={content}
-        loadLocalContent={loadLocalContent}
-        loadContentFromDrive={loadContentFromDrive}
-        saveContentToDrive={saveContentToDriveHandler}
-        driveSaving={driveSaving}
         loading={loading}
         onViewModeChange={handleViewModeChange}
         viewMode={viewMode}
         onSidebarCollapseChange={handleSidebarCollapseChange}
+        initialCollapsed={true}
       />
       {showLogin && renderAdminLogin()}
         <Suspense fallback={<div></div>}>
         {isDesktopView && isAdmin && showAdminPanel && (
           <AdminPanel
             isAdmin={isAdmin}
-            reloadFromDrive={reloadFromDrive}
-            saveContentToDrive={saveContentToDriveHandler}
-            driveSaving={driveSaving}
-            driveMessage={driveMessage}
-            screenSize={viewMode}
             content={content}
-            loadLocalContent={loadLocalContent}
-            loadContentFromDrive={loadContentFromDrive}
             loading={loading}
+            screenSize={viewMode}
             onClose={() => setShowAdminPanel(false)}
           />
         )}{/* Mobile/tablet: AdminPanel functionality is integrated into Sidebar popup menu */}

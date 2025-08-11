@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import Modal from "./ui/Modal";
 import DragDrop from "./ui/DragDrop";
 
-const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updateContent, saveContentToDrive }) => {
+const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updateContent }) => {
     // Editable project list
     const [selectedProject, setSelectedProject] = useState(() => {
         if (typeof window !== "undefined") {
@@ -122,15 +122,12 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
         // Update content when editing individual items
         if (updateContent) {
             await updateContent('projects', newList);
-            if (saveContentToDrive) {
-                await saveContentToDrive();
-            }
         }
     };    return (
-        <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-blue-950 via-blue-300 to-blue-950 dark:from-gray-950 dark:via-gray-500 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
+        <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="text-center mb-8">
-                    <h2 className="text-4xl font-serif font-bold text-green-950 dark:text-white mb-4 sm:mb-6">
+                    <h2 className="text-4xl font-serif font-bold text-white mb-4 sm:mb-6">
                         Personal Projects
                     </h2>
                     {/* Search Bar */}
@@ -161,7 +158,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                     </div>
 
                     {/* Results count */}
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div className="text-sm text-gray-400 dark:text-gray-400 mb-4">
                         Showing {filteredProjects.length} of {projectList.length} projects
                     </div>
                 </div>
@@ -224,7 +221,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                                   onChange={e => setEditData({ ...editData, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                                   className="w-full mb-2 p-2 rounded border"
                                   style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
-                              />
+                          />
                           </div>
                           <button
                               onClick={() => saveEdit(realIdx)}
@@ -335,7 +332,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                                   onChange={e => setEditData({ ...editData, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                                   className="w-full mb-2 p-2 rounded border"
                                   style={{ background: "#f9fafb", color: "#222", border: "1px solid #cbd5e1" }}
-                              />
+                          />
                           </div>
                           <button
                               onClick={() => saveEdit(realIdx)}
@@ -397,7 +394,7 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
                         href="https://github.com/dodoshrey"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 text-white hover:text-blue-400 dark:text-white dark:hover:text-blue-400"
                         >
                             <Github size={20} />
                             View More on GitHub

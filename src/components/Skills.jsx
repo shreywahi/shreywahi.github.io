@@ -26,7 +26,7 @@ const getColorClasses = (color) => {
   return defaultColorMap[color] || defaultColorMap.blue || '';
 };
 
-const Skills = ({ isAdmin, categories, setCategories, updateContent, saveContentToDrive }) => {
+const Skills = ({ isAdmin, categories, setCategories, updateContent }) => {
   const [editCategory, setEditCategory] = useState(null);
   const [editData, setEditData] = useState(null);
 
@@ -50,49 +50,30 @@ const Skills = ({ isAdmin, categories, setCategories, updateContent, saveContent
     setCategories(newCategories);
     setEditCategory(null);
     setEditData(null);
-      // Also update content when editing individual items
     if (updateContent) {
-      console.log('saveEdit: Calling updateContent with:', newCategories);
       await updateContent('skillCategories', newCategories);
-      if (saveContentToDrive) {
-        console.log('saveEdit: Calling saveContentToDrive...');
-        await saveContentToDrive();
-      }
     }
   };
 
   return (
-    <section id="skills" className="min-h-[100vh] py-16 bg-blue-950 dark:bg-gray-950 flex items-center justify-center">
+    <section id="skills" className="min-h-[100vh] py-16 bg-yellow-900 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
       <div className="max-w-6xl mx-auto px-4 lg:px-8 text-center mb-16">
-        <h2 className="text-4xl font-serif font-bold text-green-400 dark:text-purple-500 mb-6">
-          Skills & Expertise
+        <h2 className="text-4xl font-serif font-bold text-green-300 dark:text-purple-500 mb-6">
+          Skills
         </h2>
         <br />
-        <p className="text-white text-lg max-w-3xl mx-auto">
+        <p className="text-purple-300 dark:text-orange-400 text-lg max-w-3xl mx-auto">
           With a passion for creating efficient, elegant solutions, I've developed expertise across various technologies and domains.
         </p>
         <br />
         <br />
         {isAdmin ? (
           <DragDrop
-            items={categories}            onChange={async newOrder => {
-              console.log('DragDrop onChange called with:', newOrder);
+            items={categories}
+            onChange={async newOrder => {
               setCategories(newOrder);
-              
               if (updateContent) {
-                console.log('Calling updateContent...');
-                const result = await updateContent('skillCategories', newOrder);
-                console.log('updateContent result:', result);
-              } else {
-                console.log('updateContent not available as prop');
-              }
-              
-              if (saveContentToDrive) {
-                console.log('Calling saveContentToDrive...');
-                const saveResult = await saveContentToDrive();
-                console.log('saveContentToDrive result:', saveResult);
-              } else {
-                console.log('saveContentToDrive not available as prop');
+                await updateContent('skillCategories', newOrder);
               }
             }}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8"
