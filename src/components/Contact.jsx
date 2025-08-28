@@ -82,7 +82,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
           </div>
 
           <div className="flex items-center">
-            <div className="bg-black p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+            <div className="bg-white dark:bg-black p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
               <Github className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="text-slate-900 dark:text-white font-semibold text-sm sm:text-base">

@@ -62,7 +62,7 @@ const Skills = ({ isAdmin, categories, setCategories, updateContent }) => {
           Skills
         </h2>
         <br />
-        <p className="text-purple-300 dark:text-orange-400 text-lg max-w-3xl mx-auto">
+        <p className="text-purple-600 dark:text-orange-400 text-lg max-w-3xl mx-auto">
           With a passion for creating efficient, elegant solutions, I've developed expertise across various technologies and domains.
         </p>
         <br />

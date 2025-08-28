@@ -55,9 +55,9 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
           ) : (
             <>
               <h1 className="text-6xl sm:text-8xl font-serif text-slate-900 dark:text-white mb-6 tracking-tight">
-                {heroName && heroName.split(" ")[0]}
+                {heroName && heroName.split(" ")[0]}{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  {" "}{heroName && heroName.split(" ").slice(1).join(" ")}{" "}
+                  {heroName && heroName.split(" ").slice(1).join(" ")}{" "}
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-3xl font-mono text-slate-600 dark:text-indigo-100 leading-relaxed">
