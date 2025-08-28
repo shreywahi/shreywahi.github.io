@@ -31,10 +31,8 @@ body {
     system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Subtle light gradient background */
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
-              radial-gradient(800px 400px at 80% 0%, rgba(59, 130, 246, 0.10), transparent 60%),
-              linear-gradient(180deg, #f7faff 0%, #eef3ff 40%, #fbfcff 100%);
+  /* Fallback background under cosmic layers */
+  background: linear-gradient(180deg, #f7faff 0%, #eef3ff 40%, #fbfcff 100%);
 }
 
 /* Headings use Poppins for a more distinctive look */
@@ -47,12 +45,74 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Dark mode background */
 .dark body {
-  background: radial-gradient(1200px 600px at 15% 15%, rgba(99, 102, 241, 0.18), transparent 60%),
-              radial-gradient(800px 400px at 85% 5%, rgba(59, 130, 246, 0.16), transparent 60%),
-              linear-gradient(180deg, #0b1220 0%, #0f172a 40%, #0b1220 100%);
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 40%, #0b1220 100%);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Cosmic Background System */
+.cosmic-bg { position: fixed; inset: 0; overflow: hidden; }
+
+/* Nebula layers (soft radial gradients) */
+.cosmic-nebula { position: absolute; filter: blur(40px); opacity: 0.35; will-change: transform, opacity; }
+.cosmic-nebula-a { width: 120vmax; height: 120vmax; left: -20vmax; top: -30vmax; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(99,102,241,0.35), rgba(99,102,241,0.0) 70%);
+  animation: nebula-drift 60s linear infinite;
+}
+.cosmic-nebula-b { width: 100vmax; height: 100vmax; right: -30vmax; bottom: -20vmax; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(168,85,247,0.28), rgba(168,85,247,0.0) 70%);
+  animation: nebula-drift-2 80s linear infinite;
+}
+
+/* Light/Dark tuning for nebulas */
+.cosmic-bg[data-theme="light"] .cosmic-nebula { opacity: 0.18; filter: blur(48px); }
+.cosmic-bg[data-theme="dark"] .cosmic-nebula { opacity: 0.35; }
+
+/* Stars using layered radial-gradients for performance */
+.cosmic-stars { position: absolute; inset: -10%; background-repeat: repeat; background-size: 300px 300px; opacity: 0.8; }
+.cosmic-stars-sm { background-image:
+  radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.7) 100%, transparent 0),
+  radial-gradient(1px 1px at 120px 80px, rgba(255,255,255,0.6) 100%, transparent 0),
+  radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.65) 100%, transparent 0),
+  radial-gradient(1px 1px at 280px 40px, rgba(255,255,255,0.55) 100%, transparent 0);
+  animation: star-twinkle 5s ease-in-out infinite alternate, star-drift 120s linear infinite;
+}
+.cosmic-stars-md { background-image:
+  radial-gradient(2px 2px at 50px 200px, rgba(255,255,255,0.75) 100%, transparent 0),
+  radial-gradient(2px 2px at 220px 120px, rgba(255,255,255,0.7) 100%, transparent 0);
+  animation: star-twinkle 7s ease-in-out infinite alternate, star-drift-2 160s linear infinite;
+  opacity: 0.7;
+}
+.cosmic-stars-lg { background-image:
+  radial-gradient(3px 3px at 150px 100px, rgba(255,255,255,0.85) 100%, transparent 0),
+  radial-gradient(3px 3px at 280px 220px, rgba(255,255,255,0.8) 100%, transparent 0);
+  animation: star-twinkle 9s ease-in-out infinite alternate, star-drift-3 200s linear infinite;
+  opacity: 0.6;
+}
+
+/* Light/Dark tuning for stars */
+.cosmic-bg[data-theme="light"] .cosmic-stars { opacity: 0.45; filter: saturate(0.7); }
+.cosmic-bg[data-theme="dark"] .cosmic-stars { opacity: 0.85; }
+
+/* Haze subtly lifts contrast in dark */
+.cosmic-haze { position: absolute; inset: 0; background: radial-gradient(100vmax 70vmax at 50% 60%, rgba(255,255,255,0.03), transparent 70%); pointer-events: none; }
+.cosmic-bg[data-theme="light"] .cosmic-haze { background: radial-gradient(100vmax 70vmax at 50% 60%, rgba(10,20,40,0.04), transparent 70%); }
+
+/* Motion keyframes */
+@keyframes star-twinkle {
+  0% { filter: brightness(0.8); }
+  100% { filter: brightness(1.2); }
+}
+@keyframes star-drift { from { transform: translateY(0); } to { transform: translateY(-2%); } }
+@keyframes star-drift-2 { from { transform: translate(-1%, 0); } to { transform: translate(1%, -2%); } }
+@keyframes star-drift-3 { from { transform: translate(0, 1%); } to { transform: translate(-2%, -1%); } }
+@keyframes nebula-drift { from { transform: rotate(0deg) translateY(0); } to { transform: rotate(360deg) translateY(-2%); } }
+@keyframes nebula-drift-2 { from { transform: rotate(0deg) translate(0,0); } to { transform: rotate(-360deg) translate(-2%, 1%); } }
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-nebula, .cosmic-stars { animation: none !important; }
 }

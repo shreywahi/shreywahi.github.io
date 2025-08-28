@@ -124,10 +124,10 @@ const Projects = ({ onSectionChange, isAdmin, projectList, setProjectList, updat
             await updateContent('projects', newList);
         }
     };    return (
-        <section id="projects" className="min-h-[100vh] py-10 sm:py-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
+    <section id="projects" className="min-h-[100vh] py-10 sm:py-16 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="text-center mb-8">
-                    <h2 className="text-4xl font-serif font-bold text-white mb-4 sm:mb-6">
+                    <h2 className="text-4xl font-serif font-bold text-black dark:text-purple-500 mb-4 sm:mb-6">
                         Personal Projects
                     </h2>
                     {/* Search Bar */}

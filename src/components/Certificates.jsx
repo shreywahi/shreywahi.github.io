@@ -72,10 +72,10 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList, updateC
     };
 
     return (
-        <section id="certs" className="min-h-[100vh] py-10 sm:py-16 bg-yellow-900 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center pb-24 sm:pb-0">
+    <section id="certs" className="min-h-[100vh] py-10 sm:py-16 flex items-center justify-center pb-24 sm:pb-0">
             <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="text-center mb-8 sm:mb-16">
-                    <h2 className="text-4xl font-serif font-bold text-orange-300 dark:text-purple-500 mb-4 sm:mb-6">
+                    <h2 className="text-4xl font-serif font-bold text-black dark:text-purple-500 mb-4 sm:mb-6">
                         Certificates & Proficiency
                     </h2>
                 </div>
@@ -285,7 +285,7 @@ const Certificates = ({ onSectionChange, isAdmin, certList, setCertList, updateC
 
                 {/* Proficiency Highlights */}
                 <div className="font-mono mt-8 sm:mt-16 text-center">
-                    <h3 className="text-lg sm:text-2xl font-bold text-purple-300 dark:text-orange-400 mb-4 sm:mb-8">Proficiency Highlights</h3>
+                    <h3 className="text-lg sm:text-2xl font-bold text-black dark:text-orange-400 mb-4 sm:mb-8">Proficiency Highlights</h3>
                     <div className="grid md:grid-cols-3 gap-4 sm:gap-8">
                         <div className="bg-gradient-to-br from-blue-700 to-blue-900 dark:from-blue-900 dark:to-blue-800 p-4 sm:p-6 rounded-xl text-white">
                             <div className="text-xl sm:text-3xl font-bold mb-1 sm:mb-2">3+</div>

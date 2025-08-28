@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import Sidebar from '../components/Sidebar';
+import CosmicBackground from '../components/CosmicBackground';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Experience from '../components/Experience';
@@ -482,7 +483,9 @@ const Index = () => {
 
   // Main component render
   return (
-    <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden`} style={{ minWidth: '320px' }}>
+  <div className={`${isDesktopView ? "flex flex-row min-h-screen" : ""} w-full overflow-x-hidden relative`} style={{ minWidth: '320px', zIndex: 1 }}>
+      {/* Global fixed cosmic background */}
+      <CosmicBackground />
       {/* Floating Admin Panel open button (desktop only) */}
       {isDesktopView && isAdmin && !showAdminPanel && (
         <button

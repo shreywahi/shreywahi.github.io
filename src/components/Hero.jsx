@@ -14,7 +14,7 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
     }
   }, [editMode, heroName, heroDesc]);
   return (
-    <section id="hero" className="min-h-[100vh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 pb-24 sm:pb-0 w-full overflow-hidden">
+    <section id="hero" className="min-h-[100vh] flex items-center justify-center pb-24 sm:pb-0 w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 text-center w-full">
         <div className="animate-fade-in w-full">
           <br /><br />
@@ -54,13 +54,13 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
             </div>
           ) : (
             <>
-              <h1 className="text-6xl sm:text-8xl font-serif text-white mb-6 tracking-tight">
+              <h1 className="text-6xl sm:text-8xl font-serif text-slate-900 dark:text-white mb-6 tracking-tight">
                 {heroName && heroName.split(" ")[0]}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                   {" "}{heroName && heroName.split(" ").slice(1).join(" ")}{" "}
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl md:text-3xl font-mono text-indigo-100 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-3xl font-mono text-slate-600 dark:text-indigo-100 leading-relaxed">
                 <br />
                 <b>{heroDesc}</b>
                 <br /><br /><br /><br />
@@ -102,7 +102,8 @@ const Hero = ({ onNavigate, isAdmin, heroName, heroDesc, updateHero }) => {
                   const el = document.getElementById('contact');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }
-              }}              className="border-2 border-gray-200 dark:border-gray-200 text-gray-200 dark:text-gray-200 px-6 lg:px-10 py-3 lg:py-5 rounded-xl text-lg lg:text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center w-full xl:w-auto min-w-0"
+              }}
+              className="bg-gray-400 border-2 border-gray-200 dark:border-gray-200 text-white dark:text-gray-200 px-6 lg:px-10 py-3 lg:py-5 rounded-xl text-lg lg:text-xl font-semibold hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-3 justify-center w-full xl:w-auto min-w-0"
               aria-label="Scroll to Contact section"
               >
               <Mail size={20} />

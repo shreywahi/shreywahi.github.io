@@ -56,9 +56,9 @@ const Skills = ({ isAdmin, categories, setCategories, updateContent }) => {
   };
 
   return (
-    <section id="skills" className="min-h-[100vh] py-16 bg-yellow-900 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center">
+    <section id="skills" className="min-h-[100vh] py-16 flex items-center justify-center">
       <div className="max-w-6xl mx-auto px-4 lg:px-8 text-center mb-16">
-        <h2 className="text-4xl font-serif font-bold text-green-300 dark:text-purple-500 mb-6">
+        <h2 className="text-4xl font-serif font-bold text-black dark:text-purple-500 mb-6">
           Skills
         </h2>
         <br />

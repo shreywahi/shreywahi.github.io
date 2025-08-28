@@ -10,7 +10,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
   return (
     <section
       id="contact"
-      className="min-h-[100vh] py-10 sm:py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex items-center justify-center text-white pb-24 sm:pb-0"
+      className="min-h-[100vh] py-10 sm:py-20 flex items-center justify-center pb-24 sm:pb-0"
     >
       <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-16">
@@ -46,11 +46,11 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
             </div>
           ) : (
             <>
-              <h2 className="text-4xl font-serif text-white font-bold mb-4 sm:mb-6">
+              <h2 className="text-4xl font-serif text-black dark:text-purple-500 font-bold mb-4 sm:mb-6">
                 {heading}
               </h2>
               <br />
-              <p className="font-mono text-base sm:text-xl text-indigo-100 max-w-3xl mx-auto">
+              <p className="font-mono text-base sm:text-xl text-slate-600 dark:text-indigo-100 max-w-3xl mx-auto">
                 {intro}
               </p>
               {isAdmin && !editMode && (
@@ -74,7 +74,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
               <Linkedin className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="text-white font-semibold text-sm sm:text-base">LinkedIn</div>
+              <div className="text-slate-900 dark:text-white font-semibold text-sm sm:text-base">LinkedIn</div>
               <a href="https://www.linkedin.com/in/shrey-wahi/" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-400 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View LinkedIn profile">
                 /in/shrey-wahi
               </a>
@@ -85,7 +85,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
             <div className="bg-black p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
               <Github className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="text-white font-semibold text-sm sm:text-base">
+            <div className="text-slate-900 dark:text-white font-semibold text-sm sm:text-base">
               <div>GitHub Accounts</div>
               <a href="https://github.com/shreywahi" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-400 hover:text-yellow-700 dark:text-yellow-600 hover:dark:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 text-xs sm:text-base" aria-label="View GitHub profile">
                 /shreywahi
@@ -98,7 +98,7 @@ const Contact = ({ isAdmin, heading, setHeading, intro, setIntro }) => {
         </div>
 
         <div className="font-mono mt-8 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-700 text-center">
-          <p className="text-white dark:text-gray-300 text-xs sm:text-base">
+          <p className="text-slate-600 dark:text-gray-300 text-xs sm:text-base">
             © 2025 Shrey Wahi. Built with ReactJS, Vite and passion for great user experiences.
           </p>
         </div>
